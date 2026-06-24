@@ -1,11 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App.js";
-import "@rankmyseo/ui/styles.css";
 import "./index.css";
+import "@rankmyseo/ui/styles.css";
+import { App } from "@/App";
+import { Toaster } from "@/components/ui/sonner";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
+    <Toaster />
   </StrictMode>,
 );

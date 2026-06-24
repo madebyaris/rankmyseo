@@ -1,106 +1,169 @@
 import { useState } from "react";
+import { Check, Loader2, Search, X } from "lucide-react";
 import { useScan } from "@rankmyseo/react";
-import { Badge, Card, EmptyState, ScoreRing, priorityTone } from "./ui.js";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Empty, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { ScoreRing } from "@/components/score-ring";
+import { priorityVariant } from "@/lib/seo";
+
+function Signal({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b py-1.5 last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <code className="max-w-[60%] truncate text-sm">{value}</code>
+    </div>
+  );
+}
 
 export function ScanPanel() {
   const { result, scanning, error, scan } = useScan();
   const [url, setUrl] = useState("https://vercel.com");
 
   return (
-    <div className="panel">
-      <Card
-        title="Scan a website"
-        subtitle="Fetch a live URL, extract on-page signals, and score it."
-      >
-        <div className="row">
-          <input
-            className="input"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
-          />
-          <button
-            className="btn btn-primary"
-            disabled={scanning}
-            onClick={() => {
-              void scan(url).catch(() => {});
-            }}
-          >
-            {scanning ? "Scanning…" : "Scan"}
-          </button>
-        </div>
-        {error ? <p className="error">{error.message}</p> : null}
+    <div className="flex flex-col gap-5">
+      <Card>
+        <CardHeader>
+          <CardTitle>Scan a website</CardTitle>
+          <CardDescription>
+            Fetch a live URL, extract on-page signals, and score it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <div className="flex gap-2">
+            <Input
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !scanning) void scan(url).catch(() => {});
+              }}
+            />
+            <Button
+              disabled={scanning}
+              onClick={() => void scan(url).catch(() => {})}
+            >
+              {scanning ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : (
+                <Search data-icon="inline-start" />
+              )}
+              {scanning ? "Scanning…" : "Scan"}
+            </Button>
+          </div>
+          {error ? (
+            <Alert variant="destructive">
+              <X />
+              <AlertTitle>{error.message}</AlertTitle>
+            </Alert>
+          ) : null}
+        </CardContent>
       </Card>
 
       {result ? (
-        <div className="scan-results">
-          <Card title="Audit score">
-            <div className="score-block">
-              <ScoreRing score={result.audit.score} label="/ 100" />
-              <ul className="signal-list">
-                <li>
-                  <span>Title</span>
-                  <code>{result.signals.title ?? "—"}</code>
-                </li>
-                <li>
-                  <span>Meta description</span>
-                  <code>{result.signals.metaDescription ?? "—"}</code>
-                </li>
-                <li>
-                  <span>Canonical</span>
-                  <code>{result.signals.canonical ?? "—"}</code>
-                </li>
-                <li>
-                  <span>H1 count</span>
-                  <code>{result.signals.h1Count}</code>
-                </li>
-                <li>
-                  <span>Open Graph</span>
-                  <code>{result.signals.hasOgTags ? "yes" : "no"}</code>
-                </li>
-                <li>
-                  <span>JSON-LD</span>
-                  <code>{result.signals.hasJsonLd ? "yes" : "no"}</code>
-                </li>
-              </ul>
-            </div>
+        <div className="flex flex-col gap-5">
+          <Card>
+            <CardHeader>
+              <CardTitle>Audit score</CardTitle>
+              <CardDescription className="truncate">
+                {result.audit.url}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap items-center gap-6">
+              <ScoreRing score={result.audit.score} />
+              <div className="min-w-64 flex-1">
+                <Signal label="Title" value={result.signals.title ?? "—"} />
+                <Signal
+                  label="Meta description"
+                  value={result.signals.metaDescription ?? "—"}
+                />
+                <Signal
+                  label="Canonical"
+                  value={result.signals.canonical ?? "—"}
+                />
+                <Signal label="H1 count" value={String(result.signals.h1Count)} />
+                <Signal
+                  label="Open Graph"
+                  value={result.signals.hasOgTags ? "yes" : "no"}
+                />
+                <Signal
+                  label="JSON-LD"
+                  value={result.signals.hasJsonLd ? "yes" : "no"}
+                />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card title="Checks">
-            <ul className="check-list">
+          <Card>
+            <CardHeader>
+              <CardTitle>Checks</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-2">
               {result.audit.checks.map((c) => (
-                <li key={c.ruleId}>
-                  <Badge tone={c.passed ? "green" : "red"}>
-                    {c.passed ? "PASS" : "FAIL"}
-                  </Badge>
+                <div key={c.ruleId} className="flex items-start gap-2 text-sm">
+                  {c.passed ? (
+                    <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <X className="mt-0.5 size-4 shrink-0 text-destructive" />
+                  )}
                   <span>{c.message}</span>
-                </li>
+                </div>
               ))}
-            </ul>
+            </CardContent>
           </Card>
 
-          <Card title="Recommendations">
-            {result.recommendations.length === 0 ? (
-              <EmptyState>No issues found. This page looks healthy. 🎉</EmptyState>
-            ) : (
-              <ul className="rec-list">
-                {result.recommendations.map((r) => (
-                  <li key={r.id}>
-                    <Badge tone={priorityTone(r.priority)}>{r.priority}</Badge>
-                    <div>
-                      <strong>{r.title}</strong>
-                      <p className="muted">{r.detail}</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recommendations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {result.recommendations.length === 0 ? (
+                <Empty>
+                  <EmptyMedia variant="icon">
+                    <Check />
+                  </EmptyMedia>
+                  <EmptyDescription>
+                    No issues found. This page looks healthy.
+                  </EmptyDescription>
+                </Empty>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {result.recommendations.map((r) => (
+                    <div key={r.id} className="flex items-start gap-3">
+                      <Badge variant={priorityVariant(r.priority)}>
+                        {r.priority}
+                      </Badge>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium">{r.title}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {r.detail}
+                        </span>
+                      </div>
                     </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                  ))}
+                </div>
+              )}
+            </CardContent>
           </Card>
         </div>
       ) : (
-        <EmptyState>
-          Enter a URL and hit <strong>Scan</strong> to audit a live page.
-        </EmptyState>
+        <Empty>
+          <EmptyMedia variant="icon">
+            <Search />
+          </EmptyMedia>
+          <EmptyDescription>
+            Enter a URL and hit Scan to audit a live page.
+          </EmptyDescription>
+        </Empty>
       )}
     </div>
   );
