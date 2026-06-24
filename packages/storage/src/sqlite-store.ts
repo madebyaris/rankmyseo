@@ -6,19 +6,24 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { and, eq, gte, lte } from "drizzle-orm";
 import type {
   Audit,
+  AuditCheckResult,
+  BlogPost,
   CreateKeywordInput,
   CreateRankSnapshotInput,
   DashboardConfig,
   Keyword,
+  KeywordIntent,
   Project,
   RankSnapshot,
   RankStore,
   Report,
+  ReportSummary,
   SnapshotRangeQuery,
   TenantScope,
 } from "@rankmyseo/core";
 import {
   audits,
+  blogPosts,
   dashboardConfigs,
   keywords,
   projects,
@@ -26,6 +31,99 @@ import {
   reports,
   sqliteSchema,
 } from "./schema/sqlite.js";
+
+function mapBlogRow(row: {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  title: string;
+  slug: string;
+  content: string;
+  targetKeyword: string;
+  intent: string;
+  metaTitle: string;
+  metaDescription: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}): BlogPost {
+  return {
+    id: row.id,
+    tenantId: row.tenantId,
+    projectId: row.projectId,
+    title: row.title,
+    slug: row.slug,
+    content: row.content,
+    targetKeyword: row.targetKeyword,
+    intent: row.intent as KeywordIntent,
+    metaTitle: row.metaTitle,
+    metaDescription: row.metaDescription,
+    status: row.status as BlogPost["status"],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
+
+function parseChecks(raw: string | null | undefined): AuditCheckResult[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as AuditCheckResult[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function parseSummary(raw: string | null | undefined): ReportSummary | undefined {
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw) as ReportSummary;
+  } catch {
+    return undefined;
+  }
+}
+
+function mapAuditRow(row: {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  url: string;
+  score: number;
+  checks: string | null;
+  createdAt: Date;
+}): Audit {
+  return {
+    id: row.id,
+    tenantId: row.tenantId,
+    projectId: row.projectId,
+    url: row.url,
+    score: row.score,
+    checks: parseChecks(row.checks),
+    createdAt: row.createdAt,
+  };
+}
+
+function mapReportRow(row: {
+  id: string;
+  tenantId: string;
+  projectId: string;
+  title: string;
+  from: Date;
+  to: Date;
+  summary: string | null;
+  createdAt: Date;
+}): Report {
+  return {
+    id: row.id,
+    tenantId: row.tenantId,
+    projectId: row.projectId,
+    title: row.title,
+    from: row.from,
+    to: row.to,
+    summary: parseSummary(row.summary),
+    createdAt: row.createdAt,
+  };
+}
 
 function parseTags(raw: string): string[] {
   try {
@@ -75,6 +173,7 @@ function migrate(sqlite: Database.Database) {
       project_id TEXT NOT NULL,
       url TEXT NOT NULL,
       score INTEGER NOT NULL,
+      checks TEXT NOT NULL DEFAULT '[]',
       created_at INTEGER NOT NULL
     );
     CREATE TABLE IF NOT EXISTS rms_reports (
@@ -84,6 +183,7 @@ function migrate(sqlite: Database.Database) {
       title TEXT NOT NULL,
       "from" INTEGER NOT NULL,
       "to" INTEGER NOT NULL,
+      summary TEXT,
       created_at INTEGER NOT NULL
     );
     CREATE TABLE IF NOT EXISTS rms_dashboard_configs (
@@ -93,7 +193,32 @@ function migrate(sqlite: Database.Database) {
       widgets TEXT NOT NULL,
       updated_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS rms_blog_posts (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT NOT NULL,
+      project_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      content TEXT NOT NULL DEFAULT '',
+      target_keyword TEXT NOT NULL DEFAULT '',
+      intent TEXT NOT NULL DEFAULT 'informational',
+      meta_title TEXT NOT NULL DEFAULT '',
+      meta_description TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'draft',
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
   `);
+  try {
+    sqlite.exec(`ALTER TABLE rms_audits ADD COLUMN checks TEXT NOT NULL DEFAULT '[]'`);
+  } catch {
+    /* column exists */
+  }
+  try {
+    sqlite.exec(`ALTER TABLE rms_reports ADD COLUMN summary TEXT`);
+  } catch {
+    /* column exists */
+  }
 }
 
 export function createSqliteStore(databasePath: string): RankStore {
@@ -289,7 +414,7 @@ export function createSqliteStore(databasePath: string): RankStore {
 
     audits: {
       async create(input) {
-        const row: Audit = { ...input, createdAt: new Date() };
+        const row: Audit = { ...input, checks: input.checks ?? [], createdAt: new Date() };
         db.insert(audits)
           .values({
             id: row.id,
@@ -297,6 +422,7 @@ export function createSqliteStore(databasePath: string): RankStore {
             projectId: row.projectId,
             url: row.url,
             score: row.score,
+            checks: JSON.stringify(row.checks),
             createdAt: row.createdAt,
           })
           .run();
@@ -316,14 +442,7 @@ export function createSqliteStore(databasePath: string): RankStore {
           .all();
         const row = rows[0];
         if (!row) return undefined;
-        return {
-          id: row.id,
-          tenantId: row.tenantId,
-          projectId: row.projectId,
-          url: row.url,
-          score: row.score,
-          createdAt: row.createdAt,
-        };
+        return mapAuditRow(row);
       },
       async list(scope) {
         return db
@@ -336,14 +455,7 @@ export function createSqliteStore(databasePath: string): RankStore {
             ),
           )
           .all()
-          .map((row) => ({
-            id: row.id,
-            tenantId: row.tenantId,
-            projectId: row.projectId,
-            url: row.url,
-            score: row.score,
-            createdAt: row.createdAt,
-          }));
+          .map(mapAuditRow);
       },
     },
 
@@ -358,6 +470,7 @@ export function createSqliteStore(databasePath: string): RankStore {
             title: row.title,
             from: row.from,
             to: row.to,
+            summary: row.summary ? JSON.stringify(row.summary) : null,
             createdAt: row.createdAt,
           })
           .run();
@@ -377,15 +490,7 @@ export function createSqliteStore(databasePath: string): RankStore {
           .all();
         const row = rows[0];
         if (!row) return undefined;
-        return {
-          id: row.id,
-          tenantId: row.tenantId,
-          projectId: row.projectId,
-          title: row.title,
-          from: row.from,
-          to: row.to,
-          createdAt: row.createdAt,
-        };
+        return mapReportRow(row);
       },
       async list(scope) {
         return db
@@ -398,15 +503,7 @@ export function createSqliteStore(databasePath: string): RankStore {
             ),
           )
           .all()
-          .map((row) => ({
-            id: row.id,
-            tenantId: row.tenantId,
-            projectId: row.projectId,
-            title: row.title,
-            from: row.from,
-            to: row.to,
-            createdAt: row.createdAt,
-          }));
+          .map(mapReportRow);
       },
     },
 
@@ -450,6 +547,117 @@ export function createSqliteStore(databasePath: string): RankStore {
           })
           .run();
         return config;
+      },
+    },
+
+    blog: {
+      async create(input) {
+        const now = new Date();
+        const row: BlogPost = { ...input, createdAt: now, updatedAt: now };
+        db.insert(blogPosts)
+          .values({
+            id: row.id,
+            tenantId: row.tenantId,
+            projectId: row.projectId,
+            title: row.title,
+            slug: row.slug,
+            content: row.content,
+            targetKeyword: row.targetKeyword,
+            intent: row.intent,
+            metaTitle: row.metaTitle,
+            metaDescription: row.metaDescription,
+            status: row.status,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+          })
+          .run();
+        return row;
+      },
+      async getById(scope, id) {
+        const rows = db
+          .select()
+          .from(blogPosts)
+          .where(
+            and(
+              eq(blogPosts.tenantId, scope.tenantId),
+              eq(blogPosts.projectId, scope.projectId),
+              eq(blogPosts.id, id),
+            ),
+          )
+          .all();
+        const row = rows[0];
+        return row ? mapBlogRow(row) : undefined;
+      },
+      async list(scope) {
+        return db
+          .select()
+          .from(blogPosts)
+          .where(
+            and(
+              eq(blogPosts.tenantId, scope.tenantId),
+              eq(blogPosts.projectId, scope.projectId),
+            ),
+          )
+          .all()
+          .map(mapBlogRow);
+      },
+      async update(scope, id, patch) {
+        const rows = db
+          .select()
+          .from(blogPosts)
+          .where(
+            and(
+              eq(blogPosts.tenantId, scope.tenantId),
+              eq(blogPosts.projectId, scope.projectId),
+              eq(blogPosts.id, id),
+            ),
+          )
+          .all();
+        const existing = rows[0];
+        if (!existing) return undefined;
+
+        const merged = mapBlogRow(existing);
+        const next: BlogPost = {
+          ...merged,
+          ...patch,
+          updatedAt: new Date(),
+        };
+
+        db.update(blogPosts)
+          .set({
+            title: next.title,
+            slug: next.slug,
+            content: next.content,
+            targetKeyword: next.targetKeyword,
+            intent: next.intent,
+            metaTitle: next.metaTitle,
+            metaDescription: next.metaDescription,
+            status: next.status,
+            updatedAt: next.updatedAt,
+          })
+          .where(
+            and(
+              eq(blogPosts.tenantId, scope.tenantId),
+              eq(blogPosts.projectId, scope.projectId),
+              eq(blogPosts.id, id),
+            ),
+          )
+          .run();
+
+        return next;
+      },
+      async delete(scope, id) {
+        const result = db
+          .delete(blogPosts)
+          .where(
+            and(
+              eq(blogPosts.tenantId, scope.tenantId),
+              eq(blogPosts.projectId, scope.projectId),
+              eq(blogPosts.id, id),
+            ),
+          )
+          .run();
+        return result.changes > 0;
       },
     },
   };

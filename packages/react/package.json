@@ -1,0 +1,48 @@
+{
+  "name": "@rankmyseo/react",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "RankMySEO headless React hooks and on-page collector",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "publint": "publint"
+  },
+  "dependencies": {
+    "@rankmyseo/core": "workspace:*",
+    "web-vitals": "^5.1.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.2.7",
+    "happy-dom": "^20.0.11",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "publint": "^0.3.15"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

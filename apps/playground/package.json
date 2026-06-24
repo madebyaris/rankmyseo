@@ -1,0 +1,27 @@
+{
+  "name": "@rankmyseo/playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.6",
+    "@rankmyseo/core": "workspace:*",
+    "@rankmyseo/server": "workspace:*",
+    "@rankmyseo/storage": "workspace:*",
+    "hono": "^4.10.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "ai": "^6.0.116",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

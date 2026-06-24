@@ -10,7 +10,18 @@ module.exports = {
         path: "^packages/(react|vue|svelte|ui)",
       },
       to: {
-        path: "^packages/(storage|server)",
+        path: "^packages/(storage|server|agent|datasource|scheduler|cli)",
+      },
+    },
+    {
+      name: "ui-only-via-react",
+      comment: "@rankmyseo/ui must not import backend packages directly.",
+      severity: "error",
+      from: {
+        path: "^packages/ui",
+      },
+      to: {
+        path: "^packages/(storage|server|agent|datasource|scheduler|cli)",
       },
     },
     {
@@ -21,7 +32,7 @@ module.exports = {
         path: "^packages/core",
       },
       to: {
-        path: "^packages/(storage|server|server-hono)|^hono$|^drizzle-orm",
+        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|cli)|^hono$|^drizzle-orm",
       },
     },
   ],

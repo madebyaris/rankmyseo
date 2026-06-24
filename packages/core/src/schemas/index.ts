@@ -62,18 +62,43 @@ export type CreateRankSnapshotInput = z.infer<
   typeof createRankSnapshotInputSchema
 >;
 
-export const auditCheckSchema = z.object({
-  id: z.string().min(1),
-  tenantId: z.string().min(1),
-  projectId: z.string().min(1),
-  auditId: z.string().min(1),
+export const auditCheckResultSchema = z.object({
   ruleId: z.string().min(1),
   passed: z.boolean(),
   message: z.string(),
   severity: z.enum(["info", "warning", "error"]),
 });
 
+export type AuditCheckResult = z.infer<typeof auditCheckResultSchema>;
+
+export const auditCheckSchema = auditCheckResultSchema.extend({
+  id: z.string().min(1),
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+  auditId: z.string().min(1),
+});
+
 export type AuditCheck = z.infer<typeof auditCheckSchema>;
+
+export const pageSignalsSchema = z.object({
+  url: z.string().url(),
+  title: z.string().optional(),
+  metaDescription: z.string().optional(),
+  canonical: z.union([z.string().url(), z.null()]).optional(),
+  h1Count: z.number().int().nonnegative().default(0),
+  hasOgTags: z.boolean().default(false),
+  hasJsonLd: z.boolean().default(false),
+  webVitals: z
+    .object({
+      lcp: z.number().optional(),
+      fid: z.number().optional(),
+      cls: z.number().optional(),
+      inp: z.number().optional(),
+    })
+    .optional(),
+});
+
+export type PageSignals = z.infer<typeof pageSignalsSchema>;
 
 export const auditSchema = z.object({
   id: z.string().min(1),
@@ -81,10 +106,43 @@ export const auditSchema = z.object({
   projectId: z.string().min(1),
   url: z.string().url(),
   score: z.number().min(0).max(100),
+  checks: z.array(auditCheckResultSchema).default([]),
   createdAt: z.coerce.date(),
 });
 
 export type Audit = z.infer<typeof auditSchema>;
+
+export const createAuditInputSchema = auditSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type CreateAuditInput = z.infer<typeof createAuditInputSchema>;
+
+export const reportMoverSchema = z.object({
+  keywordId: z.string().min(1),
+  keywordText: z.string().min(1),
+  previousPosition: z.number().int().positive().nullable(),
+  currentPosition: z.number().int().positive().nullable(),
+  delta: z.number(),
+});
+
+export type ReportMover = z.infer<typeof reportMoverSchema>;
+
+export const reportSummarySchema = z.object({
+  topMovers: z.array(reportMoverSchema).default([]),
+  avgPositionDelta: z.number().optional(),
+  auditScoreTrend: z
+    .array(
+      z.object({
+        date: z.coerce.date(),
+        score: z.number(),
+      }),
+    )
+    .default([]),
+});
+
+export type ReportSummary = z.infer<typeof reportSummarySchema>;
 
 export const reportSchema = z.object({
   id: z.string().min(1),
@@ -93,10 +151,18 @@ export const reportSchema = z.object({
   title: z.string().min(1),
   from: z.coerce.date(),
   to: z.coerce.date(),
+  summary: reportSummarySchema.optional(),
   createdAt: z.coerce.date(),
 });
 
 export type Report = z.infer<typeof reportSchema>;
+
+export const createReportInputSchema = reportSchema.omit({
+  id: true,
+  createdAt: true,
+});
+
+export type CreateReportInput = z.infer<typeof createReportInputSchema>;
 
 export const dashboardWidgetSchema = z.object({
   id: z.string().min(1),
@@ -135,3 +201,81 @@ export const snapshotRangeQuerySchema = z.object({
 });
 
 export type SnapshotRangeQuery = z.infer<typeof snapshotRangeQuerySchema>;
+
+export const keywordIntentSchema = z.enum([
+  "informational",
+  "navigational",
+  "commercial",
+  "transactional",
+]);
+
+export type KeywordIntent = z.infer<typeof keywordIntentSchema>;
+
+export const blogPostStatusSchema = z.enum(["draft", "published"]);
+
+export type BlogPostStatus = z.infer<typeof blogPostStatusSchema>;
+
+export const blogPostSchema = z.object({
+  id: z.string().min(1),
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+  title: z.string().min(1),
+  slug: z.string().min(1),
+  content: z.string().default(""),
+  targetKeyword: z.string().default(""),
+  intent: keywordIntentSchema.default("informational"),
+  metaTitle: z.string().default(""),
+  metaDescription: z.string().default(""),
+  status: blogPostStatusSchema.default("draft"),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+
+export type BlogPost = z.infer<typeof blogPostSchema>;
+
+export const createBlogPostInputSchema = z.object({
+  tenantId: z.string().min(1),
+  projectId: z.string().min(1),
+  title: z.string().min(1),
+  slug: z.string().optional(),
+  content: z.string().default(""),
+  targetKeyword: z.string().default(""),
+  intent: keywordIntentSchema.default("informational"),
+  metaTitle: z.string().default(""),
+  metaDescription: z.string().default(""),
+  status: blogPostStatusSchema.default("draft"),
+});
+
+export type CreateBlogPostInput = z.infer<typeof createBlogPostInputSchema>;
+
+export const updateBlogPostInputSchema = createBlogPostInputSchema
+  .omit({ tenantId: true, projectId: true })
+  .partial();
+
+export type UpdateBlogPostInput = z.infer<typeof updateBlogPostInputSchema>;
+
+export const recommendationSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  detail: z.string(),
+  priority: z.enum(["high", "medium", "low"]),
+  category: z.string().min(1),
+});
+
+export type Recommendation = z.infer<typeof recommendationSchema>;
+
+export const generatedMetaSchema = z.object({
+  metaTitle: z.string(),
+  metaDescription: z.string(),
+  slug: z.string(),
+  canonical: z.string().nullable(),
+  openGraph: z.object({
+    title: z.string(),
+    description: z.string(),
+    type: z.string(),
+  }),
+  jsonLd: z.record(z.string(), z.unknown()),
+  html: z.string(),
+});
+
+export type GeneratedMeta = z.infer<typeof generatedMetaSchema>;

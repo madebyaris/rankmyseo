@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "description": "Framework-agnostic RankMySEO HTTP handler",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "exports": {
     ".": {
       "import": {
@@ -25,10 +25,14 @@
     "publint": "publint"
   },
   "dependencies": {
+    "@rankmyseo/agent": "workspace:*",
     "@rankmyseo/core": "workspace:*",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@rankmyseo/storage": "workspace:*",
+    "@types/node": "^24.10.1",
+    "ai": "^6.0.116",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",

@@ -30,6 +30,13 @@ export function runStoreContractTests(
       });
     });
 
+    it("creates and lists projects", async () => {
+      const found = await store.projects.getById(scope, scope.projectId);
+      expect(found?.name).toBe("Test Project");
+      const listed = await store.projects.list(scope);
+      expect(listed.length).toBeGreaterThanOrEqual(1);
+    });
+
     it("creates and lists keywords", async () => {
       const keyword = await store.keywords.create({
         tenantId: scope.tenantId,
@@ -195,6 +202,168 @@ export function runStoreContractTests(
       });
 
       expect(snapshots).toHaveLength(0);
+    });
+
+    it("creates and lists audits with checks", async () => {
+      const audit = await store.audits.create({
+        id: randomUUID(),
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        url: "https://example.com/page",
+        score: 85,
+        checks: [
+          {
+            ruleId: "title-length",
+            passed: true,
+            message: "Title OK",
+            severity: "info",
+          },
+        ],
+      });
+
+      expect(audit.checks).toHaveLength(1);
+      const found = await store.audits.getById(scope, audit.id);
+      expect(found?.score).toBe(85);
+      expect(found?.checks[0]?.ruleId).toBe("title-length");
+
+      const listed = await store.audits.list(scope);
+      expect(listed.some((a) => a.id === audit.id)).toBe(true);
+    });
+
+    it("creates and lists reports with summary", async () => {
+      const report = await store.reports.create({
+        id: randomUUID(),
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        title: "Weekly report",
+        from: new Date("2026-06-01T00:00:00.000Z"),
+        to: new Date("2026-06-07T00:00:00.000Z"),
+        summary: {
+          topMovers: [],
+          auditScoreTrend: [],
+        },
+      });
+
+      expect(report.title).toBe("Weekly report");
+      const found = await store.reports.getById(scope, report.id);
+      expect(found?.summary).toBeDefined();
+    });
+
+    it("upserts and gets dashboard config", async () => {
+      const config = {
+        id: randomUUID(),
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        widgets: [
+          {
+            id: "w1",
+            type: "KeywordTable",
+            title: "Keywords",
+            query: {},
+            options: {},
+          },
+        ],
+        updatedAt: new Date(),
+      };
+
+      await store.dashboard.upsert(config);
+      const found = await store.dashboard.get(scope);
+      expect(found?.widgets).toHaveLength(1);
+      expect(found?.widgets[0]?.type).toBe("KeywordTable");
+
+      const updated = {
+        ...config,
+        widgets: [
+          ...config.widgets,
+          {
+            id: "w2",
+            type: "RankHistoryChart",
+            title: "Rank history",
+            query: { keywordId: "kw-1" },
+            options: {},
+          },
+        ],
+        updatedAt: new Date(),
+      };
+      await store.dashboard.upsert(updated);
+      const refetched = await store.dashboard.get(scope);
+      expect(refetched?.widgets).toHaveLength(2);
+    });
+
+    it("enforces tenant isolation on audits", async () => {
+      const audit = await store.audits.create({
+        id: randomUUID(),
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        url: "https://example.com",
+        score: 90,
+        checks: [],
+      });
+
+      const otherScope: TenantScope = {
+        tenantId: "tenant-b",
+        projectId: scope.projectId,
+      };
+
+      expect(await store.audits.getById(otherScope, audit.id)).toBeUndefined();
+      expect(await store.audits.list(otherScope)).toHaveLength(0);
+    });
+
+    it("creates, updates, lists, and deletes blog posts", async () => {
+      const post = await store.blog.create({
+        id: randomUUID(),
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        title: "How to track rankings",
+        slug: "how-to-track-rankings",
+        content: "A guide to rank tracking.",
+        targetKeyword: "rank tracking",
+        intent: "informational",
+        metaTitle: "How to track rankings",
+        metaDescription: "A practical guide to rank tracking.",
+        status: "draft",
+      });
+
+      expect(post.id).toBeTruthy();
+      expect(post.intent).toBe("informational");
+
+      const listed = await store.blog.list(scope);
+      expect(listed).toHaveLength(1);
+
+      const updated = await store.blog.update(scope, post.id, {
+        status: "published",
+        intent: "commercial",
+      });
+      expect(updated?.status).toBe("published");
+      expect(updated?.intent).toBe("commercial");
+      expect(updated?.title).toBe("How to track rankings");
+
+      expect(await store.blog.delete(scope, post.id)).toBe(true);
+      expect(await store.blog.getById(scope, post.id)).toBeUndefined();
+    });
+
+    it("enforces tenant isolation on blog posts", async () => {
+      const post = await store.blog.create({
+        id: randomUUID(),
+        tenantId: scope.tenantId,
+        projectId: scope.projectId,
+        title: "Private post",
+        slug: "private-post",
+        content: "",
+        targetKeyword: "",
+        intent: "informational",
+        metaTitle: "",
+        metaDescription: "",
+        status: "draft",
+      });
+
+      const otherScope: TenantScope = {
+        tenantId: "tenant-b",
+        projectId: scope.projectId,
+      };
+
+      expect(await store.blog.getById(otherScope, post.id)).toBeUndefined();
+      expect(await store.blog.list(otherScope)).toHaveLength(0);
     });
   });
 }

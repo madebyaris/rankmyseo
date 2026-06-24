@@ -4,3 +4,6 @@ dist/
 .turbo/
 *.tsbuildinfo
 .DS_Store
+
+# Internal product docs — crucial, not for git
+PRD.md

@@ -40,6 +40,7 @@ export const audits = sqliteTable("rms_audits", {
   projectId: text("project_id").notNull(),
   url: text("url").notNull(),
   score: integer("score").notNull(),
+  checks: text("checks").notNull().default("[]"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -50,6 +51,7 @@ export const reports = sqliteTable("rms_reports", {
   title: text("title").notNull(),
   from: integer("from", { mode: "timestamp_ms" }).notNull(),
   to: integer("to", { mode: "timestamp_ms" }).notNull(),
+  summary: text("summary"),
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
 });
 
@@ -61,6 +63,22 @@ export const dashboardConfigs = sqliteTable("rms_dashboard_configs", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
 });
 
+export const blogPosts = sqliteTable("rms_blog_posts", {
+  id: text("id").primaryKey(),
+  tenantId: text("tenant_id").notNull(),
+  projectId: text("project_id").notNull(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull(),
+  content: text("content").notNull().default(""),
+  targetKeyword: text("target_keyword").notNull().default(""),
+  intent: text("intent").notNull().default("informational"),
+  metaTitle: text("meta_title").notNull().default(""),
+  metaDescription: text("meta_description").notNull().default(""),
+  status: text("status").notNull().default("draft"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
 export const sqliteSchema = {
   projects,
   keywords,
@@ -68,4 +86,5 @@ export const sqliteSchema = {
   audits,
   reports,
   dashboardConfigs,
+  blogPosts,
 };

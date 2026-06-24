@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RankMySEO Playground</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --surface-2: #f9fafb;
+        --border: #e3e6ea;
+        --text: #1b1f24;
+        --muted: #6b7280;
+        --accent: #4f46e5;
+        --accent-hover: #4338ca;
+        --accent-soft: #eef2ff;
+        --ok-bg: #d1fae5;
+        --ok-fg: #065f46;
+        --err-bg: #fee2e2;
+        --err-fg: #991b1b;
+        --warn-fg: #b45309;
+        --radius: 12px;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.04),
+          0 1px 3px rgba(16, 24, 40, 0.08);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .topbar {
+        background: #111827;
+        color: #fff;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .topbar .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+      }
+      .topbar .logo {
+        display: inline-grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--accent);
+        font-size: 0.8rem;
+        font-weight: 800;
+      }
+      .topbar .meta {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+        color: #c7cdd6;
+      }
+      .topbar code {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.15rem 0.4rem;
+        border-radius: 6px;
+        color: #e5e7eb;
+      }
+
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        margin: 0 0 1.25rem;
+        font-size: 0.9rem;
+      }
+      .subtitle code {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.1rem 0.35rem;
+        border-radius: 5px;
+        font-size: 0.82rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        align-items: start;
+      }
+      .grid .full {
+        grid-column: 1 / -1;
+      }
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+      }
+      .card-head h2 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 650;
+      }
+      .card-head .hint {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .card-body {
+        padding: 1.1rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: #e5e7eb;
+        color: #374151;
+      }
+      .pill::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.7;
+      }
+      .pill.ok {
+        background: var(--ok-bg);
+        color: var(--ok-fg);
+      }
+      .pill.err {
+        background: var(--err-bg);
+        color: var(--err-fg);
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin-bottom: 0.85rem;
+      }
+      .field label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      input,
+      select {
+        font: inherit;
+        font-size: 0.9rem;
+        padding: 0.55rem 0.7rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--text);
+        width: 100%;
+        transition: border-color 0.15s, box-shadow 0.15s;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+      }
+
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.25rem;
+      }
+
+      button {
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 0.55rem 0.9rem;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      button.primary:hover {
+        background: var(--accent-hover);
+      }
+      button.ghost {
+        background: #fff;
+        color: var(--text);
+        border-color: var(--border);
+      }
+      button.ghost:hover {
+        background: var(--surface-2);
+      }
+      button.danger {
+        background: #fff;
+        color: var(--err-fg);
+        border-color: #f3c4c4;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.8rem;
+      }
+      button.danger:hover {
+        background: var(--err-bg);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.86rem;
+      }
+      th {
+        text-align: left;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        padding: 0.5rem 0.6rem;
+        border-bottom: 1px solid var(--border);
+      }
+      td {
+        padding: 0.6rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      tbody tr:hover {
+        background: var(--surface-2);
+      }
+      .empty td {
+        color: var(--muted);
+        text-align: center;
+        padding: 1.25rem;
+        font-style: italic;
+      }
+      .badge {
+        display: inline-block;
+        min-width: 1.6rem;
+        text-align: center;
+        padding: 0.15rem 0.45rem;
+        border-radius: 6px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 0.82rem;
+      }
+      .tag {
+        display: inline-block;
+        padding: 0.1rem 0.45rem;
+        border-radius: 6px;
+        background: #eef1f4;
+        color: #4b5563;
+        font-size: 0.74rem;
+      }
+      .url-cell {
+        max-width: 240px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+
+      .debug-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      pre {
+        margin: 0;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 0.9rem 1rem;
+        border-radius: 8px;
+        overflow: auto;
+        font-size: 0.8rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        max-height: 280px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">R</span>
+        RankMySEO Playground
+      </div>
+      <div class="meta">
+        <span id="health-pill" class="pill">checking…</span>
+        <span>tenant <code id="meta-tenant">tenant-a</code></span>
+        <span>project <code id="meta-project">project-1</code></span>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <p class="subtitle">
+        Manual test UI for M0 — keywords &amp; rank snapshots via
+        <code>@rankmyseo/server</code> + <code>@rankmyseo/storage</code>.
+      </p>
+
+      <div class="grid">
+        <section class="card">
+          <div class="card-head">
+            <h2>Add keyword</h2>
+            <span class="hint">POST /keywords</span>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label for="keyword-text">Keyword text</label>
+              <input id="keyword-text" type="text" placeholder="best seo tools" />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="keyword-country">Country</label>
+                <input id="keyword-country" type="text" value="us" />
+              </div>
+              <div class="field">
+                <label for="keyword-device">Device</label>
+                <select id="keyword-device">
+                  <option value="desktop">desktop</option>
+                  <option value="mobile">mobile</option>
+                </select>
+              </div>
+            </div>
+            <div class="actions">
+              <button id="add-keyword" class="primary">Add keyword</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Log rank snapshot</h2>
+            <span class="hint">POST /snapshots</span>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label for="snapshot-keyword">Keyword</label>
+              <select id="snapshot-keyword"></select>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="snapshot-position">Position</label>
+                <input id="snapshot-position" type="number" min="1" value="7" />
+              </div>
+              <div class="field">
+                <label for="snapshot-date">Captured at</label>
+                <input id="snapshot-date" type="datetime-local" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="snapshot-url">URL</label>
+              <input
+                id="snapshot-url"
+                type="url"
+                value="https://example.com/page"
+              />
+            </div>
+            <div class="actions">
+              <button id="log-snapshot" class="primary">Log snapshot</button>
+              <button id="load-snapshots" class="ghost">Load history</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card full">
+          <div class="card-head">
+            <h2>Keywords</h2>
+            <button id="refresh-keywords" class="ghost">Refresh</button>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Text</th>
+                  <th>Country</th>
+                  <th>Device</th>
+                  <th style="text-align: right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="keywords-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card full">
+          <div class="card-head">
+            <h2>Snapshot history</h2>
+            <span class="hint">GET /snapshots</span>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Position</th>
+                  <th>URL</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="snapshots-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card full">
+          <div class="card-head debug-head">
+            <h2>Last API response</h2>
+            <span class="hint">live request/response</span>
+          </div>
+          <div class="card-body">
+            <pre id="debug-output">{}</pre>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

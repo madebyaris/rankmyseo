@@ -2,12 +2,15 @@
   "name": "rankmyseo",
   "private": true,
   "type": "module",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "turbo run build",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint && dependency-cruiser packages --config .dependency-cruiser.cjs",
-    "publint": "turbo run publint"
+    "publint": "turbo run publint",
+    "dev:playground": "pnpm --filter @rankmyseo/playground dev",
+    "dev:dashboard": "pnpm --filter @rankmyseo/dashboard dev"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",

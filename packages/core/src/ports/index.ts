@@ -1,5 +1,6 @@
 import type {
   Audit,
+  BlogPost,
   CreateKeywordInput,
   CreateRankSnapshotInput,
   DashboardConfig,
@@ -9,6 +10,7 @@ import type {
   Report,
   SnapshotRangeQuery,
   TenantScope,
+  UpdateBlogPostInput,
 } from "../schemas/index.js";
 
 export interface ProjectRepo {
@@ -46,6 +48,18 @@ export interface DashboardConfigRepo {
   upsert(config: DashboardConfig): Promise<DashboardConfig>;
 }
 
+export interface BlogPostRepo {
+  create(post: Omit<BlogPost, "createdAt" | "updatedAt">): Promise<BlogPost>;
+  getById(scope: TenantScope, id: string): Promise<BlogPost | undefined>;
+  list(scope: TenantScope): Promise<BlogPost[]>;
+  update(
+    scope: TenantScope,
+    id: string,
+    patch: UpdateBlogPostInput,
+  ): Promise<BlogPost | undefined>;
+  delete(scope: TenantScope, id: string): Promise<boolean>;
+}
+
 export interface RankStore {
   projects: ProjectRepo;
   keywords: KeywordRepo;
@@ -53,6 +67,7 @@ export interface RankStore {
   audits: AuditRepo;
   reports: ReportRepo;
   dashboard: DashboardConfigRepo;
+  blog: BlogPostRepo;
 }
 
 export interface PositionQuery {

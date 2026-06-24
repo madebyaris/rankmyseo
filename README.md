@@ -1,30 +1,84 @@
 # RankMySEO
 
-An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript ecosystem. Drop it into any JS/TS app — Next.js, Hono, SvelteKit, Express, Workers, plain Node — with keyword/rank tracking, persistent reports, and (planned) an AI agent layer that can reshape your dashboard.
+An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript ecosystem. Drop it into any JS/TS app — Next.js, Hono, SvelteKit, Express, Workers, plain Node — with keyword/rank tracking, SEO audits, persistent reports, an AI agent layer, and a customizable dashboard.
 
-**Status:** Early development (M0 skeleton). Packages are not published to npm yet.
+**Status:** M1–M4 feature verticals implemented (offline-verified with fixture datasource + mock LLM). Packages are not published to npm yet.
 
 ## Why RankMySEO?
 
 Most SEO tooling is locked to a single platform or shipped as a hosted SaaS iframe. RankMySEO is a **composable npm package set**:
 
 - **Headless core** — domain logic and ports with zero framework dependencies
-- **Your database** — Drizzle adapter today (SQLite); Postgres/MySQL and optional Prisma/Kysely adapters planned
+- **Your database** — Drizzle adapter today (SQLite); Postgres/MySQL and optional Prisma/Kysely adapters planned (M5)
 - **Your stack** — thin adapters per framework; the dashboard never touches your DB directly
 - **Multi-tenant ready** — every row is scoped by `tenantId` + `projectId`
 
 See [PRD.md](./PRD.md) for the full architecture, roadmap, and design decisions.
 
-## Packages (M0)
+## Packages
 
 | Package | Description |
 | --- | --- |
-| [`@rankmyseo/core`](./packages/core) | Zod schemas, `RankStore` / `RankDataSource` / `Scheduler` ports, store conformance tests |
+| [`@rankmyseo/core`](./packages/core) | Zod schemas, audit engine, report rollup, config loader, ports (`RankStore`, `RankDataSource`, `Scheduler`) |
 | [`@rankmyseo/storage`](./packages/storage) | Default Drizzle SQLite adapter (`createStore`) |
-| [`@rankmyseo/server`](./packages/server) | Framework-agnostic HTTP handler (`Request` / `Response`) |
-| [`@rankmyseo/server-hono`](./packages/server-hono) | Hono adapter — `createRankMySeoApp(store)` |
+| [`@rankmyseo/datasource`](./packages/datasource) | Fixture (offline default), Google Search Console rank source + PageSpeed Insights client |
+| [`@rankmyseo/scheduler`](./packages/scheduler) | `NodeCronScheduler` + `ManualScheduler` for rank ingestion jobs |
+| [`@rankmyseo/server`](./packages/server) | Framework-agnostic HTTP handler (`Request` / `Response`) — full API + site features |
+| [`@rankmyseo/server-hono`](./packages/server-hono) | Hono adapter — `createRankMySeoApp(store, options?)` |
+| [`@rankmyseo/agent`](./packages/agent) | AI SDK tools + MCP server for dashboard customization |
+| [`@rankmyseo/react`](./packages/react) | Headless hooks + on-page collector (`web-vitals`) |
+| [`@rankmyseo/ui`](./packages/ui) | shadcn/Tailwind widget registry + `DashboardRenderer` |
+| [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule` commands |
 
-Planned: `@rankmyseo/react`, `@rankmyseo/ui`, `@rankmyseo/datasource`, `@rankmyseo/agent`, and more framework adapters.
+Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, Postgres store adapters, more framework adapters.
+
+## What's working today (M0–M4)
+
+| Area | Status |
+| --- | --- |
+| Keyword CRUD + rank snapshots | ✓ |
+| SQLite persistence (audits, reports, dashboard config) | ✓ |
+| Multi-tenant scoping (`tenantId` + `projectId`) | ✓ |
+| Audit engine + on-page collector (`POST /collect`) | ✓ |
+| Live website scan (`POST /scan` — fetch URL → signals → score + recommendations) | ✓ |
+| Meta generator (`POST /meta/generate` — title/og/JSON-LD, audit-verified) | ✓ |
+| Blog system with keyword intent + auto meta (`/blog` CRUD) | ✓ |
+| Recommendation engine (per-scan + per-post, prioritized) | ✓ |
+| Report rollup (`POST/GET /reports`) | ✓ |
+| Rank ingestion service + scheduler port | ✓ |
+| Datasource adapters (fixture default; GSC real class) | ✓ offline via fixture |
+| React hooks + shadcn dashboard widgets | ✓ |
+| AI agent chat + MCP tools (approval-gated dashboard edits) | ✓ offline via mock LLM |
+| Site features: sitemap, `llms.txt`, markdown negotiation | ✓ |
+| `rankmyseo.config.ts` schema + CLI scaffold | ✓ |
+
+Automated tests: expanded store contract tests, server route integration tests, datasource/scheduler/agent/react/ui/cli unit tests, Hono smoke test.
+
+**Implemented but unverified without live keys:** GSC, PSI, and real OpenAI/Anthropic LLM calls.
+
+## Apps
+
+| App | Command | URL |
+| --- | --- | --- |
+| Playground (manual API UI) | `pnpm dev:playground` | http://localhost:3456 |
+| Dashboard (React reference UI) | `pnpm dev:dashboard` | http://localhost:5173 (proxies API to :3456) |
+
+Run the playground backend first when using the dashboard demo:
+
+```bash
+pnpm install
+pnpm build
+pnpm dev:playground   # terminal 1
+pnpm dev:dashboard    # terminal 2
+```
+
+## CLI
+
+```bash
+pnpm exec rankmyseo init          # scaffold rankmyseo.config.ts
+pnpm exec rankmyseo migrate       # run SQLite migrations
+pnpm exec rankmyseo schedule      # register cron ingestion job (requires config)
+```
 
 ## Quick start (local monorepo)
 
@@ -41,10 +95,11 @@ pnpm test
 ### Minimal Hono integration
 
 ```ts
+import { defineConfig } from "@rankmyseo/core";
 import { createStore } from "@rankmyseo/storage";
 import { createRankMySeoApp } from "@rankmyseo/server-hono";
 
-const store = createStore(":memory:"); // or sqlite:///path/to/db.sqlite
+const store = createStore("sqlite:///path/to/db.sqlite");
 
 await store.projects.create({
   id: "project-1",
@@ -53,7 +108,21 @@ await store.projects.create({
   domain: "example.com",
 });
 
-export default createRankMySeoApp(store);
+const config = defineConfig({
+  databaseUrl: "sqlite:///path/to/db.sqlite",
+  tenantId: "tenant-a",
+  projectId: "project-1",
+  dataSources: [{ provider: "fixture", default: true }],
+  schedule: { cron: "0 6 * * *", enabled: false },
+  siteFeatures: {
+    sitemap: true,
+    llmsTxt: true,
+    collector: true,
+    markdownNegotiation: true,
+  },
+});
+
+export default createRankMySeoApp(store, { config });
 ```
 
 ### API scoping
@@ -65,7 +134,7 @@ All routes require tenant/project headers:
 | `x-tenant-id` | Tenant scope |
 | `x-project-id` | Project scope |
 
-**M0 routes:**
+**Routes:**
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -75,11 +144,34 @@ All routes require tenant/project headers:
 | `DELETE` | `/keywords/:id` | Delete keyword |
 | `POST` | `/snapshots` | Append rank snapshot |
 | `GET` | `/snapshots?keywordId=&from=&to=` | Query snapshot history |
+| `GET` | `/projects` | List projects |
+| `POST` | `/projects` | Create project |
+| `GET` | `/projects/:id` | Get project |
+| `POST` | `/audits` | Run audit from page signals |
+| `GET` | `/audits` | List audits |
+| `GET` | `/audits/:id` | Get audit |
+| `POST` | `/collect` | On-page collector endpoint |
+| `POST` | `/scan` | Fetch a live URL, score it, return signals + recommendations |
+| `POST` | `/meta/generate` | Generate meta tags (title/description/OG/JSON-LD) + audit |
+| `GET` | `/blog` | List blog posts |
+| `POST` | `/blog` | Create blog post (auto meta + slug when omitted) |
+| `GET` | `/blog/:id` | Get a post with intent-based recommendations |
+| `PUT` | `/blog/:id` | Update a post |
+| `DELETE` | `/blog/:id` | Delete a post |
+| `POST` | `/reports` | Build report rollup |
+| `GET` | `/reports` | List reports |
+| `GET` | `/reports/:id` | Get report |
+| `GET` | `/dashboard` | Get dashboard config |
+| `PUT` | `/dashboard` | Update dashboard config |
+| `POST` | `/agent/chat` | Stream agent chat (requires `agentModel` in handler options) |
+| `GET` | `/sitemap.xml` | Generated sitemap (opt-in) |
+| `GET` | `/llms.txt` | Agent-readable site summary (opt-in) |
+| `GET` | `/` | HTML or markdown (Accept negotiation, opt-in) |
 
 Example:
 
 ```bash
-curl -X POST http://localhost:3000/keywords \
+curl -X POST http://localhost:3456/keywords \
   -H "x-tenant-id: tenant-a" \
   -H "x-project-id: project-1" \
   -H "content-type: application/json" \
@@ -91,9 +183,9 @@ curl -X POST http://localhost:3000/keywords \
 Three trust tiers keep secrets on the server:
 
 ```
-Backend (server-only)  →  core, server, storage, datasource, agent
-Frontend (client SDK)  →  headless hooks — no DB or API keys
-Dashboard (UI)         →  optional prebuilt components
+Backend (server-only)  →  core, server, storage, datasource, scheduler, agent, cli
+Frontend (client SDK)  →  @rankmyseo/react — HTTP hooks only, no DB or API keys
+Dashboard (UI)         →  @rankmyseo/ui — widgets via react hooks
 ```
 
 Backend packages use `import 'server-only'` and dependency-cruiser rules to prevent accidental client-bundle leaks. Custom storage adapters can implement the `RankStore` port and pass `runStoreContractTests()` from `@rankmyseo/core/testing`.
@@ -101,28 +193,30 @@ Backend packages use `import 'server-only'` and dependency-cruiser rules to prev
 ## Development
 
 ```bash
-pnpm build      # build all packages
-pnpm test       # run Vitest (store contract + Hono smoke)
-pnpm typecheck  # TypeScript strict
-pnpm lint       # tsc + dependency-cruiser
-pnpm publint    # package export hygiene
+pnpm build           # build all packages
+pnpm test            # Vitest across all packages
+pnpm dev:playground  # manual test UI on :3456
+pnpm dev:dashboard   # React dashboard demo on :5173
+pnpm typecheck       # TypeScript strict
+pnpm lint            # tsc + dependency-cruiser
+pnpm publint         # package export hygiene
 ```
 
 Monorepo tooling: **pnpm workspaces**, **Turborepo**, **tsup**, **Changesets**, **Vitest**.
 
 ## Roadmap
 
-| Phase | Focus |
-| --- | --- |
-| **M0** ✓ | Core ports, SQLite store, Hono adapter, conformance tests |
-| **M1** | GSC datasource, scheduler, React hooks, rank chart |
-| **M2** | SEO audits, reports, Postgres adapter |
-| **M3** | AI agent + customizable dashboard config |
-| **M4** | On-page scoring, sitemap, `llms.txt`, markdown negotiation |
-| **M5** | More adapters (Next, SvelteKit), optional ORM stores, MCP server |
+| Phase | Focus | Status |
+| --- | --- | --- |
+| **M0** | Core ports, SQLite store, Hono adapter, conformance tests | ✓ |
+| **M1** | Datasource, scheduler, React hooks, rank chart widget | ✓ |
+| **M2** | SEO audits, reports | ✓ (SQLite; Postgres deferred to M5) |
+| **M3** | AI agent + customizable dashboard config | ✓ |
+| **M4** | On-page scoring, sitemap, `llms.txt`, markdown negotiation | ✓ |
+| **M5** | More adapters (Next, SvelteKit, Express), Postgres/Prisma stores, docs site | Planned |
 
 Details in [PRD.md](./PRD.md).
 
 ## License
 
-MIT — see [LICENSE](./LICENSE) when added. Clean-room implementation; no third-party plugin code is copied.
+Apache-2.0 — see [LICENSE](./LICENSE). Clean-room implementation; no third-party plugin code is copied.

@@ -1,0 +1,197 @@
+import "server-only";
+
+import { randomUUID } from "node:crypto";
+import { tool } from "ai";
+import { z } from "zod";
+import {
+  buildReport,
+  dashboardConfigSchema,
+  runAuditChecks,
+  type RankStore,
+  type TenantScope,
+} from "@rankmyseo/core";
+
+export interface AgentToolsContext {
+  store: RankStore;
+  scope: TenantScope;
+}
+
+export function createAgentTools(ctx: AgentToolsContext) {
+  const { store, scope } = ctx;
+
+  return {
+    queryRankHistory: tool({
+      description: "Read rank snapshots for keywords over a date range",
+      inputSchema: z.object({
+        keywordId: z.string().optional(),
+        from: z.string(),
+        to: z.string(),
+      }),
+      execute: async ({ keywordId, from, to }) => {
+        const snapshots = await store.snapshots.listByRange({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          keywordId,
+          from: new Date(from),
+          to: new Date(to),
+        });
+        return { count: snapshots.length, snapshots };
+      },
+    }),
+
+    listKeywords: tool({
+      description: "List tracked keywords for the current project",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const keywords = await store.keywords.list(scope);
+        return { keywords };
+      },
+    }),
+
+    addKeyword: tool({
+      description: "Add a keyword to track",
+      inputSchema: z.object({
+        text: z.string().min(1),
+        country: z.string().default("us"),
+        device: z.enum(["desktop", "mobile"]).default("desktop"),
+      }),
+      execute: async ({ text, country, device }) => {
+        const keyword = await store.keywords.create({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          text,
+          country,
+          device,
+          tags: [],
+        });
+        return { keyword };
+      },
+    }),
+
+    runAudit: tool({
+      description: "Run an SEO audit on page signals",
+      inputSchema: z.object({
+        url: z.string().url(),
+        title: z.string().optional(),
+        metaDescription: z.string().optional(),
+        h1Count: z.number().int().nonnegative().default(1),
+        hasOgTags: z.boolean().default(false),
+        hasJsonLd: z.boolean().default(false),
+      }),
+      execute: async (input) => {
+        const { checks, score } = runAuditChecks(input);
+        const audit = await store.audits.create({
+          id: randomUUID(),
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          url: input.url,
+          score,
+          checks,
+        });
+        return { audit };
+      },
+    }),
+
+    getAudit: tool({
+      description: "Get an audit by id",
+      inputSchema: z.object({ auditId: z.string() }),
+      execute: async ({ auditId }) => {
+        const audit = await store.audits.getById(scope, auditId);
+        return { audit: audit ?? null };
+      },
+    }),
+
+    getDashboardConfig: tool({
+      description: "Read the current dashboard widget layout",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const config = await store.dashboard.get(scope);
+        return { config: config ?? null };
+      },
+    }),
+
+    updateDashboardConfig: tool({
+      description: "Update dashboard widgets (requires user approval)",
+      inputSchema: z.object({
+        widgets: z.array(
+          z.object({
+            id: z.string(),
+            type: z.string(),
+            title: z.string(),
+            query: z.record(z.string(), z.unknown()).default({}),
+            options: z.record(z.string(), z.unknown()).default({}),
+          }),
+        ),
+      }),
+      execute: async ({ widgets }) => {
+        const existing = await store.dashboard.get(scope);
+        const config = dashboardConfigSchema.parse({
+          id: existing?.id ?? randomUUID(),
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          widgets,
+          updatedAt: new Date(),
+        });
+        const saved = await store.dashboard.upsert(config);
+        return { config: saved };
+      },
+    }),
+
+    explainMetric: tool({
+      description: "Explain an SEO metric in plain language using project data",
+      inputSchema: z.object({
+        metric: z.string(),
+      }),
+      execute: async ({ metric }) => {
+        const keywords = await store.keywords.list(scope);
+        const snapshots = await store.snapshots.listByRange({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          from: new Date(Date.now() - 30 * 86400000),
+          to: new Date(),
+        });
+        return {
+          metric,
+          keywordCount: keywords.length,
+          snapshotCount: snapshots.length,
+          explanation: `You are tracking ${keywords.length} keywords with ${snapshots.length} rank snapshots in the last 30 days.`,
+        };
+      },
+    }),
+
+    buildReport: tool({
+      description: "Generate a rank and audit report for a date window",
+      inputSchema: z.object({
+        title: z.string(),
+        from: z.string(),
+        to: z.string(),
+      }),
+      execute: async ({ title, from, to }) => {
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        const keywords = await store.keywords.list(scope);
+        const snapshots = await store.snapshots.listByRange({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          from: fromDate,
+          to: toDate,
+        });
+        const audits = await store.audits.list(scope);
+        const reportData = buildReport({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          title,
+          from: fromDate,
+          to: toDate,
+          keywords,
+          snapshots,
+          audits,
+        });
+        const report = await store.reports.create(reportData);
+        return { report };
+      },
+    }),
+  };
+}
+
+export type AgentTools = ReturnType<typeof createAgentTools>;
