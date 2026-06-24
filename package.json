@@ -1,0 +1,27 @@
+{
+  "name": "rankmyseo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint && dependency-cruiser packages --config .dependency-cruiser.cjs",
+    "publint": "turbo run publint"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8",
+    "dependency-cruiser": "^16.10.4",
+    "publint": "^0.3.15",
+    "turbo": "^2.6.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.30.3",
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3", "esbuild"]
+  }
+}

@@ -1,0 +1,63 @@
+---
+description: Multi-source structured research protocol — primaries first, iterative retrieval, explicit conflicts
+alwaysApply: false
+---
+
+# Composer deep research
+
+When the user asks for investigation, comparisons, unfamiliar domains, audits, benchmarks, regulation-style questions, vendor claims, historical timelines, architecture surveys, threat models grounded in citations, etc., shift into **research mode**.
+
+**Expanded playbook**: use the skill at [.cursor/skills/deep-research/SKILL.md](.cursor/skills/deep-research/SKILL.md) for ladders, contradiction logging, and long-form workflows.
+
+## Outcome shape
+
+Produce answers in this order:
+
+1. **Scoped conclusion** framed to the user’s constraints (explicit assumptions).
+2. **What primary sources establish** versus what rests on weaker synthesis.
+3. **Conflicts/disagreements** between sources—with dates/versions/context.
+4. **Action recommendation** tied to assumptions and uncertainties.
+5. **How to verify** (commands, dashboards, reproducible benchmarks, authoritative doc sections).
+
+Avoid confident absolutes unless directly supported—flag confidence per claim tier.
+
+## Visible research thinking
+
+Do not expose private chain-of-thought or invented `<thinking>` blocks. Instead, externalize **auditable reasoning artifacts**:
+
+- **Research plan**: question, assumptions, source ladder, search angles, stop condition.
+- **Claim ledger**: important claim → source/evidence tier → counter-evidence checked → confidence.
+- **Decision rationale**: short “because” statements tied to evidence, not vibes.
+- **Residual uncertainty**: what would change the conclusion and how to test it.
+
+For quick answers, compress these into 2–4 sentences. For deep research, keep them explicit.
+
+## Source ladder (default tiering)
+
+Prefer, in descending trust for engineering facts unless the question is inherently opinion-heavy:
+
+1. Specifications, RFCs, official vendor docs keyed to product/version pages.
+2. Language/runtime/framework official guides and changelog entries—not random tutorials.
+3. Source repositories tagged releases, SECURITY advisories, CVE records with linked metadata.
+4. Peer-reviewed/academic/industry-neutral references when factual claims hinge on measurements.
+5. Secondary blogs/forums/stack answers—explicitly labelled as heuristic or anecdotal corroborating evidence.
+
+Retrieve **different independent primaries** when claims are high-impact (security/compliance/production failure modes).
+
+## Iterative retrieval
+
+- **Broaden** prompts when retrieval is sparse; **narrow** when noise dominates.
+- Re-run queries anchored to identifiers you learned (proper nouns, error codes, version numbers, CVE IDs).
+- Note **freshness**: capture page dates, release tags, deprecation banners; mark stale/conflicting timelines.
+- Run at least one **adversarial pass** for high-impact recommendations: search for deprecations, counterexamples, benchmark caveats, security advisories, and “why not” evidence.
+
+## Synthesis hygiene
+
+- Distinguish **reported symptom** versus **hypothesized mechanism** versus **validated root cause**.
+- Do not merge incompatible positions silently—present both and the deciding evidence.
+- If tools or live systems are unavailable, say so and downgrade certainty.
+- Every citation should support the sentence it appears beside; avoid dumping links that were not inspected or that only loosely relate.
+
+## Outputs
+
+Prefer structured bullet findings with citations (title + canonical URL/path). Paste long excerpts only when necessary to resolve ambiguity—otherwise summarise with pointers.

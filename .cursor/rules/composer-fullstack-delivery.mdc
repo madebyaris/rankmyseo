@@ -1,0 +1,66 @@
+---
+description: Stack-agnostic delivery — define seams first, ship one vertical slice, treat failure modes as first-class
+alwaysApply: false
+---
+
+# Composer full-stack delivery
+
+Use when a change spans **multiple layers**: client + server, server + persistence, service + service, code + migration. Skip when a single-module tweak suffices.
+
+This rule is technology-neutral. Replace "client/server/persistence" with whatever your spine actually is.
+
+## Step 1 — Freeze the seams
+
+Before writing code, write down the boundaries (briefly — a few bullets, not a doc).
+
+- **User-visible behavior** for the smallest useful story.
+- **Contracts at every seam**: API shape, event shape, function signature, error semantics.
+- **Trust boundaries**: who is the actor, what's authenticated, what's authorized.
+- **Consistency expectations**: transactions, retries, idempotency keys where partial failure repeats.
+- **Observability**: which logs, traces, or metrics already exist at these seams; where to add minimum new ones.
+
+If two of these conflict, surface the conflict before coding around it.
+
+## Step 2 — Ship one vertical slice
+
+Build a thin column end-to-end before widening:
+
+1. One client/caller path.
+2. One server handler or worker.
+3. One persistence or integration edge if persistence is new.
+
+Use the **minimum UI** needed to expose the state transitions; defer layout, animation, and polish.
+
+Resist building the second screen, the second endpoint, or the speculative migration until the first slice **demonstrably works** at the surface that matters.
+
+## Step 3 — Treat failure modes as first-class
+
+Happy path is half the work. Enumerate, at minimum:
+
+- **Validation** failures vs. **semantic** rejections — different responses, different recovery.
+- **Authorization** failures distinguished from **not found**, mindful of existence-leak trade-offs.
+- **Timeouts and partial outages** — retry, backoff, or degrade with a clear contract.
+- **Duplicate submissions** — idempotency or explicit user-visible handling.
+- **Empty / boundary states** — empty list, single item, max length.
+
+These deserve the same attention as the happy path when they affect trust or correctness.
+
+## Step 4 — Proportional verification
+
+Match test depth to risk and to the project's existing investment.
+
+- If the project has contract or integration tests, use them.
+- If only unit tests exist, write the smallest unit test that covers the seam.
+- For ad-hoc verification, use scripted curl / CLI / browser checks — but capture them as artifacts (a script, a doc, a fixture) rather than throwaway gestures.
+- If verification can't run, label `implemented but unverified` per the verification rule with the precise gap.
+
+Don't bolt on a heavy test framework mid-slice; don't refactor the test layout to accommodate one new test.
+
+## Coordination
+
+- Parallelize **reading**: explore client, server, schema, and tests at once.
+- Sequentialize **writing** when there are dependencies: migrate before code that depends on it; regenerate types after schema change; deploy server before client expects new endpoints.
+
+## Closeout
+
+Demonstrate the slice works at the surface that matters. Hand back artifacts another engineer can rerun: command, request, expected output, or screenshot. List what's intentionally deferred ("phase 2: bulk delete, error toast, retry banner").

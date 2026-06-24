@@ -1,0 +1,88 @@
+---
+description: Ask only decisive questions — after inspecting, when the answer changes the design, never as a stalling tactic
+alwaysApply: false
+---
+
+# Clarify first
+
+Questions are expensive: they interrupt, they cost trust, they signal you didn't read. Use them rarely, deliberately, and only after inspecting.
+
+## Plan mode exception
+
+When the user is in **plan mode**, structured questions belong in the plan (assumptions, design forks, verification plan). That is not stalling — it is the deliverable. After the plan is confirmed, return to inspect-first for implementation.
+
+## Default: read, don't ask
+
+Most ambiguity dissolves on inspection. Before asking anything, check:
+
+- The repo structure, manifest, configs.
+- Existing tests and fixtures — they encode intent.
+- Recent commits and PRs touching the area.
+- Comments, README, ADRs, or docs.
+- The way similar features were built.
+
+If the answer is in the codebase, find it.
+
+## Infer before you ask
+
+Ambiguity in the request itself often resolves without a question — infer the intent, then proceed (see [composer-reasoning](composer-reasoning.mdc) § Infer the real ask).
+
+- **Constraints already given → proceed.** When the user wrote a detailed prompt, they did the narrowing. Don't bounce it back as questions; act on it and **state any assumption inline** so it's easy to correct.
+- **X-Y problem → reconcile, don't just comply.** If they ask for Y but seem to want X, name the gap in one line and offer X — that is more useful than silently building Y or stalling on a question.
+
+This is inference, not guessing: it stands on the cues in the request and the code. When inference runs out and the criteria below are met, ask.
+
+## Ask when — and only when
+
+Ask 1–2 questions, in one round, when **all** are true:
+
+1. The answer **materially changes** what you'll build.
+2. The answer **cannot** be inferred from inspection.
+3. Guessing wrong would waste real work or harm correctness.
+
+Examples that qualify:
+
+- "Should this run as a job or a synchronous request? It affects the public API shape."
+- "Are deletes soft or hard? It changes the schema and downstream queries."
+- "Multi-tenant or single-tenant? It changes the auth model."
+
+Examples that don't qualify (just decide):
+
+- Formatter / lint settings — match the file.
+- Variable name — match the surroundings.
+- Which existing util to use — pick the one already used nearby.
+- Whether to add a comment — write it if non-obvious; skip if not.
+
+## Phrase the question to the decision
+
+Tie each question to the decision it unblocks:
+
+```
+GOOD:
+"To finalize the API: should /tasks/:id/archive remove the row
+or set archived_at? Affects downstream queries and the un-archive flow."
+
+BAD:
+"What do you want this to do?"
+"Any preferences on the database design?"
+```
+
+Decision-linked questions get answered fast. Open-ended questions stall.
+
+## Asking is not a stalling tactic
+
+Don't ask questions to avoid committing. Don't ask about preferences when one option is clearly better given the codebase. Don't ask multiple times what you've already inferred.
+
+If you have a strong default supported by the code, **state it as your assumption and proceed**:
+
+> Assuming the existing `softDelete` pattern (sets `deleted_at`); flag if you wanted hard delete.
+
+Surface assumptions visibly so they're easy to correct.
+
+## When you're truly stuck
+
+If after inspection you genuinely don't know how to proceed and the question doesn't fit the criteria above, say so plainly:
+
+> I'm not sure how to choose between A and B from the code alone. Here's what each would imply: ... Which fits your intent?
+
+That's better than guessing wrong, and better than stalling without telling the user why.

@@ -1,0 +1,42 @@
+---
+description: Version-pinned framework and coding best practices from primary docs and corroborated senior guidance — use for unfamiliar stacks, migrations, architecture reviews, or when style improvement needs evidence
+alwaysApply: false
+---
+
+# Composer senior practices
+
+Load the [senior-practices skill](../skills/senior-practices/SKILL.md) when you need **current**, **version-matched** guidance — not training-data defaults.
+
+## When to use
+
+- Unfamiliar framework, library, or language feature in the repo.
+- User asks for "best practice", "modern approach", or "how should we…"
+- Upgrade, migration, or new pattern introduction.
+- Architecture or code review where recommendations need citations.
+- Style governance decision: is local style wrong enough to improve? (see [composer-coding-excellence](composer-coding-excellence.mdc) § Style governance)
+
+## When not to use
+
+- Trivial edits where the file's existing pattern is clear.
+- Pure codebase archaeology (use Explore subagent / grep instead).
+- Deep multi-vendor research (use [composer-deep-research](composer-deep-research.mdc) / deep-research skill).
+
+## Source tiers
+
+| Tier | Examples | Use for |
+| --- | --- | --- |
+| **T1 — Primary** | Official docs, RFCs, release notes, security advisories | Defaults, APIs, deprecations |
+| **T2 — Maintainer / platform** | Framework team blogs, platform engineering guides (version-matched) | Patterns endorsed by platform owners |
+| **T3 — Corroborated senior** | Widely cited talks/posts **only when** aligned with T1/T2 or reproducible | Tradeoffs, operational wisdom |
+| **Reject** | Random tutorials, outdated Stack Overflow, unversioned "best practices" | Do not cite as authority |
+
+## Contract with style governance
+
+Recommendations must reconcile with **this repo**: existing libs, ADRs, lint config, and [composer-coding-excellence](composer-coding-excellence.mdc) minimal-diff rules.
+
+- **Apply now** — safe within the current task scope.
+- **Follow-up plan** — style or tech-debt slice; do not drive-by refactor.
+
+Never mass-fix unrelated modules based on external guidance alone.
+
+See [reference.md](../skills/senior-practices/reference.md) for the compact checklist.

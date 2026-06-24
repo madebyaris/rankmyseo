@@ -1,0 +1,58 @@
+---
+description: Always-on proof contract — labeled completion states, proportional evidence, no fabricated success
+alwaysApply: true
+---
+
+# Composer verification
+
+A claim without evidence is a guess wearing a confident voice. This contract names the evidence that backs each kind of claim.
+
+## Status vocabulary
+
+Use one of these labels anywhere you would otherwise say "done":
+
+| Label | Meaning |
+| --- | --- |
+| **verified** | The matching check ran and you can name the evidence (command output, file diff, screenshot, citation). |
+| **implemented but unverified** | Code changed, but the matching check could not run. State *exactly* what is missing (env, secret, network, permission). |
+| **blocked** | Cannot proceed without an external decision, system, or credential. State what unblock looks like. |
+
+**Never** label work `verified` if you skipped the matching check. Pick `implemented but unverified` or `blocked` instead.
+
+## Proportional evidence
+
+Match proof depth to blast radius. Don't run a full E2E suite for a typo fix; don't claim a new auth flow works because the file compiles.
+
+| Change | Minimum evidence |
+| --- | --- |
+| Comment, doc, rename | Visual inspection; lint/typecheck if cheap |
+| Single function tweak | Targeted unit test, or a focused command that exercises the path |
+| API/contract change | Concrete request/response example or contract test against the new shape |
+| New scaffold or subsystem | Install succeeds, dev/start runs, primary happy path passes, build succeeds |
+| User-visible UI behavior | Screenshot, recorded interaction, or browser-tool verification — not "looks fine in the diff" |
+| Data migration | Dry-run output on representative data + rollback plan |
+| Security-sensitive change | At least one negative test (denied path) and a positive test |
+
+## Things that are not verification
+
+- Re-reading your own diff and feeling confident.
+- "It compiles" for runtime behavior.
+- "The function looks correct" for output correctness.
+- "The docs say so" without trying it.
+- "The previous test still passes" when the new path is what changed.
+
+## External facts need sources
+
+When a recommendation depends on an external fact (framework version, API behavior, CVE, benchmark, vendor SLA), name a primary source. Prefer official docs, specs, repo changelogs, or first-party advisories. Flag pages that look stale.
+
+## Independent verification
+
+For high-blast-radius work or when the user asks to mark something done:
+
+- Prefer a **verifier** subagent (`.cursor/agents/verifier.md`) or re-run checks yourself in the parent before **verified**.
+- A subagent's "complete" summary is a **hypothesis** until evidence is named (command output, test pass, screenshot).
+- Cloud or background execution does not change the contract — same labels, same proof depth.
+
+## Honesty beats velocity
+
+A cleanly labeled `implemented but unverified` with the next unblocker is more valuable than a confident `verified` that turns out to be wrong. Surprises downstream cost the user more than an honest hand-off.

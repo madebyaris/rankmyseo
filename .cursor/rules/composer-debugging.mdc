@@ -1,0 +1,119 @@
+---
+description: Root-cause debugging — reproduce, trace data flow, test cheapest hypothesis, fix the cause not the symptom
+alwaysApply: false
+---
+
+# Composer debugging
+
+Use whenever something is broken, failing, flaky, or behaves unexpectedly. The goal is to find the cause, not silence the alarm.
+
+Establish **reproduction in the parent** before spawning the debugger subagent (`.cursor/agents/debugger.md`), unless the task is explore-only. For parallel survey work, see [composer-orchestration](composer-orchestration.mdc).
+
+## The debugging mindset
+
+Bugs are not random. They have causes. Your job is to find the cause with the cheapest possible experiments, then fix it surgically.
+
+Avoid the three classic anti-patterns:
+
+1. **Symptom-patching**: making the error message disappear without understanding why it appeared.
+2. **Guess-and-check**: changing things at random hoping it works.
+3. **Premature theory**: committing to a hypothesis before evidence supports it.
+
+## Step 1 — Reproduce reliably
+
+Do not start fixing until you can reproduce. A bug you cannot reproduce is a bug you cannot fix; you can only paper over it.
+
+- Find the **smallest reliable repro**: an exact command, input, route, or test case that triggers it.
+- Note environment specifics: OS, runtime version, dependency versions, timing, concurrency, data state.
+- If it's flaky, reproduce it **at least three times** before believing you have it.
+
+If you genuinely cannot reproduce, say so and propose what data would let you (logs, a failing test, more user steps).
+
+## Step 2 — Read the actual error
+
+Read the **full** error message and stack trace, not just the first line.
+
+- What component reported the error?
+- What was the input/state at the failure point?
+- What's the closest frame in code you control?
+- What does the error message actually mean (look it up if unfamiliar)?
+
+Common mistake: skimming a stack trace, picking a familiar-looking word, and chasing the wrong layer.
+
+## Step 3 — Trace the data flow
+
+Walk the path the bad value takes:
+
+1. Where does it originate?
+2. What transforms it along the way?
+3. Where does it become wrong?
+4. What invariant was violated, and where?
+
+Use the cheapest tools first: read the code, then add a log/print, then a debugger, then a test. Don't reach for the heaviest tool first.
+
+## Step 4 — Hypothesis ladder
+
+List the possible causes from **most likely × cheapest to test** to least.
+
+| Hypothesis | Test | Cost |
+| --- | --- | --- |
+| Input validation drops field X | Log the input at boundary | low |
+| Race condition between A and B | Add a deterministic delay; check ordering | medium |
+| Library bug in version Y | Reproduce in a minimal isolated case | high |
+
+Test cheapest first. Eliminate before you accuse.
+
+## Step 5 — Find the root, not a symptom
+
+When a hypothesis matches the evidence, ask **one more time**: "But why does *that* happen?"
+
+- "The list is empty" — why? "The query returns nothing" — why? "The filter compares against the wrong field" — root.
+- "Token is rejected" — why? "It's expired" — why? "The refresh job didn't run" — why? "Cron is misconfigured" — root.
+
+Stop drilling when one more "why" leaves the system you're responsible for.
+
+## Step 6 — Fix surgically and confirm
+
+- Change the **minimum** that addresses the root cause.
+- Add or update a test that **fails before the fix and passes after**. Run both directions.
+- Re-run the original reproduction; confirm it no longer triggers.
+- Check for adjacent code that has the same flaw.
+
+## Symptom-patching is occasionally legitimate
+
+If the root cause is genuinely out of scope (third-party library, infra owned by another team), patching the symptom can be the right move — **only if** you:
+
+1. Document that it's a workaround, not a fix.
+2. Reference the upstream issue or ticket where the real fix lives.
+3. Add a TODO with conditions for removing the workaround.
+
+Never silently mask a problem you don't understand.
+
+## Working with flakiness
+
+Flaky tests and intermittent bugs deserve the same root-cause discipline:
+
+- Don't add retries to make CI green without understanding the flake.
+- Don't increase timeouts blindly; find why something is slow.
+- Don't mark a test `skip` to defer the problem; file an issue with the repro and link it.
+
+## Never delete the failing test
+
+A failing test is the most valuable artifact in the room. It's the bug, captured.
+
+- Don't delete it.
+- Don't comment it out.
+- Don't change its assertions to match the broken behavior.
+- Don't catch its expected error to silence it.
+
+If the test itself is genuinely wrong, prove it (read the spec, talk to the author) before changing it.
+
+## Reporting
+
+When you report a fix, include:
+
+1. **Symptom** the user saw.
+2. **Root cause** you identified, with the evidence that confirms it.
+3. **Fix** applied (file, function, what changed and why).
+4. **Verification** — the test or command that proves it's fixed.
+5. **Adjacent risks** — places with the same pattern, if any.
