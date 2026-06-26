@@ -1,0 +1,58 @@
+name: Publish Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/wiki/**"
+      - ".github/workflows/publish-wiki.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Publish docs/wiki to GitHub Wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TMP_DIR="$(mktemp -d)"
+          WIKI_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.wiki.git"
+
+          echo "Attempting to clone wiki repository"
+          if git clone "$WIKI_URL" "$TMP_DIR" 2>/dev/null; then
+            echo "Wiki repo exists; syncing content"
+            find "$TMP_DIR" -maxdepth 1 -name '*.md' -type f -delete
+          else
+            echo "Wiki repo not found; initializing"
+            git init "$TMP_DIR"
+            git -C "$TMP_DIR" remote add origin "$WIKI_URL"
+          fi
+
+          cp docs/wiki/*.md "$TMP_DIR"/
+
+          cd "$TMP_DIR"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No wiki changes to publish"
+            exit 0
+          fi
+
+          git commit -m "Publish wiki from docs/wiki ($(date -u +%Y-%m-%d))"
+
+          git push origin HEAD:master \
+            || git push origin HEAD:main \
+            || git push -u origin HEAD
+
+          echo "Wiki published successfully"

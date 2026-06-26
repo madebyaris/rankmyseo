@@ -1,0 +1,99 @@
+# Getting Started
+
+## Requirements
+
+- **Node.js** ≥ 20
+- **pnpm** ≥ 10
+
+## Clone and verify
+
+```bash
+git clone https://github.com/madebyaris/rankmyseo.git
+cd rankmyseo
+pnpm install
+pnpm build
+pnpm test
+```
+
+## Run the demo apps
+
+Terminal 1 — API server (SQLite, seeded data):
+
+```bash
+pnpm dev:playground
+# → http://localhost:3456
+# → Manual test UI: http://localhost:3456/playground
+```
+
+Terminal 2 — React dashboard (proxies to :3456):
+
+```bash
+pnpm dev:dashboard
+# → http://localhost:5173
+```
+
+## CLI scaffold
+
+```bash
+pnpm exec rankmyseo init              # creates rankmyseo.config.ts
+pnpm exec rankmyseo migrate           # SQLite migrations
+pnpm exec rankmyseo schedule          # one rank ingestion pass
+```
+
+## Minimal Hono integration
+
+```ts
+import { defineConfig } from "@rankmyseo/core";
+import { createStore } from "@rankmyseo/storage";
+import { createRankMySeoApp } from "@rankmyseo/server-hono";
+
+const store = createStore("sqlite:///path/to/db.sqlite");
+
+await store.projects.create({
+  id: "project-1",
+  tenantId: "tenant-a",
+  name: "My Site",
+  domain: "example.com",
+});
+
+const config = defineConfig({
+  databaseUrl: "sqlite:///path/to/db.sqlite",
+  tenantId: "tenant-a",
+  projectId: "project-1",
+  dataSources: [{ provider: "fixture", default: true }],
+  schedule: { cron: "0 6 * * *", enabled: false },
+  siteFeatures: {
+    sitemap: true,
+    llmsTxt: true,
+    collector: true,
+    markdownNegotiation: true,
+    blog: false,
+  },
+});
+
+export default createRankMySeoApp(store, { config });
+```
+
+## API scoping
+
+Every mutating and scoped read requires headers:
+
+| Header | Purpose |
+| --- | --- |
+| `x-tenant-id` | Tenant scope |
+| `x-project-id` | Project scope |
+
+Example:
+
+```bash
+curl http://localhost:3456/keywords \
+  -H "x-tenant-id: tenant-a" \
+  -H "x-project-id: project-1"
+```
+
+## Next steps
+
+- Read [[Configuration]] for all config options
+- See [[API-Reference]] for every route
+- Add dashboard widgets via [[Dashboard-and-Widgets]]
+- Enable blog optionally via [[Blog-Module]]

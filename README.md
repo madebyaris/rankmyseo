@@ -4,6 +4,8 @@ An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript eco
 
 **Status:** M1–M4 feature verticals implemented (offline-verified with fixture datasource + mock LLM). Packages are not published to npm yet.
 
+**Documentation:** [GitHub Wiki](https://github.com/madebyaris/rankmyseo/wiki) (source: [`docs/wiki/`](./docs/wiki/))
+
 ## Why RankMySEO?
 
 Most SEO tooling is locked to a single platform or shipped as a hosted SaaS iframe. RankMySEO is a **composable npm package set**:
@@ -27,7 +29,7 @@ See [PRD.md](./PRD.md) for the full architecture, roadmap, and design decisions.
 | [`@rankmyseo/server-hono`](./packages/server-hono) | Hono adapter — `createRankMySeoApp(store, options?)` |
 | [`@rankmyseo/agent`](./packages/agent) | AI SDK tools + MCP server for dashboard customization |
 | [`@rankmyseo/react`](./packages/react) | Headless hooks + on-page collector (`web-vitals`) |
-| [`@rankmyseo/ui`](./packages/ui) | shadcn/Tailwind widget registry + `DashboardRenderer` |
+| [`@rankmyseo/ui`](./packages/ui) | Widget registry + `DashboardRenderer` (custom `.rms-*` CSS, no Tailwind/shadcn in consumer apps) |
 | [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule` commands |
 
 Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, Postgres store adapters, more framework adapters.
@@ -42,12 +44,12 @@ Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, P
 | Audit engine + on-page collector (`POST /collect`) | ✓ |
 | Live website scan (`POST /scan` — fetch URL → signals → score + recommendations) | ✓ |
 | Meta generator (`POST /meta/generate` — title/og/JSON-LD, audit-verified) | ✓ |
-| Blog system with keyword intent + auto meta (`/blog` CRUD) | ✓ |
+| Blog system with keyword intent + auto meta (`/blog` CRUD) | ✓ opt-in via `siteFeatures.blog` + `BlogManager` widget |
 | Recommendation engine (per-scan + per-post, prioritized) | ✓ |
 | Report rollup (`POST/GET /reports`) | ✓ |
 | Rank ingestion service + scheduler port | ✓ |
 | Datasource adapters (fixture default; GSC real class) | ✓ offline via fixture |
-| React hooks + shadcn dashboard widgets | ✓ |
+| React hooks + dashboard widgets (`@rankmyseo/ui`) | ✓ |
 | AI agent chat + MCP tools (approval-gated dashboard edits) | ✓ offline via mock LLM |
 | Site features: sitemap, `llms.txt`, markdown negotiation | ✓ |
 | `rankmyseo.config.ts` schema + CLI scaffold | ✓ |
@@ -177,6 +179,30 @@ curl -X POST http://localhost:3456/keywords \
   -H "content-type: application/json" \
   -d '{"text":"best seo tools","country":"us","device":"desktop","tags":[]}'
 ```
+
+### Optional blog module
+
+Blog is **off by default**. Enable it in config and add the dashboard widget when you need content SEO:
+
+```typescript
+// rankmyseo.config.ts
+siteFeatures: { blog: true, /* … */ }
+
+// dashboard widgets (via PUT /dashboard or agent)
+{
+  id: "blog-1",
+  type: "BlogManager",
+  title: "Blog",
+  query: {},
+  options: {
+    allowCreate: true,
+    showRecommendations: true,
+    labels: { addButton: "Publish draft" },
+  },
+}
+```
+
+Use `<BlogManager />` or `<AddBlogModule />` from `@rankmyseo/ui` — shadcn-like styling via `@rankmyseo/ui/styles.css` only (no Tailwind/shadcn install in your app). Customize with CSS variables on `.rms-root` (`--rms-primary`, `--rms-radius`, …).
 
 ## Architecture
 
