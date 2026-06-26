@@ -84,6 +84,18 @@ await generate({
 });
 ```
 
+### `useSchemaGenerator`
+
+Generate Schema.org JSON-LD (Article, Product, FAQPage, BreadcrumbList, Organization).
+
+```tsx
+const { generate, generating, result } = useSchemaGenerator();
+await generate({
+  type: "FAQPage",
+  questions: [{ question: "What is RankMySEO?", answer: "An SEO toolkit." }],
+});
+```
+
 ### `useBlog`
 
 Full blog CRUD when `siteFeatures.blog` is enabled.

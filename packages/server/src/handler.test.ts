@@ -162,6 +162,39 @@ describe("createHandler routes", () => {
     expect(body.data.score).toBeGreaterThan(0);
   });
 
+  it("generates schema via POST /schema/generate", async () => {
+    const res = await handler(
+      new Request("http://localhost/schema/generate", {
+        method: "POST",
+        headers: scopeHeaders,
+        body: JSON.stringify({
+          type: "FAQPage",
+          questions: [
+            { question: "What is RankMySEO?", answer: "An SEO toolkit." },
+          ],
+        }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      data: { schema: { type: string; jsonLd: Record<string, unknown>; html: string } };
+    };
+    expect(body.data.schema.type).toBe("FAQPage");
+    expect(body.data.schema.jsonLd["@type"]).toBe("FAQPage");
+    expect(body.data.schema.html).toContain("application/ld+json");
+  });
+
+  it("returns 400 for invalid POST /schema/generate body", async () => {
+    const res = await handler(
+      new Request("http://localhost/schema/generate", {
+        method: "POST",
+        headers: scopeHeaders,
+        body: JSON.stringify({ type: "Recipe", name: "Bad" }),
+      }),
+    );
+    expect(res.status).toBe(400);
+  });
+
   it("rejects POST /scan with an empty url", async () => {
     const res = await handler(
       new Request("http://localhost/scan", {

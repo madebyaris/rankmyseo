@@ -19,7 +19,29 @@ See [PRD.md](./PRD.md) for the full architecture, roadmap, and design decisions.
 
 ## Install
 
-All packages are published under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (Node.js ≥ 20). Install only the tiers you need:
+**Easiest path** — interactive installer (recommended, full, or pick your own packages):
+
+```bash
+npm i rankmyseo
+npx rankmyseo install
+```
+
+Non-interactive:
+
+```bash
+npx rankmyseo install --yes --preset recommended   # core + storage + server-hono + react
+npx rankmyseo install --preset full                # all @rankmyseo/* packages
+npx rankmyseo install --packages @rankmyseo/core,@rankmyseo/ui
+```
+
+After install, scaffold your project:
+
+```bash
+npx rankmyseo init
+npx rankmyseo migrate
+```
+
+**Manual install** — pick packages yourself under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (Node.js ≥ 20):
 
 ```bash
 # Backend — Hono example (server + storage + headless core)
@@ -28,7 +50,7 @@ npm i @rankmyseo/server-hono @rankmyseo/storage @rankmyseo/core hono
 # Frontend — headless hooks + optional prebuilt dashboard UI
 npm i @rankmyseo/react @rankmyseo/ui react react-dom
 
-# CLI — scaffold config, run migrations, schedule jobs
+# CLI — init, migrate, schedule (or use `npx rankmyseo` after `npm i rankmyseo`)
 npm i -D @rankmyseo/cli
 ```
 
@@ -40,7 +62,8 @@ Other adapters/utilities: [`@rankmyseo/server`](https://www.npmjs.com/package/@r
 2. **Create a project + keywords** — via the store directly or the [API routes](#api-scoping) (`POST /projects`, `POST /keywords`).
 3. **Scan & audit pages** — `POST /scan` fetches a live URL, extracts on-page signals, and returns a score + prioritized recommendations.
 4. **Render a dashboard (optional)** — wrap your app in `RankMySeoProvider` from `@rankmyseo/react`, then drop in widgets from `@rankmyseo/ui` (or just use the headless hooks).
-5. **Scaffold/migrate with the CLI** — `npx @rankmyseo/cli init` then `rankmyseo migrate`.
+5. **Scaffold/migrate with the CLI** — `npx rankmyseo init` then `npx rankmyseo migrate` (after `npm i rankmyseo` or `@rankmyseo/cli`).
+6. **Generate structured data** — `POST /schema/generate` or the dashboard **Schema generator** tab for rich-result JSON-LD.
 
 Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/wiki) carry per-package usage details.
 
@@ -48,6 +71,7 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 
 | Package | Description |
 | --- | --- |
+| [`rankmyseo`](./packages/rankmyseo) | **npm installer** — `npx rankmyseo install` (recommended / full / custom) |
 | [`@rankmyseo/core`](./packages/core) | Zod schemas, audit engine, report rollup, config loader, ports (`RankStore`, `RankDataSource`, `Scheduler`) |
 | [`@rankmyseo/storage`](./packages/storage) | Default Drizzle SQLite adapter (`createStore`) |
 | [`@rankmyseo/datasource`](./packages/datasource) | Fixture (offline default), Google Search Console rank source + PageSpeed Insights client |
@@ -71,6 +95,7 @@ Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, P
 | Audit engine + on-page collector (`POST /collect`) | ✓ |
 | Live website scan (`POST /scan` — fetch URL → signals → score + recommendations) | ✓ |
 | Meta generator (`POST /meta/generate` — title/og/JSON-LD, audit-verified) | ✓ |
+| Schema generator (`POST /schema/generate` — Article/Product/FAQ/Breadcrumb/Organization JSON-LD) | ✓ |
 | Blog system with keyword intent + auto meta (`/blog` CRUD) | ✓ opt-in via `siteFeatures.blog` + `BlogManager` widget |
 | Recommendation engine (per-scan + per-post, prioritized) | ✓ |
 | Report rollup (`POST/GET /reports`) | ✓ |
@@ -103,10 +128,23 @@ pnpm dev:dashboard    # terminal 2
 
 ## CLI
 
+**End users (npm):**
+
 ```bash
-pnpm exec rankmyseo init          # scaffold rankmyseo.config.ts
-pnpm exec rankmyseo migrate       # run SQLite migrations
-pnpm exec rankmyseo schedule      # register cron ingestion job (requires config)
+npm i rankmyseo
+npx rankmyseo install              # pick recommended, full, or custom packages
+npx rankmyseo init                 # after @rankmyseo/cli is installed
+npx rankmyseo migrate
+npx rankmyseo schedule
+```
+
+**Monorepo / direct CLI:**
+
+```bash
+pnpm exec rankmyseo-cli init       # scaffold rankmyseo.config.ts
+pnpm exec rankmyseo-cli migrate    # run SQLite migrations
+pnpm exec rankmyseo-cli schedule   # register cron ingestion job (requires config)
+pnpm exec rankmyseo-cli install --preset recommended
 ```
 
 ## Quick start (local monorepo)
@@ -182,6 +220,7 @@ All routes require tenant/project headers:
 | `POST` | `/collect` | On-page collector endpoint |
 | `POST` | `/scan` | Fetch a live URL, score it, return signals + recommendations |
 | `POST` | `/meta/generate` | Generate meta tags (title/description/OG/JSON-LD) + audit |
+| `POST` | `/schema/generate` | Generate Schema.org JSON-LD (Article, Product, FAQPage, BreadcrumbList, Organization) |
 | `GET` | `/blog` | List blog posts |
 | `POST` | `/blog` | Create blog post (auto meta + slug when omitted) |
 | `GET` | `/blog/:id` | Get a post with intent-based recommendations |

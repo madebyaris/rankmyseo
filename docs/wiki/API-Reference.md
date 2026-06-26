@@ -61,6 +61,7 @@ Base URL depends on your deployment. Demo playground: `http://localhost:3456`.
 | --- | --- | --- |
 | POST | `/scan` | Fetch live URL → signals + score + recommendations |
 | POST | `/meta/generate` | Generate meta tags from title/content/keyword |
+| POST | `/schema/generate` | Generate Schema.org JSON-LD structured data |
 
 **Scan body:**
 
@@ -79,6 +80,19 @@ Base URL depends on your deployment. Demo playground: `http://localhost:3456`.
   "siteName": "My Site"
 }
 ```
+
+**Schema generate body** (discriminated on `type`):
+
+```json
+{
+  "type": "FAQPage",
+  "questions": [
+    { "question": "What is RankMySEO?", "answer": "An open-source SEO toolkit." }
+  ]
+}
+```
+
+Supported types: `Article`, `Product`, `FAQPage`, `BreadcrumbList`, `Organization`. See [Schema-Generator](./Schema-Generator.md).
 
 ## Blog (requires `siteFeatures.blog: true`)
 

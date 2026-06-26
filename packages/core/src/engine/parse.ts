@@ -70,6 +70,7 @@ export function extractPageSignals(html: string, url: string): PageSignals {
   ).length;
 
   const wordCount = countWords(html);
+  const jsonLdTypes = extractJsonLdTypes(html);
 
   return pageSignalsSchema.parse({
     url,
@@ -80,6 +81,7 @@ export function extractPageSignals(html: string, url: string): PageSignals {
     h2Count,
     hasOgTags,
     hasJsonLd,
+    jsonLdTypes,
     lang,
     hasViewportMeta,
     robotsNoindex,
@@ -99,4 +101,54 @@ function countWords(html: string): number {
     .trim();
   if (!text) return 0;
   return text.split(" ").length;
+}
+
+function collectTypesFromNode(node: unknown, types: Set<string>): void {
+  if (node === null || node === undefined) return;
+  if (Array.isArray(node)) {
+    for (const item of node) collectTypesFromNode(item, types);
+    return;
+  }
+  if (typeof node !== "object") return;
+
+  const record = node as Record<string, unknown>;
+  const typeValue = record["@type"];
+  if (typeof typeValue === "string") {
+    types.add(typeValue);
+  } else if (Array.isArray(typeValue)) {
+    for (const t of typeValue) {
+      if (typeof t === "string") types.add(t);
+    }
+  }
+
+  if (record["@graph"]) {
+    collectTypesFromNode(record["@graph"], types);
+  }
+
+  for (const value of Object.values(record)) {
+    if (value !== record["@graph"] && value !== typeValue) {
+      collectTypesFromNode(value, types);
+    }
+  }
+}
+
+/** Parse JSON-LD blocks and collect Schema.org @type values. */
+export function extractJsonLdTypes(html: string): string[] {
+  const types = new Set<string>();
+  const scriptPattern =
+    /<script[^>]+type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+
+  let match: RegExpExecArray | null;
+  while ((match = scriptPattern.exec(html)) !== null) {
+    const raw = match[1]?.trim();
+    if (!raw) continue;
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      collectTypesFromNode(parsed, types);
+    } catch {
+      // skip invalid JSON-LD
+    }
+  }
+
+  return [...types];
 }

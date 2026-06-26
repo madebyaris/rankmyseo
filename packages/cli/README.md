@@ -1,22 +1,33 @@
 # @rankmyseo/cli
 
-Command-line tools for [RankMySEO](https://github.com/madebyaris/rankmyseo) — scaffold config, run migrations, and register scheduled rank-ingestion jobs.
+Command-line tools for [RankMySEO](https://github.com/madebyaris/rankmyseo) — interactive package install, scaffold config, run migrations, and schedule jobs.
 
 ## Install
 
+Prefer the meta installer (includes this CLI in the recommended preset):
+
+```bash
+npm i rankmyseo
+npx rankmyseo install
+```
+
+Or install the CLI directly:
+
 ```bash
 npm i -D @rankmyseo/cli
-# or run ad-hoc:
-npx @rankmyseo/cli init
+npx rankmyseo-cli install --preset recommended
 ```
 
 ## Commands
 
 ```bash
-rankmyseo init       # scaffold rankmyseo.config.ts
-rankmyseo migrate    # run SQLite migrations
-rankmyseo schedule   # register cron ingestion job (requires config)
+rankmyseo-cli install [--preset recommended|full|custom] [--packages a,b] [--yes]
+rankmyseo-cli init       # scaffold rankmyseo.config.ts
+rankmyseo-cli migrate    # run SQLite migrations
+rankmyseo-cli schedule   # register cron ingestion job (requires config)
 ```
+
+When you use the [`rankmyseo`](https://www.npmjs.com/package/rankmyseo) meta package, the same commands are available as `npx rankmyseo …` (including `init` / `migrate` after `@rankmyseo/cli` is installed).
 
 ## Documentation
 

@@ -14,6 +14,7 @@ The agent can invoke server-backed tools:
 | --- | --- |
 | `scan_url` | On-page analysis of a URL |
 | `generate_meta` | Meta title/description generation |
+| `generate_schema` | Schema.org JSON-LD (Article, Product, FAQ, Breadcrumb, Organization) |
 | `list_keywords` | Tracked keywords for project |
 | `get_rank_history` | Rank snapshots for a keyword |
 | `run_audit` | Trigger site audit |

@@ -72,10 +72,17 @@ const RULES: Rule[] = [
   {
     ruleId: "json-ld",
     severity: "info",
-    run: (s) => ({
-      passed: s.hasJsonLd,
-      message: s.hasJsonLd ? "JSON-LD schema present" : "No JSON-LD schema found",
-    }),
+    run: (s) => {
+      const types = s.jsonLdTypes ?? [];
+      if (s.hasJsonLd || types.length > 0) {
+        const label =
+          types.length > 0
+            ? `JSON-LD present: ${types.join(", ")}`
+            : "JSON-LD schema present";
+        return { passed: true, message: label };
+      }
+      return { passed: false, message: "No JSON-LD schema found" };
+    },
   },
   {
     ruleId: "cwv-lcp",

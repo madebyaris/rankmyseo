@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractPageSignals } from "./parse.js";
+import { extractPageSignals, extractJsonLdTypes } from "./parse.js";
 
 describe("extractPageSignals", () => {
   it("extracts SEO signals from raw HTML", () => {
@@ -24,6 +24,7 @@ describe("extractPageSignals", () => {
     expect(signals.h2Count).toBe(2);
     expect(signals.hasOgTags).toBe(true);
     expect(signals.hasJsonLd).toBe(true);
+    expect(signals.jsonLdTypes).toEqual(["Article"]);
     expect(signals.lang).toBe("en");
     expect(signals.hasViewportMeta).toBe(true);
     expect(signals.robotsNoindex).toBe(false);
@@ -50,5 +51,18 @@ describe("extractPageSignals", () => {
     expect(signals.hasViewportMeta).toBe(false);
     expect(signals.robotsNoindex).toBe(false);
     expect(signals.imageCount).toBe(0);
+  });
+
+  it("extracts multiple @type values including @graph", () => {
+    const html = `<html><head>
+      <script type="application/ld+json">{
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "Organization", "name": "Example" },
+          { "@type": "WebSite", "name": "Example Site" }
+        ]
+      }</script>
+      </head><body></body></html>`;
+    expect(extractJsonLdTypes(html)).toEqual(["Organization", "WebSite"]);
   });
 });

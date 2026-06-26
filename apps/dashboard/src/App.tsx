@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Braces,
   ChevronLeft,
   FileText,
   LayoutGrid,
@@ -15,6 +16,7 @@ import { Landing } from "@/components/Landing";
 import { OverviewPanel } from "@/components/OverviewPanel";
 import { ScanPanel } from "@/components/ScanPanel";
 import { MetaPanel } from "@/components/MetaPanel";
+import { SchemaPanel } from "@/components/SchemaPanel";
 
 const client = createRankMySeoClient({
   baseUrl: "",
@@ -22,12 +24,13 @@ const client = createRankMySeoClient({
   projectId: "project-1",
 });
 
-type Tab = "overview" | "scan" | "meta" | "blog";
+type Tab = "overview" | "scan" | "meta" | "schema" | "blog";
 
 const BASE_TABS: Array<{ id: Tab; label: string; icon: LucideIcon }> = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
   { id: "scan", label: "Scan", icon: Search },
   { id: "meta", label: "Meta generator", icon: Tags },
+  { id: "schema", label: "Schema generator", icon: Braces },
 ];
 
 const BLOG_TAB = { id: "blog" as const, label: "Blog", icon: FileText };
@@ -89,6 +92,7 @@ function Dashboard({ onExit }: { onExit: () => void }) {
         {tab === "overview" ? <OverviewPanel /> : null}
         {tab === "scan" ? <ScanPanel /> : null}
         {tab === "meta" ? <MetaPanel /> : null}
+        {tab === "schema" ? <SchemaPanel /> : null}
         {tab === "blog" && enabled && widget ? (
           <BlogManager widget={widget} options={options} />
         ) : null}

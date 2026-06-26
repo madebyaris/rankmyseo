@@ -13,10 +13,12 @@ import {
   dashboardConfigSchema,
   extractPageSignals,
   generateMeta,
+  generateSchema,
   normalizeHttpUrl,
   pageSignalsSchema,
   projectSchema,
   runAuditChecks,
+  schemaGeneratorInputSchema,
   slugify,
   snapshotRangeQuerySchema,
   updateBlogPostInputSchema,
@@ -282,6 +284,22 @@ addRoute("POST", /^\/meta\/generate$/, async (request, _ctx) => {
   });
 
   return Response.json({ data: { meta, checks, score } });
+});
+
+addRoute("POST", /^\/schema\/generate$/, async (request, _ctx) => {
+  const body = await readJson<unknown>(request);
+  if (body instanceof Response) return body;
+
+  const parsed = schemaGeneratorInputSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid schema input", details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  }
+
+  const schema = generateSchema(parsed.data);
+  return Response.json({ data: { schema } });
 });
 
 function blogDisabled(ctx: RouteContext): Response | null {

@@ -89,6 +89,7 @@ export const pageSignalsSchema = z.object({
   h2Count: z.number().int().nonnegative().optional(),
   hasOgTags: z.boolean().default(false),
   hasJsonLd: z.boolean().default(false),
+  jsonLdTypes: z.array(z.string()).optional(),
   lang: z.union([z.string(), z.null()]).optional(),
   hasViewportMeta: z.boolean().optional(),
   robotsNoindex: z.boolean().optional(),
@@ -325,5 +326,13 @@ export const generatedMetaSchema = z.object({
 });
 
 export type GeneratedMeta = z.infer<typeof generatedMetaSchema>;
+
+export const generatedSchemaSchema = z.object({
+  type: z.enum(["Article", "Product", "FAQPage", "BreadcrumbList", "Organization"]),
+  jsonLd: z.record(z.string(), z.unknown()),
+  html: z.string(),
+});
+
+export type GeneratedSchema = z.infer<typeof generatedSchemaSchema>;
 
 export { normalizeHttpUrl } from "../utils/url.js";

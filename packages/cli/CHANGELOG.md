@@ -1,5 +1,30 @@
 # @rankmyseo/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- Add interactive npm installer: `npm i rankmyseo` + `npx rankmyseo install` with recommended, full, or custom @rankmyseo/\* package presets.
+
+### Patch Changes
+
+- Updated dependencies
+  - @rankmyseo/installer@0.3.0
+
+## 0.2.0
+
+### Minor Changes
+
+- Add Schema.org JSON-LD generator (Article, Product, FAQPage, BreadcrumbList, Organization) with POST /schema/generate, useSchemaGenerator hook, dashboard Schema panel, agent/MCP tools, and jsonLdTypes detection in live scans.
+
+### Patch Changes
+
+- Updated dependencies
+  - @rankmyseo/core@0.2.0
+  - @rankmyseo/storage@0.2.0
+  - @rankmyseo/datasource@0.2.0
+  - @rankmyseo/scheduler@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes

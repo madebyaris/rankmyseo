@@ -6,7 +6,9 @@ import { z } from "zod";
 import {
   buildReport,
   dashboardConfigSchema,
+  generateSchema,
   runAuditChecks,
+  schemaGeneratorInputSchema,
   type RankStore,
   type TenantScope,
 } from "@rankmyseo/core";
@@ -190,6 +192,13 @@ export function createAgentTools(ctx: AgentToolsContext) {
         const report = await store.reports.create(reportData);
         return { report };
       },
+    }),
+
+    generateSchema: tool({
+      description:
+        "Generate Schema.org JSON-LD (Article, Product, FAQPage, BreadcrumbList, Organization)",
+      inputSchema: schemaGeneratorInputSchema,
+      execute: async (input) => generateSchema(input),
     }),
   };
 }

@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/cli",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "type": "module",
   "description": "RankMySEO CLI — scaffold config, migrate, schedule",
   "license": "Apache-2.0",
@@ -22,7 +22,7 @@
     "node": ">=20"
   },
   "bin": {
-    "rankmyseo": "./dist/index.js"
+    "rankmyseo-cli": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -45,6 +45,7 @@
   "dependencies": {
     "@rankmyseo/core": "workspace:*",
     "@rankmyseo/datasource": "workspace:*",
+    "@rankmyseo/installer": "workspace:*",
     "@rankmyseo/scheduler": "workspace:*",
     "@rankmyseo/storage": "workspace:*"
   },

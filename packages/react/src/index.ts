@@ -17,6 +17,10 @@ export {
   type GenerateMetaRequest,
   type MetaGenerationResult,
 } from "./hooks/use-meta-generator.js";
+export {
+  useSchemaGenerator,
+  type SchemaGenerationResult,
+} from "./hooks/use-schema-generator.js";
 export { useBlog, type NewBlogPost } from "./hooks/use-blog.js";
 export { useBlogModule } from "./hooks/use-blog-module.js";
 export {

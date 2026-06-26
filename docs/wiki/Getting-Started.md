@@ -32,12 +32,38 @@ pnpm dev:dashboard
 # → http://localhost:5173
 ```
 
-## CLI scaffold
+## Install in your app
+
+Interactive (recommended):
 
 ```bash
-pnpm exec rankmyseo init              # creates rankmyseo.config.ts
-pnpm exec rankmyseo migrate           # SQLite migrations
-pnpm exec rankmyseo schedule          # one rank ingestion pass
+npm i rankmyseo
+npx rankmyseo install
+```
+
+Choose **Recommended** (core + storage + server-hono + react), **Full** (all packages), or **Custom** (pick from a list).
+
+Non-interactive:
+
+```bash
+npx rankmyseo install --yes --preset recommended
+```
+
+Then scaffold:
+
+```bash
+npx rankmyseo init
+npx rankmyseo migrate
+```
+
+See [Packages](./Packages.md) for manual `@rankmyseo/*` installs.
+
+## CLI scaffold (monorepo contributors)
+
+```bash
+pnpm exec rankmyseo-cli init              # creates rankmyseo.config.ts
+pnpm exec rankmyseo-cli migrate           # SQLite migrations
+pnpm exec rankmyseo-cli schedule          # one rank ingestion pass
 ```
 
 ## Minimal Hono integration

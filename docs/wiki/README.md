@@ -45,6 +45,7 @@ git push
 | `Packages.md` | Packages |
 | `Configuration.md` | Configuration |
 | `API-Reference.md` | API-Reference |
+| `Schema-Generator.md` | Schema-Generator |
 | `Dashboard-and-Widgets.md` | Dashboard-and-Widgets |
 | `Blog-Module.md` | Blog-Module |
 | `Data-Sources.md` | Data-Sources |

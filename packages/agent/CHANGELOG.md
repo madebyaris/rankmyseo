@@ -1,5 +1,16 @@
 # @rankmyseo/agent
 
+## 0.2.0
+
+### Minor Changes
+
+- Add Schema.org JSON-LD generator (Article, Product, FAQPage, BreadcrumbList, Organization) with POST /schema/generate, useSchemaGenerator hook, dashboard Schema panel, agent/MCP tools, and jsonLdTypes detection in live scans.
+
+### Patch Changes
+
+- Updated dependencies
+  - @rankmyseo/core@0.2.0
+
 ## 0.1.1
 
 ### Patch Changes
