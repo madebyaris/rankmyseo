@@ -51,8 +51,17 @@ jobs:
 
           git commit -m "Publish wiki from docs/wiki ($(date -u +%Y-%m-%d))"
 
-          git push origin HEAD:master \
-            || git push origin HEAD:main \
-            || git push -u origin HEAD
+          if ! git push origin HEAD:master 2>/tmp/wiki-push.err; then
+            if ! git push origin HEAD:main 2>>/tmp/wiki-push.err; then
+              if ! git push -u origin HEAD 2>>/tmp/wiki-push.err; then
+                echo "::error::Wiki push failed. If this is the first publish, initialize the wiki:"
+                echo "  1. Open https://github.com/${REPO}/wiki/_new"
+                echo "  2. Create a placeholder Home page and save"
+                echo "  3. Re-run this workflow"
+                cat /tmp/wiki-push.err
+                exit 1
+              fi
+            fi
+          fi
 
           echo "Wiki published successfully"
