@@ -86,8 +86,15 @@ export const pageSignalsSchema = z.object({
   metaDescription: z.string().optional(),
   canonical: z.union([z.string().url(), z.null()]).optional(),
   h1Count: z.number().int().nonnegative().default(0),
+  h2Count: z.number().int().nonnegative().optional(),
   hasOgTags: z.boolean().default(false),
   hasJsonLd: z.boolean().default(false),
+  lang: z.union([z.string(), z.null()]).optional(),
+  hasViewportMeta: z.boolean().optional(),
+  robotsNoindex: z.boolean().optional(),
+  imageCount: z.number().int().nonnegative().optional(),
+  imagesWithAlt: z.number().int().nonnegative().optional(),
+  wordCount: z.number().int().nonnegative().optional(),
   webVitals: z
     .object({
       lcp: z.number().optional(),
@@ -211,6 +218,45 @@ export const keywordIntentSchema = z.enum([
 
 export type KeywordIntent = z.infer<typeof keywordIntentSchema>;
 
+export const blogWidgetOptionsSchema = z.object({
+  allowCreate: z.boolean().default(true),
+  allowDelete: z.boolean().default(true),
+  allowPublish: z.boolean().default(true),
+  showRecommendations: z.boolean().default(true),
+  showIntent: z.boolean().default(true),
+  showMetaPreview: z.boolean().default(true),
+  intents: z.array(keywordIntentSchema).optional(),
+  labels: z
+    .object({
+      createTitle: z.string().optional(),
+      createDescription: z.string().optional(),
+      listTitle: z.string().optional(),
+      addButton: z.string().optional(),
+      recommendations: z.string().optional(),
+      publish: z.string().optional(),
+      unpublish: z.string().optional(),
+      delete: z.string().optional(),
+      empty: z.string().optional(),
+    })
+    .optional(),
+});
+
+export type BlogWidgetOptions = z.infer<typeof blogWidgetOptionsSchema>;
+
+export const BLOG_WIDGET_TYPE = "BlogManager" as const;
+
+export function parseBlogWidgetOptions(
+  raw: Record<string, unknown> | undefined,
+): BlogWidgetOptions {
+  return blogWidgetOptionsSchema.parse(raw ?? {});
+}
+
+export function dashboardHasBlogWidget(
+  widgets: DashboardWidget[] | undefined,
+): boolean {
+  return widgets?.some((w) => w.type === BLOG_WIDGET_TYPE) ?? false;
+}
+
 export const blogPostStatusSchema = z.enum(["draft", "published"]);
 
 export type BlogPostStatus = z.infer<typeof blogPostStatusSchema>;
@@ -279,3 +325,5 @@ export const generatedMetaSchema = z.object({
 });
 
 export type GeneratedMeta = z.infer<typeof generatedMetaSchema>;
+
+export { normalizeHttpUrl } from "../utils/url.js";

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bot, Loader2 } from "lucide-react";
-import { useDashboardConfig, useRankMySeoChat } from "@rankmyseo/react";
-import { DashboardRenderer } from "@rankmyseo/ui";
+import { useBlogModule, useDashboardConfig, useRankMySeoChat } from "@rankmyseo/react";
+import { AddBlogModule, DashboardRenderer } from "@rankmyseo/ui";
 import {
   Card,
   CardContent,
@@ -16,14 +16,30 @@ import { Empty, EmptyDescription, EmptyMedia } from "@/components/ui/empty";
 
 export function OverviewPanel() {
   const { config, loading } = useDashboardConfig();
+  const { enabled, enable, loading: blogLoading } = useBlogModule();
   const { sendMessage, streaming } = useRankMySeoChat();
   const [prompt, setPrompt] = useState(
     "Show my keywords and suggest a dashboard layout",
   );
   const [reply, setReply] = useState("");
+  const [enabling, setEnabling] = useState(false);
 
   return (
     <div className="flex flex-col gap-5">
+      {!enabled && !blogLoading ? (
+        <AddBlogModule
+          busy={enabling}
+          onEnable={async () => {
+            setEnabling(true);
+            try {
+              await enable();
+            } finally {
+              setEnabling(false);
+            }
+          }}
+        />
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Dashboard widgets</CardTitle>

@@ -1,9 +1,10 @@
-import type { DashboardWidget } from "@rankmyseo/core";
+import type { DashboardWidget } from "@rankmyseo/core/schemas";
 import { KeywordTable } from "./widgets/keyword-table.js";
 import { RankHistoryChart } from "./widgets/rank-history-chart.js";
 import { AuditScoreCard } from "./widgets/audit-score-card.js";
 import { TopMoversList } from "./widgets/top-movers-list.js";
 import { CoreWebVitalsGauge } from "./widgets/core-web-vitals-gauge.js";
+import { BlogManagerWidget } from "./widgets/blog-manager.js";
 
 export const widgetRegistry = {
   KeywordTable,
@@ -11,6 +12,7 @@ export const widgetRegistry = {
   AuditScoreCard,
   TopMoversList,
   CoreWebVitalsGauge,
+  BlogManager: BlogManagerWidget,
 } as const;
 
 export type WidgetType = keyof typeof widgetRegistry;

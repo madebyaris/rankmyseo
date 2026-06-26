@@ -7,3 +7,4 @@ export * from "./engine/parse.js";
 export * from "./engine/recommend.js";
 export * from "./services/ingest.js";
 export * from "./config/index.js";
+export * from "./utils/url.js";

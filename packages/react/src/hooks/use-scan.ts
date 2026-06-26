@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import type { Audit, PageSignals, Recommendation } from "@rankmyseo/core";
+import type { Audit, PageSignals, Recommendation } from "@rankmyseo/core/schemas";
+import { normalizeHttpUrl } from "@rankmyseo/core/schemas";
 import { useRankMySeoClient } from "../client.js";
 
 export interface ScanResult {
@@ -19,9 +20,10 @@ export function useScan() {
       setScanning(true);
       setError(null);
       try {
+        const target = normalizeHttpUrl(url);
         const res = await api<{ data: ScanResult }>("/scan", {
           method: "POST",
-          body: JSON.stringify({ url }),
+          body: JSON.stringify({ url: target.href }),
         });
         setResult(res.data);
         return res.data;

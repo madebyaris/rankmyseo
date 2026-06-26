@@ -18,6 +18,7 @@ export {
   type MetaGenerationResult,
 } from "./hooks/use-meta-generator.js";
 export { useBlog, type NewBlogPost } from "./hooks/use-blog.js";
+export { useBlogModule } from "./hooks/use-blog-module.js";
 export {
   collectPageSignals,
   postPageSignals,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { RankSnapshot } from "@rankmyseo/core";
+import type { RankSnapshot } from "@rankmyseo/core/schemas";
 import { useRankMySeoClient } from "../client.js";
 
 export function useRankTracker(keywordId?: string) {

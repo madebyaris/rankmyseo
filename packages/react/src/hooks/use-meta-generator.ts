@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { AuditCheckResult, GeneratedMeta } from "@rankmyseo/core";
+import type { AuditCheckResult, GeneratedMeta } from "@rankmyseo/core/schemas";
 import { useRankMySeoClient } from "../client.js";
 
 export interface GenerateMetaRequest {

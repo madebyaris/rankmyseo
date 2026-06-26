@@ -1,4 +1,4 @@
-import type { KeywordIntent, Recommendation } from "@rankmyseo/core";
+import type { KeywordIntent, Recommendation } from "@rankmyseo/core/schemas";
 
 /** Color for the audit score ring (genuine status data-viz, hence explicit). */
 export function scoreColor(score: number): string {

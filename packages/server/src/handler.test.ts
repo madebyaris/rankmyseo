@@ -33,6 +33,7 @@ describe("createHandler routes", () => {
           llmsTxt: true,
           collector: true,
           markdownNegotiation: true,
+          blog: true,
         },
         sitemapRoutes: ["/", "/about"],
         llmsTxt: {
@@ -161,15 +162,26 @@ describe("createHandler routes", () => {
     expect(body.data.score).toBeGreaterThan(0);
   });
 
-  it("rejects POST /scan with an invalid url", async () => {
+  it("rejects POST /scan with an empty url", async () => {
     const res = await handler(
       new Request("http://localhost/scan", {
         method: "POST",
         headers: scopeHeaders,
-        body: JSON.stringify({ url: "not-a-url" }),
+        body: JSON.stringify({ url: "   " }),
       }),
     );
     expect(res.status).toBe(400);
+  });
+
+  it("accepts POST /scan without a scheme and normalizes to https", async () => {
+    const res = await handler(
+      new Request("http://localhost/scan", {
+        method: "POST",
+        headers: scopeHeaders,
+        body: JSON.stringify({ url: "example.com" }),
+      }),
+    );
+    expect(res.status).not.toBe(400);
   });
 
   it("runs blog CRUD with auto meta + recommendations", async () => {

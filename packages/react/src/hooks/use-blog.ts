@@ -5,7 +5,7 @@ import type {
   KeywordIntent,
   Recommendation,
   UpdateBlogPostInput,
-} from "@rankmyseo/core";
+} from "@rankmyseo/core/schemas";
 import { useRankMySeoClient } from "../client.js";
 
 /**

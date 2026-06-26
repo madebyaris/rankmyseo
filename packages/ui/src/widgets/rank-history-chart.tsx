@@ -1,4 +1,4 @@
-import type { DashboardWidget } from "@rankmyseo/core";
+import type { DashboardWidget } from "@rankmyseo/core/schemas";
 import { useRankTracker } from "@rankmyseo/react";
 import {
   LineChart,

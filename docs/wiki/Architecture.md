@@ -44,7 +44,7 @@ Custom storage adapters implement `RankStore` and should pass `runStoreContractT
 
 | Engine | Module | Purpose |
 | --- | --- | --- |
-| Audit | `runAuditChecks` | Scores page signals (title, meta, H1, OG, JSON-LD, CWV) |
+| Audit | `runAuditChecks` | Scores page signals (title, meta, headings, OG, JSON-LD, HTTPS, indexability, viewport, lang, image alt, content depth, CWV incl. INP) — see [SEO Playbook](../seo-playbook.md) |
 | Parse | `extractPageSignals` | Regex HTML parser for live URL scans |
 | Meta | `generateMeta` | Builds title, description, OG, JSON-LD, slug |
 | Recommend | `buildAuditRecommendations`, `buildBlogRecommendations` | Prioritized fix suggestions |

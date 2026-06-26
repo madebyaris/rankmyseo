@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "RankMySEO core domain models, ports, and conformance tests",
   "license": "Apache-2.0",
@@ -15,6 +15,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./schemas": {
+      "import": {
+        "types": "./dist/schemas/index.d.ts",
+        "default": "./dist/schemas/index.js"
+      },
+      "require": {
+        "types": "./dist/schemas/index.d.cts",
+        "default": "./dist/schemas/index.cjs"
+      }
+    },
     "./testing": {
       "import": {
         "types": "./dist/testing/index.d.ts",
@@ -26,7 +36,9 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",

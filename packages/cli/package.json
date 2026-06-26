@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "RankMySEO CLI — scaffold config, migrate, schedule",
   "license": "Apache-2.0",
@@ -15,7 +15,9 @@
       }
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",

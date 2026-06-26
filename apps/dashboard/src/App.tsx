@@ -7,14 +7,14 @@ import {
   Tags,
   type LucideIcon,
 } from "lucide-react";
-import { RankMySeoProvider, createRankMySeoClient } from "@rankmyseo/react";
+import { RankMySeoProvider, createRankMySeoClient, useBlogModule } from "@rankmyseo/react";
+import { BlogManager } from "@rankmyseo/ui";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Landing } from "@/components/Landing";
 import { OverviewPanel } from "@/components/OverviewPanel";
 import { ScanPanel } from "@/components/ScanPanel";
 import { MetaPanel } from "@/components/MetaPanel";
-import { BlogPanel } from "@/components/BlogPanel";
 
 const client = createRankMySeoClient({
   baseUrl: "",
@@ -24,16 +24,19 @@ const client = createRankMySeoClient({
 
 type Tab = "overview" | "scan" | "meta" | "blog";
 
-const TABS: Array<{ id: Tab; label: string; icon: LucideIcon }> = [
+const BASE_TABS: Array<{ id: Tab; label: string; icon: LucideIcon }> = [
   { id: "overview", label: "Overview", icon: LayoutGrid },
   { id: "scan", label: "Scan", icon: Search },
   { id: "meta", label: "Meta generator", icon: Tags },
-  { id: "blog", label: "Blog", icon: FileText },
 ];
 
+const BLOG_TAB = { id: "blog" as const, label: "Blog", icon: FileText };
+
 function Dashboard({ onExit }: { onExit: () => void }) {
+  const { enabled, widget, options } = useBlogModule();
+  const tabs = enabled ? [...BASE_TABS, BLOG_TAB] : BASE_TABS;
   const [tab, setTab] = useState<Tab>("scan");
-  const active = TABS.find((t) => t.id === tab);
+  const active = tabs.find((t) => t.id === tab) ?? tabs[0];
 
   return (
     <div className="grid min-h-screen grid-cols-1 md:grid-cols-[15rem_1fr]">
@@ -49,7 +52,7 @@ function Dashboard({ onExit }: { onExit: () => void }) {
         </button>
 
         <nav className="flex flex-col gap-1">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
@@ -86,7 +89,9 @@ function Dashboard({ onExit }: { onExit: () => void }) {
         {tab === "overview" ? <OverviewPanel /> : null}
         {tab === "scan" ? <ScanPanel /> : null}
         {tab === "meta" ? <MetaPanel /> : null}
-        {tab === "blog" ? <BlogPanel /> : null}
+        {tab === "blog" && enabled && widget ? (
+          <BlogManager widget={widget} options={options} />
+        ) : null}
       </main>
     </div>
   );

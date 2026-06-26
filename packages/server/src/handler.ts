@@ -34,6 +34,7 @@ const defaultConfig = defineConfig({
     llmsTxt: true,
     collector: true,
     markdownNegotiation: true,
+    blog: false,
   },
   sitemapRoutes: ["/"],
 });

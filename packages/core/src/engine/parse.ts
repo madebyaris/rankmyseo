@@ -46,9 +46,30 @@ export function extractPageSignals(html: string, url: string): PageSignals {
   );
 
   const h1Count = (html.match(/<h1[\s>]/gi) ?? []).length;
+  const h2Count = (html.match(/<h2[\s>]/gi) ?? []).length;
   const hasOgTags = /<meta[^>]+property\s*=\s*["']og:/i.test(html);
   const hasJsonLd =
     /<script[^>]+type\s*=\s*["']application\/ld\+json["']/i.test(html);
+
+  const langMatch = html.match(/<html[^>]*\slang\s*=\s*["']([^"']+)["']/i);
+  const lang = langMatch?.[1]?.trim() || null;
+
+  const hasViewportMeta = /<meta[^>]+name\s*=\s*["']viewport["']/i.test(html);
+
+  const robotsContent = matchAttr(
+    html,
+    /<meta[^>]+name\s*=\s*["']robots["'][^>]*>/i,
+    "content",
+  );
+  const robotsNoindex = /\bnoindex\b/i.test(robotsContent ?? "");
+
+  const imgTags = html.match(/<img\b[^>]*>/gi) ?? [];
+  const imageCount = imgTags.length;
+  const imagesWithAlt = imgTags.filter((tag) =>
+    /\balt\s*=\s*["'][^"']+["']/i.test(tag),
+  ).length;
+
+  const wordCount = countWords(html);
 
   return pageSignalsSchema.parse({
     url,
@@ -56,7 +77,26 @@ export function extractPageSignals(html: string, url: string): PageSignals {
     metaDescription,
     canonical: canonical ?? null,
     h1Count,
+    h2Count,
     hasOgTags,
     hasJsonLd,
+    lang,
+    hasViewportMeta,
+    robotsNoindex,
+    imageCount,
+    imagesWithAlt,
+    wordCount,
   });
+}
+
+/** Approximate visible-text word count: strip non-content tags, then tags. */
+function countWords(html: string): number {
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return 0;
+  return text.split(" ").length;
 }

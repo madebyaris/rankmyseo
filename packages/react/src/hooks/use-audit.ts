@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Audit } from "@rankmyseo/core";
+import type { Audit } from "@rankmyseo/core/schemas";
 import { useRankMySeoClient } from "../client.js";
 
 export function useAudit() {

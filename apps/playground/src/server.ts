@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
-import { defineConfig, generateMeta } from "@rankmyseo/core";
+import { defineConfig, generateMeta, BLOG_WIDGET_TYPE, dashboardHasBlogWidget } from "@rankmyseo/core";
 import { createHandler } from "@rankmyseo/server";
 import { createStore } from "@rankmyseo/storage";
 import type { LanguageModel } from "ai";
@@ -30,6 +30,7 @@ const config = defineConfig({
     llmsTxt: true,
     collector: true,
     markdownNegotiation: true,
+    blog: true,
   },
   sitemapRoutes: ["/", "/playground"],
   llmsTxt: {
@@ -73,48 +74,76 @@ const apiHandler = createHandler(store, {
   agentModel: mockModel,
 });
 
+const BLOG_WIDGET = {
+  id: "blog-manager",
+  type: BLOG_WIDGET_TYPE,
+  title: "Blog",
+  query: {},
+  options: {
+    allowCreate: true,
+    allowDelete: true,
+    allowPublish: true,
+    showRecommendations: true,
+    showIntent: true,
+    showMetaPreview: true,
+  },
+} as const;
+
 async function seedProject() {
   const existing = await store.projects.getById(
     { tenantId: TENANT_ID, projectId: PROJECT_ID },
     PROJECT_ID,
   );
-  if (existing) return;
-
-  await store.projects.create({
-    id: PROJECT_ID,
-    tenantId: TENANT_ID,
-    name: "Playground Project",
-    domain: "localhost",
-  });
-
-  const dashboard = await store.dashboard.get({
-    tenantId: TENANT_ID,
-    projectId: PROJECT_ID,
-  });
-  if (!dashboard) {
-    await store.dashboard.upsert({
-      id: "default-dashboard",
+  if (!existing) {
+    await store.projects.create({
+      id: PROJECT_ID,
       tenantId: TENANT_ID,
-      projectId: PROJECT_ID,
-      widgets: [
-        {
-          id: "kw-table",
-          type: "KeywordTable",
-          title: "Tracked keywords",
-          query: {},
-          options: {},
-        },
-        {
-          id: "audit-card",
-          type: "AuditScoreCard",
-          title: "Latest audit score",
-          query: {},
-          options: {},
-        },
-      ],
-      updatedAt: new Date(),
+      name: "Playground Project",
+      domain: "localhost",
     });
   }
+}
+
+async function seedDashboard() {
+  const scope = { tenantId: TENANT_ID, projectId: PROJECT_ID };
+  const dashboard = await store.dashboard.get(scope);
+  if (dashboard) return;
+
+  await store.dashboard.upsert({
+    id: "default-dashboard",
+    tenantId: TENANT_ID,
+    projectId: PROJECT_ID,
+    widgets: [
+      {
+        id: "kw-table",
+        type: "KeywordTable",
+        title: "Tracked keywords",
+        query: {},
+        options: {},
+      },
+      {
+        id: "audit-card",
+        type: "AuditScoreCard",
+        title: "Latest audit score",
+        query: {},
+        options: {},
+      },
+      BLOG_WIDGET,
+    ],
+    updatedAt: new Date(),
+  });
+}
+
+async function ensureBlogWidget() {
+  const scope = { tenantId: TENANT_ID, projectId: PROJECT_ID };
+  const dashboard = await store.dashboard.get(scope);
+  if (!dashboard || dashboardHasBlogWidget(dashboard.widgets)) return;
+
+  await store.dashboard.upsert({
+    ...dashboard,
+    widgets: [...dashboard.widgets, BLOG_WIDGET],
+    updatedAt: new Date(),
+  });
 }
 
 async function seedBlog() {
@@ -215,6 +244,8 @@ for (const prefix of apiPaths) {
 app.get("/", (c) => apiHandler(c.req.raw));
 
 await seedProject();
+await seedDashboard();
+await ensureBlogWidget();
 await seedBlog();
 
 console.log(`RankMySEO playground → http://localhost:${PORT}`);

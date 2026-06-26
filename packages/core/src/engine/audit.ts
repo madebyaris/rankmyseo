@@ -105,6 +105,127 @@ const RULES: Rule[] = [
       };
     },
   },
+  {
+    ruleId: "cwv-inp",
+    severity: "warning",
+    run: (s) => {
+      const inp = s.webVitals?.inp;
+      if (inp === undefined) {
+        return { passed: true, message: "INP not measured" };
+      }
+      return {
+        passed: inp <= 200,
+        message: `INP ${inp}ms ${inp <= 200 ? "passes" : "exceeds"} 200ms threshold`,
+      };
+    },
+  },
+  {
+    ruleId: "https",
+    severity: "error",
+    run: (s) => {
+      const isHttps = s.url.startsWith("https://");
+      return {
+        passed: isHttps,
+        message: isHttps ? "Served over HTTPS" : "Page is not served over HTTPS",
+      };
+    },
+  },
+  {
+    ruleId: "robots-indexable",
+    severity: "error",
+    run: (s) => {
+      const blocked = s.robotsNoindex === true;
+      return {
+        passed: !blocked,
+        message: blocked
+          ? "Page is blocked from indexing by a robots noindex directive"
+          : "Page is indexable",
+      };
+    },
+  },
+  {
+    ruleId: "viewport-meta",
+    severity: "warning",
+    run: (s) => {
+      if (s.hasViewportMeta === undefined) {
+        return { passed: true, message: "Viewport meta not measured" };
+      }
+      return {
+        passed: s.hasViewportMeta,
+        message: s.hasViewportMeta
+          ? "Mobile viewport meta tag present"
+          : "Missing mobile viewport meta tag",
+      };
+    },
+  },
+  {
+    ruleId: "lang-attribute",
+    severity: "warning",
+    run: (s) => {
+      if (s.lang === undefined) {
+        return { passed: true, message: "Language attribute not measured" };
+      }
+      const hasLang = Boolean(s.lang);
+      return {
+        passed: hasLang,
+        message: hasLang
+          ? `Document language declared (${s.lang})`
+          : "Missing <html lang> attribute",
+      };
+    },
+  },
+  {
+    ruleId: "heading-structure",
+    severity: "info",
+    run: (s) => {
+      if (s.h2Count === undefined) {
+        return { passed: true, message: "Heading structure not measured" };
+      }
+      return {
+        passed: s.h2Count >= 1,
+        message:
+          s.h2Count >= 1
+            ? `Found ${s.h2Count} H2 subheadings`
+            : "No H2 subheadings — content lacks a scannable structure",
+      };
+    },
+  },
+  {
+    ruleId: "image-alt",
+    severity: "warning",
+    run: (s) => {
+      if (s.imageCount === undefined || s.imagesWithAlt === undefined) {
+        return { passed: true, message: "Image alt coverage not measured" };
+      }
+      if (s.imageCount === 0) {
+        return { passed: true, message: "No images to check for alt text" };
+      }
+      const missing = s.imageCount - s.imagesWithAlt;
+      return {
+        passed: missing <= 0,
+        message:
+          missing <= 0
+            ? `All ${s.imageCount} images have alt text`
+            : `${missing} of ${s.imageCount} images are missing alt text`,
+      };
+    },
+  },
+  {
+    ruleId: "content-depth",
+    severity: "warning",
+    run: (s) => {
+      if (s.wordCount === undefined) {
+        return { passed: true, message: "Content length not measured" };
+      }
+      return {
+        passed: s.wordCount >= 250,
+        message:
+          s.wordCount >= 250
+            ? `Content depth ${s.wordCount} words`
+            : `Thin content: ${s.wordCount} words (aim for 250+)`,
+      };
+    },
+  },
 ];
 
 export function runAuditChecks(signals: PageSignals): AuditEngineResult {

@@ -6,5 +6,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: ["react", "react-dom", "web-vitals"],
+  external: ["react", "react-dom", "web-vitals", "@rankmyseo/core/schemas"],
 });

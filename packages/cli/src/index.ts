@@ -36,6 +36,7 @@ async function main() {
           llmsTxt: true,
           collector: true,
           markdownNegotiation: true,
+          blog: false,
         },
         sitemapRoutes: ["/"],
       });

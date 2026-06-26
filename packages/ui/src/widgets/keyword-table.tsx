@@ -1,4 +1,4 @@
-import type { DashboardWidget } from "@rankmyseo/core";
+import type { DashboardWidget } from "@rankmyseo/core/schemas";
 import { useKeywords } from "@rankmyseo/react";
 
 export function KeywordTable({ widget }: { widget: DashboardWidget }) {

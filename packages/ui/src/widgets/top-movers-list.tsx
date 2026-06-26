@@ -1,4 +1,4 @@
-import type { DashboardWidget } from "@rankmyseo/core";
+import type { DashboardWidget } from "@rankmyseo/core/schemas";
 import { useReport } from "@rankmyseo/react";
 
 export function TopMoversList({ widget }: { widget: DashboardWidget }) {

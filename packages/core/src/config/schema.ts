@@ -18,6 +18,8 @@ export const siteFeaturesConfigSchema = z.object({
   llmsTxt: z.boolean().default(true),
   collector: z.boolean().default(true),
   markdownNegotiation: z.boolean().default(true),
+  /** Opt-in blog module (API + dashboard widget). Off by default. */
+  blog: z.boolean().default(false),
 });
 
 export type SiteFeaturesConfig = z.infer<typeof siteFeaturesConfigSchema>;
@@ -45,6 +47,7 @@ export const rankMySeoConfigSchema = z.object({
     llmsTxt: true,
     collector: true,
     markdownNegotiation: true,
+    blog: false,
   }),
   dashboard: z
     .object({

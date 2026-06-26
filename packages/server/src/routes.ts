@@ -13,6 +13,7 @@ import {
   dashboardConfigSchema,
   extractPageSignals,
   generateMeta,
+  normalizeHttpUrl,
   pageSignalsSchema,
   projectSchema,
   runAuditChecks,
@@ -206,7 +207,7 @@ addRoute("POST", /^\/scan$/, async (request, ctx) => {
 
   let target: URL;
   try {
-    target = new URL(String(body.url));
+    target = normalizeHttpUrl(String(body.url ?? ""));
   } catch {
     return Response.json({ error: "A valid url is required" }, { status: 400 });
   }
@@ -283,12 +284,23 @@ addRoute("POST", /^\/meta\/generate$/, async (request, _ctx) => {
   return Response.json({ data: { meta, checks, score } });
 });
 
+function blogDisabled(ctx: RouteContext): Response | null {
+  if (!ctx.config.siteFeatures.blog) {
+    return Response.json({ error: "Blog module disabled" }, { status: 403 });
+  }
+  return null;
+}
+
 addRoute("GET", /^\/blog$/, async (_req, ctx) => {
+  const denied = blogDisabled(ctx);
+  if (denied) return denied;
   const data = await ctx.store.blog.list(ctx.scope);
   return Response.json({ data });
 });
 
 addRoute("POST", /^\/blog$/, async (request, ctx) => {
+  const denied = blogDisabled(ctx);
+  if (denied) return denied;
   const body = await readJson<Record<string, unknown>>(request);
   if (body instanceof Response) return body;
   const parsed = createBlogPostInputSchema.safeParse({
@@ -330,6 +342,8 @@ addRoute("POST", /^\/blog$/, async (request, ctx) => {
 });
 
 addRoute("GET", /^\/blog\/([^/]+)$/, async (_req, ctx, params) => {
+  const denied = blogDisabled(ctx);
+  if (denied) return denied;
   const post = await ctx.store.blog.getById(ctx.scope, params[1]!);
   if (!post) return Response.json({ error: "Not found" }, { status: 404 });
   const recommendations = buildBlogRecommendations({
@@ -343,6 +357,8 @@ addRoute("GET", /^\/blog\/([^/]+)$/, async (_req, ctx, params) => {
 });
 
 addRoute("PUT", /^\/blog\/([^/]+)$/, async (request, ctx, params) => {
+  const denied = blogDisabled(ctx);
+  if (denied) return denied;
   const body = await readJson<Record<string, unknown>>(request);
   if (body instanceof Response) return body;
   const parsed = updateBlogPostInputSchema.safeParse(body);
@@ -355,6 +371,8 @@ addRoute("PUT", /^\/blog\/([^/]+)$/, async (request, ctx, params) => {
 });
 
 addRoute("DELETE", /^\/blog\/([^/]+)$/, async (_req, ctx, params) => {
+  const denied = blogDisabled(ctx);
+  if (denied) return denied;
   const deleted = await ctx.store.blog.delete(ctx.scope, params[1]!);
   if (!deleted) return Response.json({ error: "Not found" }, { status: 404 });
   return new Response(null, { status: 204 });

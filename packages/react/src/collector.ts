@@ -1,4 +1,4 @@
-import type { PageSignals } from "@rankmyseo/core";
+import type { PageSignals } from "@rankmyseo/core/schemas";
 
 export function collectPageSignals(): PageSignals {
   const title = document.title || undefined;

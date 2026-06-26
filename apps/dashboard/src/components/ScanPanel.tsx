@@ -43,7 +43,7 @@ export function ScanPanel() {
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://example.com"
+              placeholder="example.com or https://example.com"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !scanning) void scan(url).catch(() => {});
               }}
@@ -98,6 +98,31 @@ export function ScanPanel() {
                 <Signal
                   label="JSON-LD"
                   value={result.signals.hasJsonLd ? "yes" : "no"}
+                />
+                <Signal
+                  label="Indexable"
+                  value={result.signals.robotsNoindex ? "no (noindex)" : "yes"}
+                />
+                <Signal
+                  label="Mobile viewport"
+                  value={result.signals.hasViewportMeta ? "yes" : "no"}
+                />
+                <Signal label="Language" value={result.signals.lang ?? "—"} />
+                <Signal
+                  label="Image alt coverage"
+                  value={
+                    result.signals.imageCount
+                      ? `${result.signals.imagesWithAlt ?? 0}/${result.signals.imageCount}`
+                      : "—"
+                  }
+                />
+                <Signal
+                  label="Word count"
+                  value={
+                    result.signals.wordCount !== undefined
+                      ? String(result.signals.wordCount)
+                      : "—"
+                  }
                 />
               </div>
             </CardContent>

@@ -30,6 +30,22 @@ const RULE_ADVICE: Record<string, string> = {
     "Improve Largest Contentful Paint: optimize the hero image, preload critical assets, and reduce server response time.",
   "cwv-cls":
     "Reduce Cumulative Layout Shift: set explicit width/height on media and reserve space for dynamic content.",
+  "cwv-inp":
+    "Improve Interaction to Next Paint (replaced FID in 2024): break up long tasks, defer non-critical JS, and keep the main thread responsive.",
+  https:
+    "Serve the site over HTTPS with a valid TLS certificate and redirect all HTTP traffic to HTTPS.",
+  "robots-indexable":
+    "Remove the noindex directive (meta robots / X-Robots-Tag) so this page can be indexed — unless it is intentionally hidden.",
+  "viewport-meta":
+    "Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> so the page is mobile-friendly under mobile-first indexing.",
+  "lang-attribute":
+    "Set a <html lang=\"…\"> attribute so search engines and assistive tech know the page language.",
+  "heading-structure":
+    "Break the content into sections with descriptive <h2>/<h3> subheadings so it is scannable and easier to rank for sub-topics.",
+  "image-alt":
+    "Add descriptive alt text to every meaningful image for accessibility and image-search visibility.",
+  "content-depth":
+    "Expand thin content to fully cover the topic and match search intent; aim for substantive depth, not padding.",
 };
 
 /** Turn failed audit checks into prioritized, actionable recommendations. */

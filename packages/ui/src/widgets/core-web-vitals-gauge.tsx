@@ -1,4 +1,4 @@
-import type { DashboardWidget } from "@rankmyseo/core";
+import type { DashboardWidget } from "@rankmyseo/core/schemas";
 import { useAudit } from "@rankmyseo/react";
 
 export function CoreWebVitalsGauge({ widget }: { widget: DashboardWidget }) {

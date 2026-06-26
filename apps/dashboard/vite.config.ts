@@ -3,12 +3,21 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
+const repoRoot = path.resolve(__dirname, "../..");
+const appNodeModules = path.resolve(__dirname, "node_modules");
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      { find: "@rankmyseo/core/schemas$", replacement: path.join(repoRoot, "packages/core/src/schemas/index.ts") },
+      { find: "@rankmyseo/react$", replacement: path.join(repoRoot, "packages/react/src/index.ts") },
+      { find: "@rankmyseo/ui$", replacement: path.join(repoRoot, "packages/ui/src/index.ts") },
+      { find: "react", replacement: path.join(appNodeModules, "react") },
+      { find: "react-dom", replacement: path.join(appNodeModules, "react-dom") },
+    ],
+    dedupe: ["react", "react-dom"],
   },
   server: {
     port: 5173,
