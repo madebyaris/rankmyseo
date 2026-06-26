@@ -19,6 +19,8 @@ See [PRD.md](./PRD.md) for the full architecture, roadmap, and design decisions.
 
 ## Install
 
+![RankMySEO setup in 3 steps — install, pick your stack, scaffold](./docs/assets/easy-setup.webp)
+
 **Easiest path** — interactive installer (recommended, full, or pick your own packages):
 
 ```bash
