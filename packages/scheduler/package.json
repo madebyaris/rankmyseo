@@ -1,9 +1,27 @@
 {
   "name": "@rankmyseo/scheduler",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "RankMySEO scheduler adapters (node-cron, manual)",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/scheduler"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "scheduler",
+    "cron",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
       "import": {

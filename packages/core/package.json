@@ -1,9 +1,30 @@
 {
   "name": "@rankmyseo/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "RankMySEO core domain models, ports, and conformance tests",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "seo-audit",
+    "rank-tracking",
+    "core-web-vitals",
+    "headless",
+    "zod",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
       "import": {

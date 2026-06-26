@@ -2,7 +2,7 @@
 
 An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript ecosystem. Drop it into any JS/TS app — Next.js, Hono, SvelteKit, Express, Workers, plain Node — with keyword/rank tracking, SEO audits, persistent reports, an AI agent layer, and a customizable dashboard.
 
-**Status:** M1–M4 feature verticals implemented (offline-verified with fixture datasource + mock LLM). Packages are not published to npm yet.
+**Status:** M1–M4 feature verticals implemented (offline-verified with fixture datasource + mock LLM). Published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.1.x).
 
 **Documentation:** [GitHub Wiki](https://github.com/madebyaris/rankmyseo/wiki) (source: [`docs/wiki/`](./docs/wiki/))
 
@@ -16,6 +16,33 @@ Most SEO tooling is locked to a single platform or shipped as a hosted SaaS ifra
 - **Multi-tenant ready** — every row is scoped by `tenantId` + `projectId`
 
 See [PRD.md](./PRD.md) for the full architecture, roadmap, and design decisions.
+
+## Install
+
+All packages are published under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (Node.js ≥ 20). Install only the tiers you need:
+
+```bash
+# Backend — Hono example (server + storage + headless core)
+npm i @rankmyseo/server-hono @rankmyseo/storage @rankmyseo/core hono
+
+# Frontend — headless hooks + optional prebuilt dashboard UI
+npm i @rankmyseo/react @rankmyseo/ui react react-dom
+
+# CLI — scaffold config, run migrations, schedule jobs
+npm i -D @rankmyseo/cli
+```
+
+Other adapters/utilities: [`@rankmyseo/server`](https://www.npmjs.com/package/@rankmyseo/server) (framework-agnostic handler), [`@rankmyseo/datasource`](https://www.npmjs.com/package/@rankmyseo/datasource) (GSC/PSI/fixture), [`@rankmyseo/scheduler`](https://www.npmjs.com/package/@rankmyseo/scheduler) (cron), [`@rankmyseo/agent`](https://www.npmjs.com/package/@rankmyseo/agent) (AI + MCP).
+
+## How to use it
+
+1. **Spin up the backend** — mount the API with a framework adapter (Hono shown below), pointed at a database via `@rankmyseo/storage`. See [Minimal Hono integration](#minimal-hono-integration).
+2. **Create a project + keywords** — via the store directly or the [API routes](#api-scoping) (`POST /projects`, `POST /keywords`).
+3. **Scan & audit pages** — `POST /scan` fetches a live URL, extracts on-page signals, and returns a score + prioritized recommendations.
+4. **Render a dashboard (optional)** — wrap your app in `RankMySeoProvider` from `@rankmyseo/react`, then drop in widgets from `@rankmyseo/ui` (or just use the headless hooks).
+5. **Scaffold/migrate with the CLI** — `npx @rankmyseo/cli init` then `rankmyseo migrate`.
+
+Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/wiki) carry per-package usage details.
 
 ## Packages
 

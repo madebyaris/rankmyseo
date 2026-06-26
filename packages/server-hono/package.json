@@ -1,9 +1,27 @@
 {
   "name": "@rankmyseo/server-hono",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Hono adapter for RankMySEO server handler",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/server-hono"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "hono",
+    "adapter",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
       "import": {

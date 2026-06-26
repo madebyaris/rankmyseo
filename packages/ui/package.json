@@ -1,9 +1,28 @@
 {
   "name": "@rankmyseo/ui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "RankMySEO prebuilt dashboard widgets and renderer",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "react",
+    "dashboard",
+    "widgets",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
       "import": {

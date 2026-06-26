@@ -1,9 +1,28 @@
 {
   "name": "@rankmyseo/storage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "RankMySEO storage adapters (default: Drizzle SQLite)",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/storage"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "drizzle",
+    "sqlite",
+    "storage",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
       "import": {
