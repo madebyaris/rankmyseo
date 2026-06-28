@@ -4,7 +4,7 @@ Welcome to the **RankMySEO** documentation wiki — an open-source, framework-ag
 
 **Repository:** [github.com/madebyaris/rankmyseo](https://github.com/madebyaris/rankmyseo)  
 **License:** Apache-2.0  
-**Status:** M0–M4 implemented; packages not yet published to npm.
+**Status:** M0–M4 implemented; published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.2.x).
 
 ---
 

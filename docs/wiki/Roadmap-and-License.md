@@ -21,18 +21,20 @@ RankMySEO is a **modular, embeddable SEO toolkit** — not a hosted SaaS lock-in
 
 ## Milestones (high level)
 
+Canonical milestone plan (M0–M5). Through M4 is implemented and verified offline (fixture datasource + mock LLM); live GSC/PSI/LLM paths are implemented but unverified without keys.
+
 | Milestone | Status | Scope |
 | --- | --- | --- |
-| M1 Core + storage | Done | Schemas, SQLite, config |
-| M2 Rank tracking | Done | Keywords, snapshots, datasource port |
-| M3 Audits + reports | Done | On-page rules, CWV, reports |
-| M4 Scan + meta + blog | Done | Live scan, meta gen, optional blog |
-| M5 Dashboard widgets | Done | KeywordTable, charts, BlogManager |
-| M6 AI agent | Partial | Tools defined; LLM wiring optional |
-| M7 WordPress plugin | Planned | PHP wrapper around server |
-| M8 SaaS tier | Planned | Hosted rank APIs, multi-tenant |
+| **M0 — Skeleton** | Done | Monorepo, `@rankmyseo/core` ports + Zod models, SQLite store, Hono adapter, Vitest |
+| **M1 — Rank tracking** | Done | GSC/fixture datasource, scheduler port, snapshot ingestion, React hooks, rank chart widget |
+| **M2 — Audits & reports** | Done | On-page audit engine, Core Web Vitals, report rollups (SQLite; Postgres deferred to M5) |
+| **M3 — Agent layer** | Done | AI SDK tools + MCP, dashboard config + widget registry, approval-gated edits |
+| **M4 — Site integration** | Done | On-page collector + score, live scan, meta/schema generators, sitemap, `llms.txt`, markdown negotiation, optional blog |
+| **M5 — Ecosystem** | Planned | More framework adapters (Next, SvelteKit, Express), Postgres/Prisma/Kysely storage, docs site |
 
-Exact internal milestone detail is in local `PRD.md` (not in git).
+**Beyond M5 (exploratory, unscheduled):** WordPress plugin (PHP wrapper around the server) and a hosted SaaS tier with paid SERP providers (kept out of OSS by design).
+
+Exact internal milestone detail is in the local `PRD.md` (gitignored, not published).
 
 ## What's in OSS today
 
@@ -48,7 +50,6 @@ Exact internal milestone detail is in local `PRD.md` (not in git).
 - Paid SERP rank providers
 - Hosted SaaS deployment
 - WordPress plugin package
-- Official npm publish (packages are workspace-local for now)
 
 ## Links
 

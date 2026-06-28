@@ -115,8 +115,8 @@ graph LR
 ## Off-page SEO — parameters
 
 > Out of scope for the RankMySEO OSS audit engine (no backlink crawling in v1 — see
-> [PRD §1 non-goals](../PRD.md)). Listed here as the practitioner reference; plug a
-> custom `RankDataSource` to ingest these.
+> the [Architecture](https://github.com/madebyaris/rankmyseo/wiki/Architecture) wiki, "OSS vs future SaaS").
+> Listed here as the practitioner reference; plug a custom `RankDataSource` to ingest these.
 
 ```mermaid
 graph TD

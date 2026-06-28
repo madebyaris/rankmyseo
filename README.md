@@ -15,7 +15,7 @@ Most SEO tooling is locked to a single platform or shipped as a hosted SaaS ifra
 - **Your stack** — thin adapters per framework; the dashboard never touches your DB directly
 - **Multi-tenant ready** — every row is scoped by `tenantId` + `projectId`
 
-See [PRD.md](./PRD.md) for the full architecture, roadmap, and design decisions.
+See the [Architecture](https://github.com/madebyaris/rankmyseo/wiki/Architecture) and [Roadmap](https://github.com/madebyaris/rankmyseo/wiki/Roadmap-and-License) wiki pages for the full architecture, roadmap, and design decisions.
 
 ## Install
 
@@ -309,7 +309,7 @@ Monorepo tooling: **pnpm workspaces**, **Turborepo**, **tsup**, **Changesets**, 
 | **M4** | On-page scoring, sitemap, `llms.txt`, markdown negotiation | ✓ |
 | **M5** | More adapters (Next, SvelteKit, Express), Postgres/Prisma stores, docs site | Planned |
 
-Details in [PRD.md](./PRD.md).
+Details in the [Roadmap wiki page](https://github.com/madebyaris/rankmyseo/wiki/Roadmap-and-License).
 
 ## License
 
