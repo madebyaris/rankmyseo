@@ -1,7 +1,7 @@
 {
   "name": "@rankmyseo/example-astro-adapter",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "Executable Astro API route fixture for RankMySEO (native Request/Response)",
   "scripts": {

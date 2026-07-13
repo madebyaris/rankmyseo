@@ -1,6 +1,6 @@
 {
   "name": "rankmyseo",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Install RankMySEO — interactive package picker (recommended, full, or custom)",
   "license": "Apache-2.0",

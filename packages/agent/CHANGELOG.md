@@ -1,5 +1,19 @@
 # @rankmyseo/agent
 
+## 1.0.0
+
+### Minor Changes
+
+- 2aa22cb: Make backend packages portable on generic Node by removing the Next-specific `server-only` runtime guard, add `basePath` mounting for `createHandler`, and lazy-load scanner/agent on demand.
+
+### Patch Changes
+
+- Updated dependencies [2aa22cb]
+- Updated dependencies [c801bcf]
+- Updated dependencies [2dd96f1]
+  - @rankmyseo/storage@1.0.0
+  - @rankmyseo/core@1.0.0
+
 ## 0.2.0
 
 ### Minor Changes

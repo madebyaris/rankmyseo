@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/client",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Framework-neutral HTTP client for the RankMySEO API",
   "license": "Apache-2.0",

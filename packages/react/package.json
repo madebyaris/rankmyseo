@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/react",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "RankMySEO headless React hooks (backed by @rankmyseo/client + @rankmyseo/collector)",
   "license": "Apache-2.0",
@@ -49,7 +49,6 @@
     "@rankmyseo/collector": "workspace:*",
     "@rankmyseo/core": "workspace:*"
   },
-
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/server",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Framework-agnostic RankMySEO HTTP handler",
   "license": "Apache-2.0",
