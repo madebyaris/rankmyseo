@@ -6,10 +6,21 @@ Base URL depends on your deployment. Demo playground: `http://localhost:3456`.
 
 | Header | Required | Description |
 | --- | --- | --- |
-| `x-tenant-id` | Yes (scoped routes) | Tenant identifier |
-| `x-project-id` | Yes (scoped routes) | Project identifier |
+| `x-tenant-id` | Yes (most routes) | Tenant identifier |
+| `x-project-id` | Yes (most routes) | Project identifier |
 | `content-type` | POST/PUT | `application/json` |
 | `accept` | Optional | `text/markdown` on `GET /` for markdown negotiation |
+
+### Header exemptions
+
+| Route | Scope headers |
+| --- | --- |
+| `GET /sitemap.xml` | Not required |
+| `GET /llms.txt` | Not required |
+| `GET /` | Optional (defaults to config tenant/project) |
+| All other routes | Required |
+
+Disabled features: collector/blog → **403**; disabled sitemap/llms.txt → **404**.
 
 ## Projects
 
@@ -132,8 +143,8 @@ Returns **403** when blog is disabled in config.
 | Method | Path | Description |
 | --- | --- | --- |
 | GET | `/sitemap.xml` | Generated sitemap (requires `siteFeatures.sitemap`) |
-| GET | `/llms.txt` | Agent-readable site summary |
-| GET | `/` | HTML or markdown (Accept negotiation) |
+| GET | `/llms.txt` | Agent-readable site summary (agent-readiness; not an SEO ranking lever) |
+| GET | `/` | HTML or markdown (`Accept: text/markdown`) for agent/dev-tool consumption |
 
 ## Audit rules
 
@@ -149,5 +160,13 @@ The audit engine checks:
 | `json-ld` | info | JSON-LD schema |
 | `cwv-lcp` | warning | LCP ≤ 2.5s |
 | `cwv-cls` | warning | CLS ≤ 0.1 |
+| `cwv-inp` | warning | INP ≤ 200ms |
+| `https` | error | Served over HTTPS |
+| `robots-indexable` | error | Not blocked by robots noindex |
+| `viewport-meta` | warning | Mobile viewport meta present |
+| `lang-attribute` | warning | `<html lang>` declared |
+| `heading-structure` | info | At least one H2 |
+| `image-alt` | warning | Images have alt text |
+| `content-depth` | warning | ≥ 250 words when measured |
 
-Score = percentage of passed checks (rounded).
+Score = percentage of passed checks (rounded). **16 rules** total.

@@ -31,7 +31,7 @@ npx rankmyseo install
 Non-interactive:
 
 ```bash
-npx rankmyseo install --yes --preset recommended   # core + storage + server-hono + react
+npx rankmyseo install --yes --preset recommended   # core + storage + server-hono + react + cli
 npx rankmyseo install --preset full                # all @rankmyseo/* packages
 npx rankmyseo install --packages @rankmyseo/core,@rankmyseo/ui
 ```
@@ -104,8 +104,8 @@ Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, P
 | Rank ingestion service + scheduler port | ✓ |
 | Datasource adapters (fixture default; GSC real class) | ✓ offline via fixture |
 | React hooks + dashboard widgets (`@rankmyseo/ui`) | ✓ |
-| AI agent chat + MCP tools (approval-gated dashboard edits) | ✓ offline via mock LLM |
-| Site features: sitemap, `llms.txt`, markdown negotiation | ✓ |
+| AI agent chat + MCP tools (approval-gated mutating tools via AI SDK `needsApproval`) | ✓ offline via mock LLM |
+| Agent-readiness: sitemap, `llms.txt`, markdown negotiation (for coding agents — not evidenced SEO ranking levers) | ✓ |
 | `rankmyseo.config.ts` schema + CLI scaffold | ✓ |
 
 Automated tests: expanded store contract tests, server route integration tests, datasource/scheduler/agent/react/ui/cli unit tests, Hono smoke test.
@@ -137,7 +137,9 @@ npm i rankmyseo
 npx rankmyseo install              # pick recommended, full, or custom packages
 npx rankmyseo init                 # after @rankmyseo/cli is installed
 npx rankmyseo migrate
-npx rankmyseo schedule
+npx rankmyseo schedule   # one rank ingestion pass (reads rankmyseo.config.ts when present)
+npx rankmyseo doctor
+npx rankmyseo version
 ```
 
 **Monorepo / direct CLI:**
@@ -145,7 +147,8 @@ npx rankmyseo schedule
 ```bash
 pnpm exec rankmyseo-cli init       # scaffold rankmyseo.config.ts
 pnpm exec rankmyseo-cli migrate    # run SQLite migrations
-pnpm exec rankmyseo-cli schedule   # register cron ingestion job (requires config)
+pnpm exec rankmyseo-cli schedule   # one rank ingestion pass
+pnpm exec rankmyseo-cli doctor
 pnpm exec rankmyseo-cli install --preset recommended
 ```
 
@@ -196,12 +199,14 @@ export default createRankMySeoApp(store, { config });
 
 ### API scoping
 
-All routes require tenant/project headers:
+Most routes require tenant/project headers:
 
 | Header | Purpose |
 | --- | --- |
 | `x-tenant-id` | Tenant scope |
 | `x-project-id` | Project scope |
+
+**Exempt:** `GET /sitemap.xml` and `GET /llms.txt` do not require scope headers. `GET /` accepts optional headers (defaults to config tenant/project).
 
 **Routes:**
 
@@ -235,8 +240,8 @@ All routes require tenant/project headers:
 | `PUT` | `/dashboard` | Update dashboard config |
 | `POST` | `/agent/chat` | Stream agent chat (requires `agentModel` in handler options) |
 | `GET` | `/sitemap.xml` | Generated sitemap (opt-in) |
-| `GET` | `/llms.txt` | Agent-readable site summary (opt-in) |
-| `GET` | `/` | HTML or markdown (Accept negotiation, opt-in) |
+| `GET` | `/llms.txt` | Agent-readable site summary (opt-in; agent-readiness) |
+| `GET` | `/` | HTML or markdown (`Accept: text/markdown`, opt-in) |
 
 Example:
 

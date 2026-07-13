@@ -1,5 +1,7 @@
-import type { RankMySeoConfig } from "./schema.js";
+import { type RankMySeoConfig, rankMySeoConfigSchema } from "./schema.js";
 
-export function defineConfig(config: RankMySeoConfig): RankMySeoConfig {
-  return config;
+export function defineConfig(
+  config: Parameters<typeof rankMySeoConfigSchema.parse>[0],
+): RankMySeoConfig {
+  return rankMySeoConfigSchema.parse(config);
 }

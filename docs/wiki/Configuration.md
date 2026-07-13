@@ -1,6 +1,6 @@
 # Configuration
 
-Configuration is validated by Zod in `@rankmyseo/core`. Use `defineConfig()` for type-safe objects.
+Configuration is validated at runtime by Zod in `@rankmyseo/core`. Use `defineConfig()` when authoring `rankmyseo.config.ts` — invalid values throw on load.
 
 ## Full schema
 
@@ -77,10 +77,18 @@ dataSources: [
 ## CLI scaffold
 
 ```bash
-pnpm exec rankmyseo init
+npx rankmyseo init
+# or: pnpm exec rankmyseo-cli init
 ```
 
-Generates a starter `rankmyseo.config.ts` with `blog: false`.
+Generates a starter `rankmyseo.config.ts` with `blog: false`. Refuses to overwrite an existing file.
+
+Load at runtime:
+
+```typescript
+import { loadRankMySeoConfig } from "@rankmyseo/core";
+const config = await loadRankMySeoConfig("rankmyseo.config.ts");
+```
 
 ## Handler options
 

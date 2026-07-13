@@ -5,7 +5,7 @@ Monorepo managed with **pnpm workspaces** and **Turborepo**.
 ## Prerequisites
 
 - Node.js 20+
-- pnpm 9+
+- pnpm 10+
 
 ## Install
 
@@ -24,7 +24,7 @@ pnpm install
 | `pnpm typecheck` | TypeScript check all packages |
 | `pnpm lint` | ESLint |
 | `pnpm dev:playground` | API server on `:3456` |
-| `pnpm dev:dashboard` | Reference dashboard on `:5174` |
+| `pnpm dev:dashboard` | Reference dashboard on `:5173` |
 
 ## Project layout
 
@@ -60,7 +60,7 @@ Terminal 2 — Dashboard:
 pnpm dev:dashboard
 ```
 
-Open http://localhost:5174. Default tenant/project headers match playground seeds.
+Open http://localhost:5173. Default tenant/project headers match playground seeds.
 
 ## Configuration file
 
@@ -92,8 +92,9 @@ Reset: delete the `.db` file and restart playground (seeds re-run).
 
 1. Fork and branch from `main`
 2. Keep changes scoped — one feature per PR
-3. Run `pnpm build && pnpm test && pnpm typecheck && pnpm lint`
-4. Apache-2.0 — contributions under same license
+3. Run `pnpm build && pnpm test && pnpm typecheck && pnpm lint && pnpm publint`
+4. See [CONTRIBUTING.md](https://github.com/madebyaris/rankmyseo/blob/main/CONTRIBUTING.md) for adapter conformance expectations
+5. Apache-2.0 — contributions under same license
 
 ## Internal docs
 

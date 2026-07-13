@@ -296,4 +296,98 @@ describe("createHandler routes", () => {
     const body = (await res.json()) as { data: { widgets: unknown[] } };
     expect(body.data.widgets).toHaveLength(1);
   });
+
+  it("returns 400 when scoped route lacks headers", async () => {
+    const res = await handler(new Request("http://localhost/keywords"));
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; code?: string };
+    expect(body.error).toMatch(/x-tenant-id/i);
+    expect(body.code).toBe("MISSING_SCOPE");
+  });
+
+  it("returns 403 when collector is disabled", async () => {
+    const store = createSqliteStore(":memory:");
+    await store.projects.create({
+      id: "project-1",
+      tenantId: "tenant-a",
+      name: "Demo",
+      domain: "example.com",
+    });
+    const disabledHandler = createHandler(store, {
+      config: defineConfig({
+        databaseUrl: "sqlite://:memory:",
+        tenantId: "tenant-a",
+        projectId: "project-1",
+        dataSources: [{ provider: "fixture", default: true }],
+        schedule: { cron: "0 6 * * *", enabled: false },
+        siteFeatures: {
+          sitemap: true,
+          llmsTxt: true,
+          collector: false,
+          markdownNegotiation: true,
+          blog: false,
+        },
+      }),
+    });
+
+    const res = await disabledHandler(
+      new Request("http://localhost/collect", {
+        method: "POST",
+        headers: scopeHeaders,
+        body: JSON.stringify({ url: "https://example.com", h1Count: 1 }),
+      }),
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it("returns 404 when sitemap feature is disabled", async () => {
+    const store = createSqliteStore(":memory:");
+    await store.projects.create({
+      id: "project-1",
+      tenantId: "tenant-a",
+      name: "Demo",
+      domain: "example.com",
+    });
+    const disabledHandler = createHandler(store, {
+      config: defineConfig({
+        databaseUrl: "sqlite://:memory:",
+        tenantId: "tenant-a",
+        projectId: "project-1",
+        dataSources: [{ provider: "fixture", default: true }],
+        schedule: { cron: "0 6 * * *", enabled: false },
+        siteFeatures: {
+          sitemap: false,
+          llmsTxt: true,
+          collector: true,
+          markdownNegotiation: true,
+          blog: false,
+        },
+      }),
+    });
+
+    const res = await disabledHandler(new Request("http://localhost/sitemap.xml"));
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 406 when Accept rejects html and markdown on GET /", async () => {
+    const res = await handler(
+      new Request("http://localhost/", {
+        headers: { accept: "application/json" },
+      }),
+    );
+    expect(res.status).toBe(406);
+  });
+
+  it("returns 400 for invalid POST /reports body", async () => {
+    const res = await handler(
+      new Request("http://localhost/reports", {
+        method: "POST",
+        headers: scopeHeaders,
+        body: JSON.stringify({ title: "Weekly" }),
+      }),
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { code?: string };
+    expect(body.code).toBe("VALIDATION_ERROR");
+  });
 });

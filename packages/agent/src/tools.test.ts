@@ -16,24 +16,6 @@ describe("createAgentTools", () => {
     });
   });
 
-  it("lists keywords via tool execute", async () => {
-    await store.keywords.create({
-      tenantId: scope.tenantId,
-      projectId: scope.projectId,
-      text: "seo audit",
-      country: "us",
-      device: "desktop",
-      tags: [],
-    });
-
-    const tools = createAgentTools({ store, scope });
-    const execute = tools.listKeywords.execute;
-    if (!execute) throw new Error("execute missing");
-    const result = await execute({}, { toolCallId: "1", messages: [] });
-
-    expect("keywords" in result && result.keywords).toHaveLength(1);
-  });
-
   it("updates dashboard config via tool execute", async () => {
     const tools = createAgentTools({ store, scope });
     const execute = tools.updateDashboardConfig.execute;
@@ -54,5 +36,32 @@ describe("createAgentTools", () => {
     );
 
     expect("config" in result && result.config.widgets).toHaveLength(1);
+  });
+
+  it("requires approval for mutating tools", () => {
+    const tools = createAgentTools({ store, scope });
+    expect(tools.addKeyword.needsApproval).toBe(true);
+    expect(tools.runAudit.needsApproval).toBe(true);
+    expect(tools.updateDashboardConfig.needsApproval).toBe(true);
+    expect(tools.buildReport.needsApproval).toBe(true);
+    expect(tools.listKeywords.needsApproval).toBeFalsy();
+  });
+
+  it("lists keywords via tool execute", async () => {
+    await store.keywords.create({
+      tenantId: scope.tenantId,
+      projectId: scope.projectId,
+      text: "seo audit",
+      country: "us",
+      device: "desktop",
+      tags: [],
+    });
+
+    const tools = createAgentTools({ store, scope });
+    const execute = tools.listKeywords.execute;
+    if (!execute) throw new Error("execute missing");
+    const result = await execute({}, { toolCallId: "1", messages: [] });
+
+    expect("keywords" in result && result.keywords).toHaveLength(1);
   });
 });

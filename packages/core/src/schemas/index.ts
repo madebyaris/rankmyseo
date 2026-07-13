@@ -172,9 +172,22 @@ export const createReportInputSchema = reportSchema.omit({
 
 export type CreateReportInput = z.infer<typeof createReportInputSchema>;
 
+export const DASHBOARD_WIDGET_TYPES = [
+  "KeywordTable",
+  "RankHistoryChart",
+  "AuditScoreCard",
+  "TopMoversList",
+  "CoreWebVitalsGauge",
+  "BlogManager",
+] as const;
+
+export type DashboardWidgetType = (typeof DASHBOARD_WIDGET_TYPES)[number];
+
+export const dashboardWidgetTypeSchema = z.enum(DASHBOARD_WIDGET_TYPES);
+
 export const dashboardWidgetSchema = z.object({
   id: z.string().min(1),
-  type: z.string().min(1),
+  type: dashboardWidgetTypeSchema,
   title: z.string().min(1),
   query: z.record(z.string(), z.unknown()).default({}),
   options: z.record(z.string(), z.unknown()).default({}),
@@ -336,3 +349,17 @@ export const generatedSchemaSchema = z.object({
 export type GeneratedSchema = z.infer<typeof generatedSchemaSchema>;
 
 export { normalizeHttpUrl } from "../utils/url.js";
+
+export {
+  rankMySeoConfigSchema,
+  parseRankMySeoConfig,
+  dataSourceConfigSchema,
+  dataSourceProviderSchema,
+  siteFeaturesConfigSchema,
+  scheduleConfigSchema,
+  type RankMySeoConfig,
+  type DataSourceConfig,
+  type DataSourceProvider,
+  type SiteFeaturesConfig,
+  type ScheduleConfig,
+} from "../config/schema.js";

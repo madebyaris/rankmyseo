@@ -53,7 +53,7 @@ async function main() {
     return;
   }
 
-  if (cmd === "init" || cmd === "migrate" || cmd === "schedule") {
+  if (cmd === "init" || cmd === "migrate" || cmd === "schedule" || cmd === "doctor" || cmd === "version") {
     await forwardToCli([cmd, ...args]);
     return;
   }
@@ -77,10 +77,12 @@ Install (pick recommended, full, or custom packages):
   npx rankmyseo install --preset full
   npx rankmyseo install --packages @rankmyseo/core,@rankmyseo/react
 
-Project setup (requires @rankmyseo/cli):
+Project setup (requires @rankmyseo/cli — included in recommended preset):
   npx rankmyseo init [path]
   npx rankmyseo migrate [dbUrl]
   npx rankmyseo schedule [dbUrl]
+  npx rankmyseo doctor [--config path]
+  npx rankmyseo version
 
 Docs: https://github.com/madebyaris/rankmyseo/wiki/Getting-Started
 `);

@@ -23,7 +23,7 @@ await store.projects.create({
 });
 ```
 
-The factory selects the dialect from the connection string. Migrations run per dialect via `drizzle-kit` (or `rankmyseo migrate` from `@rankmyseo/cli`).
+The factory selects the dialect from the connection string. Tables are created automatically on first `createStore()` (inline DDL). Use `npx rankmyseo migrate` or `npx rankmyseo-cli migrate` to initialize the database file without starting a server.
 
 Not using Drizzle? Implement the `RankStore` port from `@rankmyseo/core` and validate it with `runStoreContractTests()`.
 

@@ -41,7 +41,7 @@ npm i rankmyseo
 npx rankmyseo install
 ```
 
-Choose **Recommended** (core + storage + server-hono + react), **Full** (all packages), or **Custom** (pick from a list).
+Choose **Recommended** (core + storage + server-hono + react + cli), **Full** (all packages), or **Custom** (pick from a list).
 
 Non-interactive:
 
@@ -54,6 +54,7 @@ Then scaffold:
 ```bash
 npx rankmyseo init
 npx rankmyseo migrate
+npx rankmyseo doctor
 ```
 
 See [Packages](./Packages.md) for manual `@rankmyseo/*` installs.
@@ -102,12 +103,16 @@ export default createRankMySeoApp(store, { config });
 
 ## API scoping
 
-Every mutating and scoped read requires headers:
+Most routes require tenant/project headers:
 
 | Header | Purpose |
 | --- | --- |
 | `x-tenant-id` | Tenant scope |
 | `x-project-id` | Project scope |
+
+**No headers required:** `GET /sitemap.xml`, `GET /llms.txt`
+
+**Optional headers:** `GET /` (defaults to config `tenantId` / `projectId`)
 
 Example:
 

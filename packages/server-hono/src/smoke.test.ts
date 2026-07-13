@@ -1,14 +1,39 @@
 import { describe, it, expect } from "vitest";
+import { defineConfig } from "@rankmyseo/core";
+import { runServerAdapterContractTests } from "@rankmyseo/core/testing";
 import { createStore } from "@rankmyseo/storage";
+import { createHandler } from "@rankmyseo/server";
 import { createRankMySeoApp } from "./index.js";
 
-describe("createRankMySeoApp smoke", () => {
-  const scopeHeaders = {
-    "x-tenant-id": "tenant-a",
-    "x-project-id": "project-1",
-  };
+const config = defineConfig({
+  databaseUrl: "sqlite://:memory:",
+  tenantId: "tenant-a",
+  projectId: "project-1",
+  dataSources: [{ provider: "fixture", default: true }],
+  schedule: { cron: "0 6 * * *", enabled: false },
+  siteFeatures: {
+    sitemap: true,
+    llmsTxt: true,
+    collector: true,
+    markdownNegotiation: true,
+    blog: false,
+  },
+  sitemapRoutes: ["/"],
+  llmsTxt: {
+    projectName: "Example",
+    summary: "Demo site",
+    links: [{ title: "About", url: "/about.md" }],
+  },
+});
 
-  it("adds keyword -> appends snapshot -> range-reads snapshots", async () => {
+runServerAdapterContractTests({
+  config,
+  makeStore: () => createStore(":memory:"),
+  makeHandler: (store) => createHandler(store, { config }),
+});
+
+describe("createRankMySeoApp smoke", () => {
+  it("mounts the Hono adapter on the same contract surface", async () => {
     const store = createStore(":memory:");
     await store.projects.create({
       id: "project-1",
@@ -16,61 +41,13 @@ describe("createRankMySeoApp smoke", () => {
       name: "Smoke Project",
       domain: "example.com",
     });
-
-    const app = createRankMySeoApp(store);
-
-    const keywordRes = await app.request("/keywords", {
-      method: "POST",
+    const app = createRankMySeoApp(store, { config });
+    const res = await app.request("/keywords", {
       headers: {
-        ...scopeHeaders,
-        "content-type": "application/json",
+        "x-tenant-id": "tenant-a",
+        "x-project-id": "project-1",
       },
-      body: JSON.stringify({
-        text: "seo toolkit",
-        country: "us",
-        device: "desktop",
-        tags: [],
-      }),
     });
-
-    expect(keywordRes.status).toBe(201);
-    const keywordJson = (await keywordRes.json()) as {
-      data: { id: string };
-    };
-    const keywordId = keywordJson.data.id;
-
-    const snapshotRes = await app.request("/snapshots", {
-      method: "POST",
-      headers: {
-        ...scopeHeaders,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        keywordId,
-        position: 4,
-        url: "https://example.com/blog",
-        source: "gsc",
-        device: "desktop",
-        country: "us",
-        capturedAt: "2026-06-01T00:00:00.000Z",
-      }),
-    });
-
-    expect(snapshotRes.status).toBe(201);
-
-    const rangeRes = await app.request(
-      `/snapshots?keywordId=${keywordId}&from=2026-05-31T00:00:00.000Z&to=2026-06-02T00:00:00.000Z`,
-      {
-        method: "GET",
-        headers: scopeHeaders,
-      },
-    );
-
-    expect(rangeRes.status).toBe(200);
-    const rangeJson = (await rangeRes.json()) as {
-      data: Array<{ position: number | null }>;
-    };
-    expect(rangeJson.data).toHaveLength(1);
-    expect(rangeJson.data[0]?.position).toBe(4);
+    expect(res.status).toBe(200);
   });
 });

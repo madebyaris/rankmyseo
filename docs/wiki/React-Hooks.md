@@ -15,12 +15,14 @@ const client = createRankMySeoClient({
 
 export function App() {
   return (
-    <RankMySeoProvider client={client}>
+    <RankMySeoProvider value={client}>
       <Dashboard />
     </RankMySeoProvider>
   );
 }
 ```
+
+Note: the provider prop is `value`, not `client`.
 
 ## Core hooks
 
@@ -29,46 +31,47 @@ export function App() {
 Load and update dashboard widget layout.
 
 ```tsx
-const { config, loading, error, updateConfig } = useDashboardConfig();
-// config.widgets — array of WidgetConfig
-await updateConfig({ widgets: [...] });
+const { config, loading, refresh, update } = useDashboardConfig();
+await update([{ id: "w1", type: "KeywordTable", title: "Keywords", query: {}, options: {} }]);
 ```
 
 ### `useKeywords`
 
 ```tsx
-const { keywords, loading, createKeyword, deleteKeyword } = useKeywords();
+const { keywords, loading, error, refresh, addKeyword } = useKeywords();
 ```
+
+There is no `deleteKeyword` helper yet — call the API directly if needed.
 
 ### `useRankTracker`
 
-Historical rank snapshots for charting.
+Historical rank snapshots for charting (defaults to last 12 months when `keywordId` is set).
 
 ```tsx
-const { snapshots, loading } = useRankTracker({ keywordId: "kw-1" });
+const { snapshots, loading, loadHistory } = useRankTracker("kw-1");
 ```
 
 ### `useAudit`
 
 ```tsx
-const { audits, loading, runAudit } = useAudit();
+const { audits, loading, refresh } = useAudit();
 ```
 
 ### `useReport`
 
 ```tsx
-const { report, loading, generate } = useReport();
+const { reports, loading, error, refresh, createReport } = useReport();
 ```
 
 ## Feature hooks
 
 ### `useScan`
 
-Live URL scan (title, meta, headings, links, images).
+Live URL scan (title, meta, headings, signals, recommendations).
 
 ```tsx
 const { scan, scanning, result, error } = useScan();
-await scan({ url: "https://example.com" });
+await scan("https://example.com");
 ```
 
 ### `useMetaGenerator`
@@ -76,24 +79,15 @@ await scan({ url: "https://example.com" });
 Generate SEO meta title and description.
 
 ```tsx
-const { generate, generating, result } = useMetaGenerator();
-await generate({
-  title: "Best Rank Trackers",
-  content: "...",
-  targetKeyword: "rank tracker",
-});
+const { generate, generating, result, error } = useMetaGenerator();
 ```
 
 ### `useSchemaGenerator`
 
-Generate Schema.org JSON-LD (Article, Product, FAQPage, BreadcrumbList, Organization).
+Generate Schema.org JSON-LD.
 
 ```tsx
-const { generate, generating, result } = useSchemaGenerator();
-await generate({
-  type: "FAQPage",
-  questions: [{ question: "What is RankMySEO?", answer: "An SEO toolkit." }],
-});
+const { generate, generating, result, error } = useSchemaGenerator();
 ```
 
 ### `useBlog`
@@ -101,14 +95,7 @@ await generate({
 Full blog CRUD when `siteFeatures.blog` is enabled.
 
 ```tsx
-const {
-  posts,
-  loading,
-  createPost,
-  updatePost,
-  deletePost,
-  getPost,
-} = useBlog();
+const { posts, loading, error, refresh, createPost, updatePost, deletePost, getPost } = useBlog();
 ```
 
 ### `useBlogModule`
@@ -117,28 +104,25 @@ Opt-in blog widget management.
 
 ```tsx
 const { enabled, enable, disable, options } = useBlogModule();
-// enable() adds BlogManager to dashboard config
-// disable() removes it
 ```
 
 ### `useRankMySeoChat`
 
-Streaming AI agent chat (requires agent server).
+Posts messages to `POST /agent/chat` (requires server `agentModel`).
 
 ```tsx
-const { messages, send, streaming } = useRankMySeoChat();
+const { sendMessage, streaming } = useRankMySeoChat();
+const text = await sendMessage([{ role: "user", content: "Summarize rank changes" }]);
 ```
+
+Returns raw stream text today — for tool-approval flows use AI SDK `useChat` against `/agent/chat`.
 
 ## Error handling
 
-All hooks expose `error` where applicable. HTTP errors surface as `Error` with message from API body when available.
+Hooks that fetch data expose `error` where applicable. HTTP failures throw or surface as `Error` with status text.
 
 ## TypeScript
 
-Types re-export from `@rankmyseo/core` where possible. Import schemas for form validation:
-
-```tsx
-import { blogPostSchema } from "@rankmyseo/core";
-```
+Types re-export from `@rankmyseo/core` / `@rankmyseo/core/schemas`. Config JSON Schemas: `@rankmyseo/core/json-schema`.
 
 See [[API-Reference]] for endpoint details each hook calls.

@@ -40,7 +40,16 @@
   "dependencies": {
     "@rankmyseo/installer": "workspace:*"
   },
+  "peerDependencies": {
+    "@rankmyseo/cli": "*"
+  },
+  "peerDependenciesMeta": {
+    "@rankmyseo/cli": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@rankmyseo/cli": "workspace:*",
     "@types/node": "^24.10.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",

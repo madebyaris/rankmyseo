@@ -1,7 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
-import type { LanguageModel } from "ai";
+import type { LanguageModel, UIMessage } from "ai";
 import {
   buildAuditRecommendations,
   buildBlogRecommendations,
@@ -34,6 +34,13 @@ import {
   readJson,
   withMarkdownNegotiation,
 } from "./utils.js";
+import { apiError } from "./errors.js";
+import {
+  agentChatBodySchema,
+  createReportBodySchema,
+  generateMetaBodySchema,
+  scanBodySchema,
+} from "./schemas.js";
 
 export interface RouteContext {
   store: RankStore;
@@ -204,14 +211,22 @@ addRoute("POST", /^\/collect$/, async (request, ctx) => {
 });
 
 addRoute("POST", /^\/scan$/, async (request, ctx) => {
-  const body = await readJson<{ url?: string }>(request);
+  const body = await readJson<unknown>(request);
   if (body instanceof Response) return body;
+
+  const parsed = scanBodySchema.safeParse(body);
+  if (!parsed.success) {
+    return apiError("Invalid scan request", 400, {
+      code: "VALIDATION_ERROR",
+      details: parsed.error.flatten(),
+    });
+  }
 
   let target: URL;
   try {
-    target = normalizeHttpUrl(String(body.url ?? ""));
+    target = normalizeHttpUrl(parsed.data.url);
   } catch {
-    return Response.json({ error: "A valid url is required" }, { status: 400 });
+    return apiError("A valid url is required", 400, { code: "VALIDATION_ERROR" });
   }
   if (target.protocol !== "http:" && target.protocol !== "https:") {
     return Response.json({ error: "Only http(s) URLs can be scanned" }, { status: 400 });
@@ -253,31 +268,34 @@ addRoute("POST", /^\/scan$/, async (request, ctx) => {
 });
 
 addRoute("POST", /^\/meta\/generate$/, async (request, _ctx) => {
-  const body = await readJson<{
-    title?: string;
-    content?: string;
-    targetKeyword?: string;
-    url?: string;
-    siteName?: string;
-  }>(request);
+  const body = await readJson<unknown>(request);
   if (body instanceof Response) return body;
-  if (!body.title || !body.title.trim()) {
-    return Response.json({ error: "title is required" }, { status: 400 });
+
+  const parsed = generateMetaBodySchema.safeParse(body);
+  if (!parsed.success) {
+    return apiError("Invalid meta generate request", 400, {
+      code: "VALIDATION_ERROR",
+      details: parsed.error.flatten(),
+    });
   }
 
   const meta = generateMeta({
-    title: body.title,
-    content: body.content,
-    targetKeyword: body.targetKeyword,
-    url: body.url,
-    siteName: body.siteName,
+    title: parsed.data.title,
+    content: parsed.data.content,
+    targetKeyword: parsed.data.targetKeyword,
+    url: parsed.data.url,
+    siteName: parsed.data.siteName,
   });
 
   const { checks, score } = runAuditChecks({
-    url: body.url && /^https?:\/\//.test(body.url) ? body.url : "https://example.com",
+    url:
+      parsed.data.url && /^https?:\/\//.test(parsed.data.url)
+        ? parsed.data.url
+        : "https://example.com",
     title: meta.metaTitle,
     metaDescription: meta.metaDescription,
-    canonical: meta.canonical && /^https?:\/\//.test(meta.canonical) ? meta.canonical : null,
+    canonical:
+      meta.canonical && /^https?:\/\//.test(meta.canonical) ? meta.canonical : null,
     h1Count: 1,
     hasOgTags: true,
     hasJsonLd: true,
@@ -402,11 +420,18 @@ addRoute("GET", /^\/reports$/, async (_req, ctx) => {
 });
 
 addRoute("POST", /^\/reports$/, async (request, ctx) => {
-  const body = await readJson<Record<string, unknown>>(request);
+  const body = await readJson<unknown>(request);
   if (body instanceof Response) return body;
-  const from = new Date(String(body.from));
-  const to = new Date(String(body.to));
-  const title = String(body.title ?? "Report");
+
+  const parsed = createReportBodySchema.safeParse(body);
+  if (!parsed.success) {
+    return apiError("Invalid report request", 400, {
+      code: "VALIDATION_ERROR",
+      details: parsed.error.flatten(),
+    });
+  }
+
+  const { title, from, to } = parsed.data;
   const keywords = await ctx.store.keywords.list(ctx.scope);
   const snapshots = await ctx.store.snapshots.listByRange({
     tenantId: ctx.scope.tenantId,
@@ -460,17 +485,36 @@ addRoute("PUT", /^\/dashboard$/, async (request, ctx) => {
 
 addRoute("POST", /^\/agent\/chat$/, async (request, ctx) => {
   if (!ctx.agentModel) {
-    return Response.json({ error: "Agent model not configured" }, { status: 503 });
+    return apiError("Agent model not configured", 503, { code: "AGENT_UNAVAILABLE" });
   }
-  const body = await readJson<{ messages?: Array<{ role: "user" | "assistant" | "system"; content: string }> }>(request);
+  const body = await readJson<unknown>(request);
   if (body instanceof Response) return body;
+
+  const parsed = agentChatBodySchema.safeParse(body);
+  if (!parsed.success) {
+    return apiError("Invalid agent chat request", 400, {
+      code: "VALIDATION_ERROR",
+      details: parsed.error.flatten(),
+    });
+  }
+
   const result = await streamAgentChat({
     store: ctx.store,
     scope: ctx.scope,
     model: ctx.agentModel,
-    messages: body.messages ?? [],
+    messages: parsed.data.messages.map((message, index) => ({
+      id: message.id ?? `msg-${index}`,
+      role: message.role,
+      parts: message.parts?.length
+        ? (message.parts as Array<{ type: string; text?: string }>).map((part) =>
+            part.type === "text"
+              ? { type: "text" as const, text: part.text ?? "" }
+              : part,
+          )
+        : [{ type: "text" as const, text: message.content ?? "" }],
+    })) as UIMessage[],
   });
-  return result.toTextStreamResponse();
+  return result.toUIMessageStreamResponse();
 });
 
 addRoute("GET", /^\/sitemap\.xml$/, async (_req, ctx) => {

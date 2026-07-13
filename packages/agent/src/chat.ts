@@ -1,6 +1,12 @@
 import "server-only";
 
-import { streamText, type LanguageModel, type StreamTextResult } from "ai";
+import {
+  convertToModelMessages,
+  streamText,
+  type LanguageModel,
+  type StreamTextResult,
+  type UIMessage,
+} from "ai";
 import type { RankStore, TenantScope } from "@rankmyseo/core";
 import { createAgentTools, type AgentTools } from "./tools.js";
 
@@ -8,7 +14,7 @@ export interface AgentChatOptions {
   store: RankStore;
   scope: TenantScope;
   model: LanguageModel;
-  messages: Array<{ role: "user" | "assistant" | "system"; content: string }>;
+  messages: UIMessage[];
 }
 
 export async function streamAgentChat(
@@ -19,11 +25,15 @@ export async function streamAgentChat(
     scope: options.scope,
   });
 
+  const modelMessages = await convertToModelMessages(options.messages, { tools });
+
   return streamText({
     model: options.model,
     system:
-      "You are RankMySEO assistant. Help users understand SEO data and customize their dashboard via tools. Never expose secrets.",
-    messages: options.messages,
+      "You are RankMySEO assistant. Help users understand SEO data and customize their dashboard via tools. Never expose secrets. Mutating tools require user approval before they run.",
+    messages: modelMessages,
     tools,
   });
 }
+
+export type { AgentTools };

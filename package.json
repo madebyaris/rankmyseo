@@ -9,6 +9,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint && dependency-cruiser packages --config .dependency-cruiser.cjs",
     "publint": "turbo run publint",
+    "test:coverage": "vitest run --coverage",
     "dev:playground": "pnpm --filter @rankmyseo/playground dev",
     "dev:dashboard": "pnpm --filter @rankmyseo/dashboard dev"
   },
@@ -16,6 +17,7 @@
     "@changesets/cli": "^2.29.8",
     "dependency-cruiser": "^16.10.4",
     "publint": "^0.3.15",
+    "@vitest/coverage-v8": "^3.2.4",
     "turbo": "^2.6.1",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"

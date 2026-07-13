@@ -1,4 +1,5 @@
 import type { RankMySeoConfig, TenantScope } from "@rankmyseo/core";
+import { apiError } from "./errors.js";
 
 export interface RequestScope extends TenantScope {}
 
@@ -7,10 +8,9 @@ export function readScope(request: Request): RequestScope | Response {
   const projectId = request.headers.get("x-project-id");
 
   if (!tenantId || !projectId) {
-    return Response.json(
-      { error: "Missing or invalid x-tenant-id / x-project-id headers" },
-      { status: 400 },
-    );
+    return apiError("Missing or invalid x-tenant-id / x-project-id headers", 400, {
+      code: "MISSING_SCOPE",
+    });
   }
 
   return { tenantId, projectId };

@@ -18,6 +18,7 @@ RankMySEO is a **composable npm package set** — not a hosted SaaS iframe. You 
 - Optional blog module with keyword intent and recommendations
 - Report rollups and customizable dashboard widgets
 - AI agent layer for dashboard customization (AI SDK + MCP)
+- Agent-readiness site features (`llms.txt`, markdown negotiation) for coding agents — not SEO ranking levers
 
 ---
 

@@ -1,75 +1,123 @@
 #!/usr/bin/env node
+import { existsSync } from "node:fs";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { defineConfig } from "@rankmyseo/core";
 import { runInstallWizard, type InstallOptions } from "@rankmyseo/installer";
-import { createStore } from "@rankmyseo/storage";
+import { runMigrateCommand, runScheduleCommand } from "./config-commands.js";
+import { runDoctor } from "./doctor.js";
 import { scaffoldConfig } from "./init.js";
-import { migrateDatabase } from "./migrate.js";
-import { runScheduledIngestion } from "./schedule.js";
+import { readCliVersion } from "./version.js";
+
+export interface CliGlobalOptions {
+  json?: boolean;
+}
 
 export async function runCli(argv: string[] = process.argv.slice(2)) {
-  const [command, ...args] = argv;
+  const globalOptions = parseGlobalOptions(argv);
+  const args = stripGlobalOptions(argv);
+  const [command, ...rest] = args;
+
+  const emit = (payload: unknown) => {
+    if (globalOptions.json) {
+      console.log(JSON.stringify(payload, null, 2));
+      return;
+    }
+    if (typeof payload === "string") {
+      console.log(payload);
+    }
+  };
 
   switch (command) {
     case "init": {
-      const target = resolve(process.cwd(), args[0] ?? "rankmyseo.config.ts");
+      const target = resolve(process.cwd(), rest[0] ?? "rankmyseo.config.ts");
+      if (existsSync(target)) {
+        const message = `Refusing to overwrite existing file: ${target}`;
+        if (globalOptions.json) {
+          emit({ ok: false, error: message });
+        } else {
+          console.error(message);
+        }
+        process.exitCode = 1;
+        break;
+      }
       writeFileSync(target, scaffoldConfig(), "utf8");
-      console.log(`Created ${target}`);
+      emit(globalOptions.json ? { ok: true, path: target } : `Created ${target}`);
       break;
     }
     case "migrate": {
-      const url = args[0] ?? "sqlite://./data/rankmyseo.sqlite";
-      const result = migrateDatabase(url);
-      console.log(`Migrated ${result.path}`);
+      const result = await runMigrateCommand({
+        databaseUrl: rest[0],
+        configPath: readOption(rest, "--config"),
+      });
+      emit(
+        globalOptions.json
+          ? { ok: true, ...result }
+          : `Migrated ${result.path}`,
+      );
       break;
     }
     case "schedule": {
-      const url = args[0] ?? "sqlite://./data/rankmyseo.sqlite";
-      const config = defineConfig({
-        databaseUrl: url,
-        tenantId: "tenant-a",
-        projectId: "project-1",
-        dataSources: [{ provider: "fixture", default: true }],
-        schedule: { cron: "0 6 * * *", enabled: false },
-        siteFeatures: {
-          sitemap: true,
-          llmsTxt: true,
-          collector: true,
-          markdownNegotiation: true,
-          blog: false,
-        },
-        sitemapRoutes: ["/"],
+      const result = await runScheduleCommand({
+        databaseUrl: rest[0],
+        configPath: readOption(rest, "--config"),
       });
-      const store = createStore(url);
-      await store.projects.create({
-        id: config.projectId,
-        tenantId: config.tenantId,
-        name: "CLI Project",
-        domain: "example.com",
-      });
-      const result = await runScheduledIngestion(config, store);
-      console.log(`Ingested ${result.appended} snapshots`);
+      emit(
+        globalOptions.json
+          ? { ok: true, ...result }
+          : `Ingested ${result.appended} snapshots${result.projectCreated ? " (seed project created)" : ""}`,
+      );
+      break;
+    }
+    case "doctor": {
+      const result = await runDoctor(readOption(rest, "--config") ?? rest[0]);
+      if (globalOptions.json) {
+        emit(result);
+      } else {
+        for (const check of result.checks) {
+          console.log(`${check.ok ? "✓" : "✗"} ${check.name}: ${check.message}`);
+        }
+      }
+      if (!result.ok) process.exitCode = 1;
+      break;
+    }
+    case "version":
+    case "--version":
+    case "-v": {
+      const version = readCliVersion();
+      emit(globalOptions.json ? { version } : version);
       break;
     }
     case "install":
     case "i": {
-      const options = parseInstallArgs(args);
+      const options = parseInstallArgs(rest);
       await runInstallWizard(options);
       break;
     }
     default:
-      console.log(`RankMySEO CLI
+      console.log(`RankMySEO CLI v${readCliVersion()}
 
 Usage:
-  rankmyseo install [--preset recommended|full|custom] [--packages a,b] [--yes]
-  rankmyseo init [path]       Scaffold rankmyseo.config.ts
-  rankmyseo migrate [dbUrl]   Run storage migrations
-  rankmyseo schedule [dbUrl]  Run one ingestion pass
+  rankmyseo-cli install [--preset recommended|full|custom] [--packages a,b] [--yes]
+  rankmyseo-cli init [path]                 Scaffold rankmyseo.config.ts
+  rankmyseo-cli migrate [dbUrl]             Run storage migrations
+  rankmyseo-cli schedule [dbUrl]            Run one ingestion pass
+  rankmyseo-cli doctor [--config path]      Validate config + storage
+  rankmyseo-cli version                     Print CLI version
+
+Global flags:
+  --json                                    Machine-readable output
 
 Tip: npm i rankmyseo && npx rankmyseo install  — interactive package picker
 `);
   }
+}
+
+function parseGlobalOptions(args: string[]): CliGlobalOptions {
+  return { json: args.includes("--json") };
+}
+
+function stripGlobalOptions(args: string[]): string[] {
+  return args.filter((arg) => arg !== "--json");
 }
 
 function parseInstallArgs(args: string[]): InstallOptions {

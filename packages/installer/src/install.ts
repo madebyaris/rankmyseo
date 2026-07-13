@@ -63,7 +63,7 @@ export async function promptPreset(): Promise<InstallPreset> {
   console.log(`
 RankMySEO installer — pick a setup:
 
-  1) Recommended  — core + storage + server-hono + react (most apps)
+  1) Recommended  — core + storage + server-hono + react + cli (most apps)
   2) Full         — all @rankmyseo/* packages
   3) Custom       — choose packages yourself
 `);

@@ -6,6 +6,8 @@ import { z } from "zod";
 import {
   buildReport,
   dashboardConfigSchema,
+  dashboardWidgetSchema,
+  DASHBOARD_WIDGET_TYPES,
   generateSchema,
   runAuditChecks,
   schemaGeneratorInputSchema,
@@ -18,17 +20,73 @@ export interface AgentToolsContext {
   scope: TenantScope;
 }
 
+const widgetExample = JSON.stringify(
+  {
+    widgets: [
+      {
+        id: "w1",
+        type: "KeywordTable",
+        title: "Keywords",
+        query: {},
+        options: {},
+      },
+    ],
+  },
+  null,
+  2,
+);
+
+export const addKeywordInputSchema = z.object({
+  text: z.string().min(1),
+  country: z.string().default("us"),
+  device: z.enum(["desktop", "mobile"]).default("desktop"),
+});
+
+export const queryRankHistoryInputSchema = z.object({
+  keywordId: z.string().optional(),
+  from: z.string().describe("ISO-8601 date/time"),
+  to: z.string().describe("ISO-8601 date/time"),
+});
+
+export const runAuditInputSchema = z.object({
+  url: z.string().url(),
+  title: z.string().optional(),
+  metaDescription: z.string().optional(),
+  h1Count: z.number().int().nonnegative().default(1),
+  hasOgTags: z.boolean().default(false),
+  hasJsonLd: z.boolean().default(false),
+});
+
+export const updateDashboardConfigInputSchema = z.object({
+  widgets: z.array(
+    dashboardWidgetSchema.omit({ layout: true }).extend({
+      layout: dashboardWidgetSchema.shape.layout.optional(),
+    }),
+  ),
+});
+
+export const buildReportInputSchema = z.object({
+  title: z.string(),
+  from: z.string().describe("ISO-8601 date/time"),
+  to: z.string().describe("ISO-8601 date/time"),
+});
+
+export const explainMetricInputSchema = z.object({
+  metric: z.string(),
+});
+
+export const getAuditInputSchema = z.object({
+  auditId: z.string(),
+});
+
 export function createAgentTools(ctx: AgentToolsContext) {
   const { store, scope } = ctx;
 
   return {
     queryRankHistory: tool({
-      description: "Read rank snapshots for keywords over a date range",
-      inputSchema: z.object({
-        keywordId: z.string().optional(),
-        from: z.string(),
-        to: z.string(),
-      }),
+      description:
+        "Read rank snapshots for keywords over a date range. Dates must be ISO-8601 strings.",
+      inputSchema: queryRankHistoryInputSchema,
       execute: async ({ keywordId, from, to }) => {
         const snapshots = await store.snapshots.listByRange({
           tenantId: scope.tenantId,
@@ -51,12 +109,9 @@ export function createAgentTools(ctx: AgentToolsContext) {
     }),
 
     addKeyword: tool({
-      description: "Add a keyword to track",
-      inputSchema: z.object({
-        text: z.string().min(1),
-        country: z.string().default("us"),
-        device: z.enum(["desktop", "mobile"]).default("desktop"),
-      }),
+      description: "Add a keyword to track (requires user approval)",
+      inputSchema: addKeywordInputSchema,
+      needsApproval: true,
       execute: async ({ text, country, device }) => {
         const keyword = await store.keywords.create({
           tenantId: scope.tenantId,
@@ -71,15 +126,10 @@ export function createAgentTools(ctx: AgentToolsContext) {
     }),
 
     runAudit: tool({
-      description: "Run an SEO audit on page signals",
-      inputSchema: z.object({
-        url: z.string().url(),
-        title: z.string().optional(),
-        metaDescription: z.string().optional(),
-        h1Count: z.number().int().nonnegative().default(1),
-        hasOgTags: z.boolean().default(false),
-        hasJsonLd: z.boolean().default(false),
-      }),
+      description:
+        "Run an SEO audit on provided page signals (does not fetch the URL — use POST /scan for live fetches)",
+      inputSchema: runAuditInputSchema,
+      needsApproval: true,
       execute: async (input) => {
         const { checks, score } = runAuditChecks(input);
         const audit = await store.audits.create({
@@ -96,7 +146,7 @@ export function createAgentTools(ctx: AgentToolsContext) {
 
     getAudit: tool({
       description: "Get an audit by id",
-      inputSchema: z.object({ auditId: z.string() }),
+      inputSchema: getAuditInputSchema,
       execute: async ({ auditId }) => {
         const audit = await store.audits.getById(scope, auditId);
         return { audit: audit ?? null };
@@ -113,18 +163,9 @@ export function createAgentTools(ctx: AgentToolsContext) {
     }),
 
     updateDashboardConfig: tool({
-      description: "Update dashboard widgets (requires user approval)",
-      inputSchema: z.object({
-        widgets: z.array(
-          z.object({
-            id: z.string(),
-            type: z.string(),
-            title: z.string(),
-            query: z.record(z.string(), z.unknown()).default({}),
-            options: z.record(z.string(), z.unknown()).default({}),
-          }),
-        ),
-      }),
+      description: `Update dashboard widgets (requires user approval). Widget types: ${DASHBOARD_WIDGET_TYPES.join(", ")}. Example:\n${widgetExample}`,
+      inputSchema: updateDashboardConfigInputSchema,
+      needsApproval: true,
       execute: async ({ widgets }) => {
         const existing = await store.dashboard.get(scope);
         const config = dashboardConfigSchema.parse({
@@ -140,10 +181,9 @@ export function createAgentTools(ctx: AgentToolsContext) {
     }),
 
     explainMetric: tool({
-      description: "Explain an SEO metric in plain language using project data",
-      inputSchema: z.object({
-        metric: z.string(),
-      }),
+      description:
+        "Return a template summary of project tracking stats for a metric name (not LLM-grounded)",
+      inputSchema: explainMetricInputSchema,
       execute: async ({ metric }) => {
         const keywords = await store.keywords.list(scope);
         const snapshots = await store.snapshots.listByRange({
@@ -156,18 +196,16 @@ export function createAgentTools(ctx: AgentToolsContext) {
           metric,
           keywordCount: keywords.length,
           snapshotCount: snapshots.length,
-          explanation: `You are tracking ${keywords.length} keywords with ${snapshots.length} rank snapshots in the last 30 days.`,
+          explanation: `Template summary: tracking ${keywords.length} keywords with ${snapshots.length} rank snapshots in the last 30 days for metric "${metric}".`,
         };
       },
     }),
 
     buildReport: tool({
-      description: "Generate a rank and audit report for a date window",
-      inputSchema: z.object({
-        title: z.string(),
-        from: z.string(),
-        to: z.string(),
-      }),
+      description:
+        "Generate a rank and audit report for a date window (requires user approval). Dates must be ISO-8601 strings.",
+      inputSchema: buildReportInputSchema,
+      needsApproval: true,
       execute: async ({ title, from, to }) => {
         const fromDate = new Date(from);
         const toDate = new Date(to);

@@ -7,6 +7,7 @@ import {
   type RankStore,
 } from "@rankmyseo/core";
 import { dispatchRoute } from "./routes.js";
+import { apiError } from "./errors.js";
 import { readScope } from "./utils.js";
 
 export type { RequestScope } from "./utils.js";
@@ -17,6 +18,8 @@ export {
   pageToMarkdown,
   withMarkdownNegotiation,
 } from "./utils.js";
+export type { ApiErrorResponse, ApiSuccessResponse } from "./errors.js";
+export { apiError, isApiErrorResponse } from "./errors.js";
 
 export interface HandlerOptions {
   config?: RankMySeoConfig;
@@ -46,12 +49,11 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
     const url = new URL(request.url);
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-    const sitePaths = ["/sitemap.xml", "/llms.txt", "/"];
-    const needsScope =
-      !sitePaths.includes(pathname) || pathname === "/";
+    const sitePathsWithoutScope = ["/sitemap.xml", "/llms.txt", "/"];
+    const needsScope = !sitePathsWithoutScope.includes(pathname);
 
     let scope = { tenantId: config.tenantId, projectId: config.projectId };
-    if (needsScope && pathname !== "/") {
+    if (needsScope) {
       const parsed = readScope(request);
       if (parsed instanceof Response) return parsed;
       scope = parsed;
@@ -60,14 +62,19 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
       if (!(parsed instanceof Response)) scope = parsed;
     }
 
-    const response = await dispatchRoute(request, {
-      store,
-      scope,
-      config,
-      agentModel: options.agentModel,
-    });
+    try {
+      const response = await dispatchRoute(request, {
+        store,
+        scope,
+        config,
+        agentModel: options.agentModel,
+      });
 
-    if (response) return response;
-    return Response.json({ error: "Not found" }, { status: 404 });
+      if (response) return response;
+      return apiError("Not found", 404, { code: "NOT_FOUND" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Internal server error";
+      return apiError(message, 500, { code: "INTERNAL_ERROR" });
+    }
   };
 }

@@ -257,7 +257,7 @@ export function runStoreContractTests(
         widgets: [
           {
             id: "w1",
-            type: "KeywordTable",
+            type: "KeywordTable" as const,
             title: "Keywords",
             query: {},
             options: {},
@@ -277,7 +277,7 @@ export function runStoreContractTests(
           ...config.widgets,
           {
             id: "w2",
-            type: "RankHistoryChart",
+            type: "RankHistoryChart" as const,
             title: "Rank history",
             query: { keywordId: "kw-1" },
             options: {},

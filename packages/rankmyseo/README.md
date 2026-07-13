@@ -19,7 +19,7 @@ npx rankmyseo install
 
 | Preset | Packages |
 | --- | --- |
-| **Recommended** | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-hono`, `@rankmyseo/react` (+ peer deps `hono`, `react`) |
+| **Recommended** | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-hono`, `@rankmyseo/react`, `@rankmyseo/cli` (+ peer deps `hono`, `react`) |
 | **Full** | All 10 `@rankmyseo/*` packages |
 | **Custom** | Pick from the numbered list |
 
@@ -34,8 +34,8 @@ npx rankmyseo install --packages @rankmyseo/core,@rankmyseo/ui
 ## After install
 
 ```bash
-npx @rankmyseo/cli init
-npx @rankmyseo/cli migrate
+npx rankmyseo init
+npx rankmyseo migrate
 ```
 
 ## License

@@ -42,6 +42,7 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 `@rankmyseo/core/testing` exports:
 
 - `runStoreContractTests(makeStore)` — conformance suite for custom `RankStore` implementations
+- `runServerAdapterContractTests(options)` — HTTP adapter conformance (keywords, snapshots, site routes, scope errors)
 - `newId()` — UUID helper for tests
 
 ## Planned (M5)

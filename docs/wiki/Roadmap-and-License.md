@@ -28,8 +28,8 @@ Canonical milestone plan (M0–M5). Through M4 is implemented and verified offli
 | **M0 — Skeleton** | Done | Monorepo, `@rankmyseo/core` ports + Zod models, SQLite store, Hono adapter, Vitest |
 | **M1 — Rank tracking** | Done | GSC/fixture datasource, scheduler port, snapshot ingestion, React hooks, rank chart widget |
 | **M2 — Audits & reports** | Done | On-page audit engine, Core Web Vitals, report rollups (SQLite; Postgres deferred to M5) |
-| **M3 — Agent layer** | Done | AI SDK tools + MCP, dashboard config + widget registry, approval-gated edits |
-| **M4 — Site integration** | Done | On-page collector + score, live scan, meta/schema generators, sitemap, `llms.txt`, markdown negotiation, optional blog |
+| **M3 — Agent layer** | Done | AI SDK tools + MCP, dashboard config + widget registry, `needsApproval` on mutating tools |
+| **M4 — Site integration** | Done | On-page collector + score, live scan, meta/schema generators, sitemap, agent-readiness (`llms.txt`, markdown negotiation), optional blog |
 | **M5 — Ecosystem** | Planned | More framework adapters (Next, SvelteKit, Express), Postgres/Prisma/Kysely storage, docs site |
 
 **Beyond M5 (exploratory, unscheduled):** WordPress plugin (PHP wrapper around the server) and a hosted SaaS tier with paid SERP providers (kept out of OSS by design).

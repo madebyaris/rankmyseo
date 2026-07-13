@@ -67,6 +67,7 @@ export const PRESET_RECOMMENDED = [
   "@rankmyseo/storage",
   "@rankmyseo/server-hono",
   "@rankmyseo/react",
+  "@rankmyseo/cli",
 ] as const;
 
 export const PRESET_FULL = PACKAGE_CATALOG.map((p) => p.name);
