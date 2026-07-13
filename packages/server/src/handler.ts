@@ -5,6 +5,7 @@ import {
   defineConfig,
   type RankMySeoConfig,
   type RankStore,
+  type TenantScope,
 } from "@rankmyseo/core";
 import { dispatchRoute } from "./routes.js";
 import { apiError } from "./errors.js";
@@ -24,6 +25,18 @@ export { apiError, isApiErrorResponse } from "./errors.js";
 export interface HandlerOptions {
   config?: RankMySeoConfig;
   agentModel?: LanguageModel;
+  /**
+   * Optional authorization hook. Scope headers select tenant/project — they do
+   * not authenticate. Integrators should validate the caller against `scope`.
+   * Return a Response to deny, or void/undefined to allow.
+   */
+  authorize?: (
+    request: Request,
+    scope: TenantScope,
+  ) => Promise<Response | void> | Response | void;
+  /** Optional PageSpeed Insights enrichment for POST /scan. */
+  includeWebVitals?: boolean;
+  psiApiKey?: string;
 }
 
 const defaultConfig = defineConfig({
@@ -62,12 +75,19 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
       if (!(parsed instanceof Response)) scope = parsed;
     }
 
+    if (options.authorize) {
+      const denied = await options.authorize(request, scope);
+      if (denied instanceof Response) return denied;
+    }
+
     try {
       const response = await dispatchRoute(request, {
         store,
         scope,
         config,
         agentModel: options.agentModel,
+        includeWebVitals: options.includeWebVitals,
+        psiApiKey: options.psiApiKey,
       });
 
       if (response) return response;

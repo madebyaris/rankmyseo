@@ -14,6 +14,15 @@ export default defineConfig({
     blog: false,
   },
   sitemapRoutes: ["/", "/about"],
+  regression: {
+    enabled: false,
+    productionUrl: "https://example.com",
+    alwaysRoutes: ["/"],
+    routeMap: [
+      { files: ["app/**/*.tsx", "pages/**/*.tsx"], routes: ["/", "/about"] },
+    ],
+    failOn: "error",
+  },
   llmsTxt: {
     projectName: "My Site",
     summary: "SEO tracking powered by RankMySEO.",

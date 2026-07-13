@@ -11,10 +11,8 @@ import {
   createKeywordInputSchema,
   createRankSnapshotInputSchema,
   dashboardConfigSchema,
-  extractPageSignals,
   generateMeta,
   generateSchema,
-  normalizeHttpUrl,
   pageSignalsSchema,
   projectSchema,
   runAuditChecks,
@@ -27,6 +25,8 @@ import {
   type TenantScope,
 } from "@rankmyseo/core";
 import { streamAgentChat } from "@rankmyseo/agent";
+import { ScanError, scanPage } from "@rankmyseo/scanner";
+import { PsiClient } from "@rankmyseo/datasource";
 import {
   buildLlmsTxt,
   buildSitemapXml,
@@ -47,6 +47,8 @@ export interface RouteContext {
   scope: TenantScope;
   config: RankMySeoConfig;
   agentModel?: LanguageModel;
+  includeWebVitals?: boolean;
+  psiApiKey?: string;
 }
 
 type RouteHandler = (
@@ -222,47 +224,63 @@ addRoute("POST", /^\/scan$/, async (request, ctx) => {
     });
   }
 
-  let target: URL;
+  let snapshot;
   try {
-    target = normalizeHttpUrl(parsed.data.url);
-  } catch {
-    return apiError("A valid url is required", 400, { code: "VALIDATION_ERROR" });
-  }
-  if (target.protocol !== "http:" && target.protocol !== "https:") {
-    return Response.json({ error: "Only http(s) URLs can be scanned" }, { status: 400 });
-  }
-
-  let html: string;
-  try {
-    const res = await fetch(target.toString(), {
-      headers: { "user-agent": "RankMySEO-Scanner/1.0" },
-      redirect: "follow",
+    snapshot = await scanPage(parsed.data.url, {
+      originLabel: "candidate",
+      timeoutMs: ctx.config.regression?.timeoutMs,
+      maxBytes: ctx.config.regression?.maxBytes,
     });
-    if (!res.ok) {
-      return Response.json(
-        { error: `Fetch failed with status ${res.status}` },
-        { status: 502 },
-      );
+  } catch (err) {
+    if (err instanceof ScanError) {
+      const status =
+        err.code === "PRIVATE_HOST" ||
+        err.code === "PRIVATE_IP" ||
+        err.code === "ORIGIN_NOT_ALLOWED" ||
+        err.code === "INVALID_PROTOCOL"
+          ? 400
+          : 502;
+      return apiError(err.message, status, { code: err.code });
     }
-    html = await res.text();
-  } catch {
-    return Response.json({ error: "Could not fetch the target URL" }, { status: 502 });
+    return apiError("Could not fetch the target URL", 502, {
+      code: "FETCH_FAILED",
+    });
   }
 
-  const signals = extractPageSignals(html, target.toString());
+  let signals = snapshot.signals;
+  if (ctx.includeWebVitals) {
+    try {
+      const psi = new PsiClient({ apiKey: ctx.psiApiKey });
+      signals = await psi.enrichPageSignals(signals, "lab");
+    } catch {
+      // Optional enrichment — keep HTML-only scan on PSI failure.
+    }
+  }
+
   const { checks, score } = runAuditChecks(signals);
   const audit = await ctx.store.audits.create({
     id: randomUUID(),
     tenantId: ctx.scope.tenantId,
     projectId: ctx.scope.projectId,
-    url: target.toString(),
+    url: snapshot.finalUrl,
     score,
     checks,
   });
   const recommendations = buildAuditRecommendations(checks);
 
   return Response.json(
-    { data: { audit, signals, recommendations } },
+    {
+      data: {
+        audit,
+        signals,
+        recommendations,
+        snapshot: {
+          statusCode: snapshot.statusCode,
+          finalUrl: snapshot.finalUrl,
+          redirectChain: snapshot.redirectChain,
+        },
+      },
+    },
     { status: 201 },
   );
 });

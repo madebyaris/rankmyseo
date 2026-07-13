@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "RankMySEO core domain models, ports, and conformance tests",
   "license": "Apache-2.0",
@@ -79,15 +79,16 @@
   },
   "dependencies": {
     "jiti": "^2.6.1",
+    "node-html-parser": "^7.1.0",
     "zod": "^4.1.12",
     "zod-to-json-schema": "^3.25.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "publint": "^0.3.15",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
-    "publint": "^0.3.15"
+    "vitest": "^3.2.4"
   },
   "publishConfig": {
     "access": "public"

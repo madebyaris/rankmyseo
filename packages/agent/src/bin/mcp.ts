@@ -12,6 +12,7 @@ async function main() {
   await startMcpStdioServer({
     store,
     scope: { tenantId, projectId },
+    allowMutations: process.env.RANKMYSEO_MCP_ALLOW_MUTATIONS === "1",
   });
 }
 

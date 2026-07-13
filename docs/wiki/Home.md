@@ -36,6 +36,7 @@ RankMySEO is a **composable npm package set** — not a hosted SaaS iframe. You 
 | GSC, PSI, fixture datasources | [[Data-Sources]] |
 | React hooks (`@rankmyseo/react`) | [[React-Hooks]] |
 | AI agent & MCP tools | [[AI-Agent]] |
+| SEO regression CI gate | [[SEO-Regression]] |
 | Contributing & monorepo dev | [[Development]] |
 | Roadmap & license | [[Roadmap-and-License]] |
 

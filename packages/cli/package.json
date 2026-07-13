@@ -46,6 +46,7 @@
     "@rankmyseo/core": "workspace:*",
     "@rankmyseo/datasource": "workspace:*",
     "@rankmyseo/installer": "workspace:*",
+    "@rankmyseo/scanner": "workspace:*",
     "@rankmyseo/scheduler": "workspace:*",
     "@rankmyseo/storage": "workspace:*"
   },

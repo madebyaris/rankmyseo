@@ -1,106 +1,121 @@
+import { parse as parseHtml } from "node-html-parser";
 import { pageSignalsSchema, type PageSignals } from "../schemas/index.js";
 
-function decodeEntities(text: string): string {
-  return text
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .trim();
+function decodeText(text: string | undefined | null): string | undefined {
+  if (!text) return undefined;
+  return text.replace(/\s+/g, " ").trim() || undefined;
 }
 
-function matchAttr(
-  html: string,
-  tag: RegExp,
-  attr: "content" | "href",
+function attr(
+  el: { getAttribute(name: string): string | undefined } | null,
+  name: string,
 ): string | undefined {
-  const match = html.match(tag);
-  if (!match) return undefined;
-  const fragment = match[0];
-  const attrMatch = fragment.match(
-    new RegExp(`${attr}\\s*=\\s*["']([^"']*)["']`, "i"),
-  );
-  return attrMatch?.[1] ? decodeEntities(attrMatch[1]) : undefined;
+  return decodeText(el?.getAttribute(name) ?? undefined);
+}
+
+function normalizeCanonical(
+  href: string | undefined,
+  pageUrl: string,
+): string | null {
+  if (!href) return null;
+  try {
+    return new URL(href, pageUrl).href;
+  } catch {
+    return null;
+  }
+}
+
+export interface ExtractPageSignalsOptions {
+  /** HTTP header X-Robots-Tag value, if available from the response. */
+  xRobotsTag?: string | null;
 }
 
 /**
- * Extract on-page SEO signals from a raw HTML string. Regex-based so it stays
- * dependency-free and runnable anywhere the core runs (no DOM required).
+ * Extract on-page SEO signals from a raw HTML string using a real HTML parser.
  */
-export function extractPageSignals(html: string, url: string): PageSignals {
-  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const title = titleMatch?.[1] ? decodeEntities(titleMatch[1]) : undefined;
+export function extractPageSignals(
+  html: string,
+  url: string,
+  options: ExtractPageSignalsOptions = {},
+): PageSignals {
+  const root = parseHtml(html, {
+    lowerCaseTagName: false,
+    comment: false,
+    blockTextElements: {
+      script: true,
+      style: true,
+      noscript: true,
+    },
+  });
 
-  const metaDescription = matchAttr(
-    html,
-    /<meta[^>]+name\s*=\s*["']description["'][^>]*>/i,
+  const title = decodeText(root.querySelector("title")?.text);
+  const metaDescription = attr(
+    root.querySelector('meta[name="description"]'),
     "content",
   );
-
-  const canonical = matchAttr(
-    html,
-    /<link[^>]+rel\s*=\s*["']canonical["'][^>]*>/i,
+  const canonicalHref = attr(
+    root.querySelector('link[rel="canonical"]'),
     "href",
   );
+  const canonical = normalizeCanonical(canonicalHref, url);
 
-  const h1Count = (html.match(/<h1[\s>]/gi) ?? []).length;
-  const h2Count = (html.match(/<h2[\s>]/gi) ?? []).length;
-  const hasOgTags = /<meta[^>]+property\s*=\s*["']og:/i.test(html);
-  const hasJsonLd =
-    /<script[^>]+type\s*=\s*["']application\/ld\+json["']/i.test(html);
+  const h1Count = root.querySelectorAll("h1").length;
+  const h2Count = root.querySelectorAll("h2").length;
+  const hasOgTags = Boolean(root.querySelector('meta[property^="og:"]'));
 
-  const langMatch = html.match(/<html[^>]*\slang\s*=\s*["']([^"']+)["']/i);
-  const lang = langMatch?.[1]?.trim() || null;
+  const lang =
+    decodeText(root.querySelector("html")?.getAttribute("lang")) ?? null;
+  const hasViewportMeta = Boolean(
+    root.querySelector('meta[name="viewport"]'),
+  );
 
-  const hasViewportMeta = /<meta[^>]+name\s*=\s*["']viewport["']/i.test(html);
-
-  const robotsContent = matchAttr(
-    html,
-    /<meta[^>]+name\s*=\s*["']robots["'][^>]*>/i,
+  const robotsContent = attr(
+    root.querySelector('meta[name="robots"]'),
     "content",
   );
   const robotsNoindex = /\bnoindex\b/i.test(robotsContent ?? "");
+  const xRobotsNoindex = /\bnoindex\b/i.test(options.xRobotsTag ?? "");
 
-  const imgTags = html.match(/<img\b[^>]*>/gi) ?? [];
+  const imgTags = root.querySelectorAll("img");
   const imageCount = imgTags.length;
-  const imagesWithAlt = imgTags.filter((tag) =>
-    /\balt\s*=\s*["'][^"']+["']/i.test(tag),
-  ).length;
+  const imagesWithAlt = imgTags.filter((tag) => {
+    const alt = tag.getAttribute("alt");
+    return typeof alt === "string" && alt.trim().length > 0;
+  }).length;
 
-  const wordCount = countWords(html);
-  const jsonLdTypes = extractJsonLdTypes(html);
+  const { types: jsonLdTypes, valid: jsonLdValid, present: hasJsonLd } =
+    extractJsonLdInfo(html);
+
+  const wordCount = countWords(root);
 
   return pageSignalsSchema.parse({
     url,
     title,
     metaDescription,
-    canonical: canonical ?? null,
+    canonical,
     h1Count,
     h2Count,
     hasOgTags,
     hasJsonLd,
     jsonLdTypes,
+    jsonLdValid,
     lang,
     hasViewportMeta,
     robotsNoindex,
+    xRobotsNoindex,
     imageCount,
     imagesWithAlt,
     wordCount,
   });
 }
 
-/** Approximate visible-text word count: strip non-content tags, then tags. */
-function countWords(html: string): number {
-  const text = html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  if (!text) return 0;
-  return text.split(" ").length;
+function countWords(root: {
+  querySelector(selector: string): { text: string } | null;
+}): number {
+  const body = root.querySelector("body");
+  const raw = (body?.text ?? "").replace(/\s+/g, " ").trim();
+  if (!raw) return 0;
+  return raw.split(" ").filter(Boolean).length;
 }
 
 function collectTypesFromNode(node: unknown, types: Set<string>): void {
@@ -132,23 +147,37 @@ function collectTypesFromNode(node: unknown, types: Set<string>): void {
   }
 }
 
-/** Parse JSON-LD blocks and collect Schema.org @type values. */
 export function extractJsonLdTypes(html: string): string[] {
+  return extractJsonLdInfo(html).types;
+}
+
+export function extractJsonLdInfo(html: string): {
+  types: string[];
+  valid: boolean;
+  present: boolean;
+} {
   const types = new Set<string>();
   const scriptPattern =
     /<script[^>]+type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
 
   let match: RegExpExecArray | null;
+  let present = false;
+  let valid = true;
+
   while ((match = scriptPattern.exec(html)) !== null) {
+    present = true;
     const raw = match[1]?.trim();
-    if (!raw) continue;
+    if (!raw) {
+      valid = false;
+      continue;
+    }
     try {
       const parsed = JSON.parse(raw) as unknown;
       collectTypesFromNode(parsed, types);
     } catch {
-      // skip invalid JSON-LD
+      valid = false;
     }
   }
 
-  return [...types];
+  return { types: [...types], valid: present ? valid : true, present };
 }

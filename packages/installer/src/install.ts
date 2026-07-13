@@ -1,8 +1,5 @@
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   PACKAGE_CATALOG,
   peersForPackages,
@@ -28,14 +25,9 @@ export interface InstallResult {
 }
 
 function getDefaultVersion(): string {
-  try {
-    const dir = dirname(fileURLToPath(import.meta.url));
-    const pkgPath = join(dir, "..", "package.json");
-    const pkg = JSON.parse(readFileSync(pkgPath, "utf8")) as { version?: string };
-    if (pkg.version) return `^${pkg.version}`;
-  } catch {
-    // fall through
-  }
+  // Prefer "latest" so mismatched local installer versions never pin
+  // consumers to unpublished @rankmyseo/* ranges. Callers can still pass
+  // an explicit --version / options.version for reproducible installs.
   return "latest";
 }
 

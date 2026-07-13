@@ -13,7 +13,8 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 | `@rankmyseo/server` | Framework-agnostic `createHandler` — full HTTP API |
 | `@rankmyseo/server-hono` | Hono adapter — `createRankMySeoApp(store, options)` |
 | `@rankmyseo/agent` | AI SDK tools + MCP server for dashboard/agent chat |
-| `@rankmyseo/cli` | `init`, `migrate`, `schedule` commands |
+| `@rankmyseo/scanner` | SSRF-safe page fetch for `/scan` and regression CLI |
+| `@rankmyseo/cli` | `init`, `migrate`, `schedule`, `doctor`, `regression check` |
 
 ## Frontend
 
@@ -35,7 +36,7 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 - `react` — depends on `core` only (HTTP client)
 - `ui` — depends on `core` + `react`
 - `server` — depends on `core`, optionally `agent`
-- Client bundles must **never** import `storage`, `datasource`, `scheduler`, `agent`, `cli`, or `server`
+- Client bundles must **never** import `storage`, `datasource`, `scheduler`, `scanner`, `agent`, `cli`, or `server`
 
 ## Testing exports
 

@@ -2,11 +2,14 @@ import "server-only";
 
 import type { DataSourceConfig, RankDataSource } from "@rankmyseo/core";
 import { FixtureDataSource } from "./fixture.js";
-import { GscDataSource } from "./gsc.js";
+import { GscDataSource, type GscKeyword } from "./gsc.js";
 
 export interface CreateDataSourceOptions {
   configs: DataSourceConfig[];
   siteUrl?: string;
+  /** OAuth access token for GSC (maps from config.apiKey for backwards compatibility). */
+  accessToken?: string;
+  keywords?: GscKeyword[];
   fetchImpl?: typeof fetch;
 }
 
@@ -21,8 +24,9 @@ export function createDataSource(
       return new FixtureDataSource();
     case "gsc":
       return new GscDataSource({
-        apiKey: config?.apiKey ?? "",
+        accessToken: options.accessToken ?? config?.apiKey ?? "",
         siteUrl: options.siteUrl ?? "https://example.com",
+        keywords: options.keywords,
         fetchImpl: options.fetchImpl,
       });
     default:

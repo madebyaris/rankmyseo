@@ -6,6 +6,7 @@ export * from "./engine/meta.js";
 export * from "./engine/schema.js";
 export * from "./engine/parse.js";
 export * from "./engine/recommend.js";
+export * from "./engine/regression.js";
 export * from "./services/ingest.js";
 export * from "./config/index.js";
 export * from "./utils/url.js";

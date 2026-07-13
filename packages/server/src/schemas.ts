@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const scanBodySchema = z.object({
-  url: z.string().min(1),
+  url: z.string().trim().min(1),
 });
 
 export const generateMetaBodySchema = z.object({

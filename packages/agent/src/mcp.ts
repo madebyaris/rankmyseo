@@ -30,6 +30,11 @@ import {
 export interface McpServerOptions {
   store: RankStore;
   scope: TenantScope;
+  /**
+   * When false (default), only read-only tools are registered.
+   * Set true or RANKMYSEO_MCP_ALLOW_MUTATIONS=1 to enable mutating tools.
+   */
+  allowMutations?: boolean;
 }
 
 const READ_ONLY: ToolAnnotations = { readOnlyHint: true };
@@ -67,6 +72,9 @@ function zodShape<T extends z.ZodRawShape>(schema: z.ZodObject<T>): T {
 
 export function createRankMySeoMcpServer(options: McpServerOptions): McpServer {
   const { store, scope } = options;
+  const allowMutations =
+    options.allowMutations === true ||
+    process.env.RANKMYSEO_MCP_ALLOW_MUTATIONS === "1";
   const server = new McpServer({
     name: "rankmyseo",
     version: readPackageVersion(),
@@ -100,47 +108,49 @@ export function createRankMySeoMcpServer(options: McpServerOptions): McpServer {
     },
   );
 
-  server.registerTool(
-    "add_keyword",
-    {
-      description: "Add a keyword to track",
-      inputSchema: zodShape(addKeywordInputSchema),
-      annotations: MUTATING,
-    },
-    async ({ text, country, device }) => {
-      const keyword = await store.keywords.create({
-        tenantId: scope.tenantId,
-        projectId: scope.projectId,
-        text,
-        country: country ?? "us",
-        device: device ?? "desktop",
-        tags: [],
-      });
-      return jsonResult({ keyword });
-    },
-  );
+  if (allowMutations) {
+    server.registerTool(
+      "add_keyword",
+      {
+        description: "Add a keyword to track (mutations enabled)",
+        inputSchema: zodShape(addKeywordInputSchema),
+        annotations: MUTATING,
+      },
+      async ({ text, country, device }) => {
+        const keyword = await store.keywords.create({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          text,
+          country: country ?? "us",
+          device: device ?? "desktop",
+          tags: [],
+        });
+        return jsonResult({ keyword });
+      },
+    );
 
-  server.registerTool(
-    "run_audit",
-    {
-      description:
-        "Run an SEO audit on provided page signals (does not fetch the URL live)",
-      inputSchema: zodShape(runAuditInputSchema),
-      annotations: MUTATING,
-    },
-    async (input) => {
-      const { checks, score } = runAuditChecks(input);
-      const audit = await store.audits.create({
-        id: randomUUID(),
-        tenantId: scope.tenantId,
-        projectId: scope.projectId,
-        url: input.url,
-        score,
-        checks,
-      });
-      return jsonResult({ audit });
-    },
-  );
+    server.registerTool(
+      "run_audit",
+      {
+        description:
+          "Run an SEO audit on provided page signals (does not fetch the URL live)",
+        inputSchema: zodShape(runAuditInputSchema),
+        annotations: MUTATING,
+      },
+      async (input) => {
+        const { checks, score } = runAuditChecks(input);
+        const audit = await store.audits.create({
+          id: randomUUID(),
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          url: input.url,
+          score,
+          checks,
+        });
+        return jsonResult({ audit });
+      },
+    );
+  }
 
   server.registerTool(
     "get_audit",
@@ -161,26 +171,28 @@ export function createRankMySeoMcpServer(options: McpServerOptions): McpServer {
     async () => jsonResult({ config: (await store.dashboard.get(scope)) ?? null }),
   );
 
-  server.registerTool(
-    "update_dashboard_config",
-    {
-      description: "Update dashboard widgets",
-      inputSchema: zodShape(updateDashboardConfigInputSchema),
-      annotations: IDEMPOTENT_WRITE,
-    },
-    async ({ widgets }) => {
-      const existing = await store.dashboard.get(scope);
-      const config = dashboardConfigSchema.parse({
-        id: existing?.id ?? randomUUID(),
-        tenantId: scope.tenantId,
-        projectId: scope.projectId,
-        widgets,
-        updatedAt: new Date(),
-      });
-      const saved = await store.dashboard.upsert(config);
-      return jsonResult({ config: saved });
-    },
-  );
+  if (allowMutations) {
+    server.registerTool(
+      "update_dashboard_config",
+      {
+        description: "Update dashboard widgets (mutations enabled)",
+        inputSchema: zodShape(updateDashboardConfigInputSchema),
+        annotations: IDEMPOTENT_WRITE,
+      },
+      async ({ widgets }) => {
+        const existing = await store.dashboard.get(scope);
+        const config = dashboardConfigSchema.parse({
+          id: existing?.id ?? randomUUID(),
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          widgets,
+          updatedAt: new Date(),
+        });
+        const saved = await store.dashboard.upsert(config);
+        return jsonResult({ config: saved });
+      },
+    );
+  }
 
   server.registerTool(
     "explain_metric",
@@ -206,38 +218,41 @@ export function createRankMySeoMcpServer(options: McpServerOptions): McpServer {
     },
   );
 
-  server.registerTool(
-    "build_report",
-    {
-      description: "Generate a rank and audit report for an ISO-8601 date window",
-      inputSchema: zodShape(buildReportInputSchema),
-      annotations: MUTATING,
-    },
-    async ({ title, from, to }) => {
-      const fromDate = new Date(from);
-      const toDate = new Date(to);
-      const keywords = await store.keywords.list(scope);
-      const snapshots = await store.snapshots.listByRange({
-        tenantId: scope.tenantId,
-        projectId: scope.projectId,
-        from: fromDate,
-        to: toDate,
-      });
-      const audits = await store.audits.list(scope);
-      const reportData = buildReport({
-        tenantId: scope.tenantId,
-        projectId: scope.projectId,
-        title,
-        from: fromDate,
-        to: toDate,
-        keywords,
-        snapshots,
-        audits,
-      });
-      const report = await store.reports.create(reportData);
-      return jsonResult({ report });
-    },
-  );
+  if (allowMutations) {
+    server.registerTool(
+      "build_report",
+      {
+        description:
+          "Generate a rank and audit report for an ISO-8601 date window (mutations enabled)",
+        inputSchema: zodShape(buildReportInputSchema),
+        annotations: MUTATING,
+      },
+      async ({ title, from, to }) => {
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        const keywords = await store.keywords.list(scope);
+        const snapshots = await store.snapshots.listByRange({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          from: fromDate,
+          to: toDate,
+        });
+        const audits = await store.audits.list(scope);
+        const reportData = buildReport({
+          tenantId: scope.tenantId,
+          projectId: scope.projectId,
+          title,
+          from: fromDate,
+          to: toDate,
+          keywords,
+          snapshots,
+          audits,
+        });
+        const report = await store.reports.create(reportData);
+        return jsonResult({ report });
+      },
+    );
+  }
 
   server.registerTool(
     "generate_schema",

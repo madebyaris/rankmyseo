@@ -62,14 +62,32 @@ export type CreateRankSnapshotInput = z.infer<
   typeof createRankSnapshotInputSchema
 >;
 
+export const auditCheckStatusSchema = z.enum([
+  "pass",
+  "fail",
+  "unknown",
+  "not_applicable",
+]);
+
+export type AuditCheckStatus = z.infer<typeof auditCheckStatusSchema>;
+
 export const auditCheckResultSchema = z.object({
   ruleId: z.string().min(1),
   passed: z.boolean(),
+  status: auditCheckStatusSchema.optional(),
   message: z.string(),
   severity: z.enum(["info", "warning", "error"]),
 });
 
 export type AuditCheckResult = z.infer<typeof auditCheckResultSchema>;
+
+/** Normalize older persisted checks that only had `passed`. */
+export function resolveAuditCheckStatus(
+  check: Pick<AuditCheckResult, "passed" | "status">,
+): AuditCheckStatus {
+  if (check.status) return check.status;
+  return check.passed ? "pass" : "fail";
+}
 
 export const auditCheckSchema = auditCheckResultSchema.extend({
   id: z.string().min(1),
@@ -90,9 +108,11 @@ export const pageSignalsSchema = z.object({
   hasOgTags: z.boolean().default(false),
   hasJsonLd: z.boolean().default(false),
   jsonLdTypes: z.array(z.string()).optional(),
+  jsonLdValid: z.boolean().optional(),
   lang: z.union([z.string(), z.null()]).optional(),
   hasViewportMeta: z.boolean().optional(),
   robotsNoindex: z.boolean().optional(),
+  xRobotsNoindex: z.boolean().optional(),
   imageCount: z.number().int().nonnegative().optional(),
   imagesWithAlt: z.number().int().nonnegative().optional(),
   wordCount: z.number().int().nonnegative().optional(),
@@ -102,6 +122,7 @@ export const pageSignalsSchema = z.object({
       fid: z.number().optional(),
       cls: z.number().optional(),
       inp: z.number().optional(),
+      source: z.enum(["lab", "field", "collector"]).optional(),
     })
     .optional(),
 });
@@ -357,9 +378,17 @@ export {
   dataSourceProviderSchema,
   siteFeaturesConfigSchema,
   scheduleConfigSchema,
+  regressionConfigSchema,
   type RankMySeoConfig,
   type DataSourceConfig,
   type DataSourceProvider,
   type SiteFeaturesConfig,
   type ScheduleConfig,
+  type RegressionConfig,
 } from "../config/schema.js";
+
+export {
+  seoPageSnapshotSchema,
+  seoRegressionFindingSchema,
+  seoRegressionResultSchema,
+} from "./regression.js";

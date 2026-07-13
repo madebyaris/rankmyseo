@@ -3,6 +3,9 @@ import { rankMySeoConfigSchema } from "./config/schema.js";
 import {
   dashboardConfigSchema,
   dashboardWidgetSchema,
+  seoPageSnapshotSchema,
+  seoRegressionFindingSchema,
+  seoRegressionResultSchema,
 } from "./schemas/index.js";
 
 function toJsonSchema(schema: unknown, name: string) {
@@ -25,4 +28,19 @@ export const dashboardConfigJsonSchema = toJsonSchema(
 export const dashboardWidgetJsonSchema = toJsonSchema(
   dashboardWidgetSchema,
   "DashboardWidget",
+);
+
+export const seoPageSnapshotJsonSchema = toJsonSchema(
+  seoPageSnapshotSchema,
+  "SeoPageSnapshot",
+);
+
+export const seoRegressionFindingJsonSchema = toJsonSchema(
+  seoRegressionFindingSchema,
+  "SeoRegressionFinding",
+);
+
+export const seoRegressionResultJsonSchema = toJsonSchema(
+  seoRegressionResultSchema,
+  "SeoRegressionResult",
 );

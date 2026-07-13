@@ -22,7 +22,9 @@ pnpm install
 | `pnpm build` | Build all packages |
 | `pnpm test` | Run Vitest across workspace |
 | `pnpm typecheck` | TypeScript check all packages |
-| `pnpm lint` | ESLint |
+| `pnpm lint` | `tsc --noEmit` per package + dependency-cruiser |
+| `pnpm publint` | Package export hygiene |
+| `pnpm test:coverage` | Vitest coverage across packages |
 | `pnpm dev:playground` | API server on `:3456` |
 | `pnpm dev:dashboard` | Reference dashboard on `:5173` |
 
@@ -43,7 +45,8 @@ rankmyseo/
 │   ├── react/         # Hooks + provider
 │   ├── ui/            # Widget components + CSS
 │   ├── agent/         # AI agent tools
-│   └── cli/           # rankmyseo CLI
+│   ├── scanner/       # SSRF-safe page fetch
+│   └── cli/           # rankmyseo CLI (init/migrate/schedule/doctor/regression)
 ```
 
 ## Local workflow

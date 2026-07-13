@@ -11,6 +11,7 @@ This file is for **AI coding agents** (Cursor, Claude Code, Copilot, etc.) wirin
 | + Prebuilt dashboard widgets | add `@rankmyseo/ui`, `react-dom` |
 | + CLI (`init`, `migrate`, `schedule`, `doctor`) | add `@rankmyseo/cli` (dev) or use `rankmyseo` meta installer |
 | + AI chat tools / MCP | add `@rankmyseo/agent`, configure `agentModel` on the server handler |
+| + SEO regression CI gate | add `@rankmyseo/cli` (+ `@rankmyseo/scanner`), configure `regression` in config |
 | Full stack shortcut | `npx rankmyseo install --yes --preset recommended` |
 
 The **recommended** preset installs: `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-hono`, `@rankmyseo/react`, `@rankmyseo/cli` (+ peers `hono`, `react`).
@@ -23,6 +24,7 @@ The **recommended** preset installs: `@rankmyseo/core`, `@rankmyseo/storage`, `@
 | `npx rankmyseo migrate` | `npx rankmyseo-cli migrate` |
 | `npx rankmyseo schedule` | `npx rankmyseo-cli schedule` |
 | `npx rankmyseo doctor` | `npx rankmyseo-cli doctor` |
+| `npx rankmyseo regression check` | `npx rankmyseo-cli regression check` |
 
 Do **not** use `npx @rankmyseo/cli` — that is not a valid binary name.
 
@@ -36,6 +38,7 @@ Global flags: `--json` (machine-readable output), `--version`.
 | `DATABASE_URL` / `RANKMYSEO_DATABASE_URL` | `rankmyseo-mcp` bin | SQLite/Postgres URL for MCP stdio server |
 | `TENANT_ID` / `RANKMYSEO_TENANT_ID` | MCP bin | Default tenant scope |
 | `PROJECT_ID` / `RANKMYSEO_PROJECT_ID` | MCP bin | Default project scope |
+| `RANKMYSEO_MCP_ALLOW_MUTATIONS` | MCP bin | Set to `1` to register mutating MCP tools (read-only by default) |
 
 RankMySEO does not read OpenAI keys internally — you pass a `LanguageModel` to `createHandler` / `createRankMySeoApp`.
 
@@ -47,6 +50,8 @@ Most API routes require:
 x-tenant-id: <tenant>
 x-project-id: <project>
 ```
+
+**These headers select scope — they do not authenticate.** Pass `authorize(request, scope)` to `createHandler` / `createRankMySeoApp` to validate the caller. Return a `Response` to deny.
 
 **Exempt routes** (no scope headers required; default config tenant/project is used):
 
@@ -164,6 +169,19 @@ DATABASE_URL=sqlite://./data/rankmyseo.sqlite TENANT_ID=tenant-a PROJECT_ID=proj
 
 MCP tools use **snake_case** names matching the AI SDK tools (`list_keywords`, `query_rank_history`, `add_keyword`, …).
 
+**Mutating MCP tools are off by default.** Set `allowMutations: true` or `RANKMYSEO_MCP_ALLOW_MUTATIONS=1` to enable `add_keyword`, `run_audit`, `update_dashboard_config`, and `build_report`. Treat MCP as a trusted-local boundary when mutations are enabled.
+
+## SEO regression CLI
+
+```bash
+npx rankmyseo-cli regression check \
+  --candidate-url https://preview.example.com \
+  --base-ref origin/main \
+  --json
+```
+
+Requires `regression.enabled` + `regression.productionUrl` + `routeMap` in config. Exit `0` = pass, `1` = gated findings, `2` = runtime/config/network error. See the [SEO Regression](https://github.com/madebyaris/rankmyseo/wiki/SEO-Regression) wiki page.
+
 JSON Schemas:
 
 - `@rankmyseo/core/json-schema`
@@ -176,8 +194,10 @@ JSON Schemas:
 2. **Missing scope headers** on `/keywords`, `/dashboard`, etc.
 3. **Assuming `/sitemap.xml` needs headers** — it does not.
 4. **`runAudit` tool vs `/scan` route** — the tool scores provided signals; `/scan` fetches a live URL.
-5. **`schedule` is one ingestion pass** — it does not install a cron daemon; use `@rankmyseo/scheduler` in your app for recurring jobs.
+5. **`schedule` is one ingestion pass** — it does not install a cron daemon; use `@rankmyseo/scheduler` in your app for recurring jobs. `schedule.enabled=false` makes the CLI command a no-op.
 6. **`migrate` runs inline DDL** via `createStore()` — not `drizzle-kit migrate`.
+7. **MCP mutations disabled** — without `RANKMYSEO_MCP_ALLOW_MUTATIONS=1`, mutating tools are not registered.
+8. **Scope headers are not auth** — wire `authorize` on the handler for multi-tenant production.
 
 ## Error envelope
 

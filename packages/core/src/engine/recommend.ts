@@ -67,7 +67,7 @@ const INTENT_ADVICE: Record<KeywordIntent, { title: string; detail: string }> = 
   informational: {
     title: "Structure for informational intent",
     detail:
-      "Answer the question directly in the first paragraph, add an FAQ section, and mark it up with FAQPage/HowTo schema.",
+      "Answer the question directly in the first paragraph and use clear H2/H3 sections. FAQPage rich results are generally limited to authoritative government and health sites; HowTo rich results are deprecated — treat FAQ/HowTo markup as optional structure, not a ranking lever.",
   },
   navigational: {
     title: "Optimize for navigational intent",
@@ -77,12 +77,12 @@ const INTENT_ADVICE: Record<KeywordIntent, { title: string; detail: string }> = 
   commercial: {
     title: "Support commercial-investigation intent",
     detail:
-      "Add comparison tables, pros/cons, and aggregateRating schema so buyers can evaluate options on-page.",
+      "Add comparison tables, pros/cons, and aggregateRating schema so buyers can evaluate options on-page. Structured data enables eligibility for supported appearances; it does not guarantee rich results.",
   },
   transactional: {
     title: "Drive transactional intent",
     detail:
-      "Place a clear primary CTA above the fold, surface pricing, and add Product/Offer schema.",
+      "Place a clear primary CTA above the fold, surface pricing, and add Product/Offer schema when it matches visible content.",
   },
 };
 

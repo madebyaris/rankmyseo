@@ -10,7 +10,7 @@ module.exports = {
         path: "^packages/(react|vue|svelte|ui)",
       },
       to: {
-        path: "^packages/(storage|server|agent|datasource|scheduler|cli)",
+        path: "^packages/(storage|server|agent|datasource|scheduler|scanner|cli)",
       },
     },
     {
@@ -21,7 +21,7 @@ module.exports = {
         path: "^packages/ui",
       },
       to: {
-        path: "^packages/(storage|server|agent|datasource|scheduler|cli)",
+        path: "^packages/(storage|server|agent|datasource|scheduler|scanner|cli)",
       },
     },
     {
@@ -32,7 +32,7 @@ module.exports = {
         path: "^packages/core",
       },
       to: {
-        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|cli)|^hono$|^drizzle-orm",
+        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli)|^hono$|^drizzle-orm",
       },
     },
   ],

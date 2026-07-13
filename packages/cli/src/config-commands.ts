@@ -12,7 +12,7 @@ export interface ScheduleOptions {
 
 export async function runScheduleCommand(
   options: ScheduleOptions = {},
-): Promise<{ appended: number; projectCreated: boolean }> {
+): Promise<{ appended: number; projectCreated: boolean; skipped?: boolean }> {
   const configPath = options.configPath ?? "rankmyseo.config.ts";
   const absolute = resolve(process.cwd(), configPath);
 
@@ -58,7 +58,11 @@ export async function runScheduleCommand(
   }
 
   const result = await runScheduledIngestion(config, store);
-  return { appended: result.appended, projectCreated };
+  return {
+    appended: result.appended,
+    projectCreated,
+    skipped: result.skipped === true,
+  };
 }
 
 export async function runMigrateCommand(

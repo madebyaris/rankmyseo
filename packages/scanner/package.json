@@ -1,0 +1,61 @@
+{
+  "name": "@rankmyseo/scanner",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "Safe HTTP page scanner for RankMySEO audits and regression checks",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/scanner"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "scanner",
+    "ssrf",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "publint": "publint"
+  },
+  "dependencies": {
+    "@rankmyseo/core": "workspace:*",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "publint": "^0.3.15",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

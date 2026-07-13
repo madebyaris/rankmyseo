@@ -81,9 +81,10 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 | [`@rankmyseo/server`](./packages/server) | Framework-agnostic HTTP handler (`Request` / `Response`) — full API + site features |
 | [`@rankmyseo/server-hono`](./packages/server-hono) | Hono adapter — `createRankMySeoApp(store, options?)` |
 | [`@rankmyseo/agent`](./packages/agent) | AI SDK tools + MCP server for dashboard customization |
+| [`@rankmyseo/scanner`](./packages/scanner) | SSRF-safe live page fetch used by `/scan` and the regression CLI |
 | [`@rankmyseo/react`](./packages/react) | Headless hooks + on-page collector (`web-vitals`) |
 | [`@rankmyseo/ui`](./packages/ui) | Widget registry + `DashboardRenderer` (custom `.rms-*` CSS, no Tailwind/shadcn in consumer apps) |
-| [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule` commands |
+| [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule`, `doctor`, `regression check` |
 
 Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, Postgres store adapters, more framework adapters.
 
@@ -107,6 +108,8 @@ Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, P
 | AI agent chat + MCP tools (approval-gated mutating tools via AI SDK `needsApproval`) | ✓ offline via mock LLM |
 | Agent-readiness: sitemap, `llms.txt`, markdown negotiation (for coding agents — not evidenced SEO ranking levers) | ✓ |
 | `rankmyseo.config.ts` schema + CLI scaffold | ✓ |
+| SEO regression gate (`regression check` — production vs preview) | ✓ opt-in via `regression.enabled` |
+| Safe shared scanner (`@rankmyseo/scanner`) | ✓ |
 
 Automated tests: expanded store contract tests, server route integration tests, datasource/scheduler/agent/react/ui/cli unit tests, Hono smoke test.
 
@@ -139,6 +142,7 @@ npx rankmyseo init                 # after @rankmyseo/cli is installed
 npx rankmyseo migrate
 npx rankmyseo schedule   # one rank ingestion pass (reads rankmyseo.config.ts when present)
 npx rankmyseo doctor
+npx rankmyseo regression check --candidate-url <preview> --base-ref <sha>
 npx rankmyseo version
 ```
 
@@ -149,8 +153,11 @@ pnpm exec rankmyseo-cli init       # scaffold rankmyseo.config.ts
 pnpm exec rankmyseo-cli migrate    # run SQLite migrations
 pnpm exec rankmyseo-cli schedule   # one rank ingestion pass
 pnpm exec rankmyseo-cli doctor
+pnpm exec rankmyseo-cli regression check --candidate-url <url> --base-ref <sha>
 pnpm exec rankmyseo-cli install --preset recommended
 ```
+
+SEO regression docs: [Wiki → SEO Regression](https://github.com/madebyaris/rankmyseo/wiki/SEO-Regression).
 
 ## Quick start (local monorepo)
 
@@ -207,6 +214,8 @@ Most routes require tenant/project headers:
 | `x-project-id` | Project scope |
 
 **Exempt:** `GET /sitemap.xml` and `GET /llms.txt` do not require scope headers. `GET /` accepts optional headers (defaults to config tenant/project).
+
+**Scope headers select tenant/project — they are not authentication.** Pass `authorize(request, scope)` to `createHandler` / `createRankMySeoApp` in production.
 
 **Routes:**
 
@@ -282,7 +291,7 @@ Use `<BlogManager />` or `<AddBlogModule />` from `@rankmyseo/ui` — shadcn-lik
 Three trust tiers keep secrets on the server:
 
 ```
-Backend (server-only)  →  core, server, storage, datasource, scheduler, agent, cli
+Backend (server-only)  →  core, server, storage, datasource, scheduler, scanner, agent, cli
 Frontend (client SDK)  →  @rankmyseo/react — HTTP hooks only, no DB or API keys
 Dashboard (UI)         →  @rankmyseo/ui — widgets via react hooks
 ```

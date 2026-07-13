@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { runAuditChecks } from "../engine/audit.js";
+import { runAuditChecks, AUDIT_ENGINE_VERSION } from "../engine/audit.js";
 
 describe("runAuditChecks", () => {
   it("scores a well-optimized page highly", () => {
@@ -23,7 +23,8 @@ describe("runAuditChecks", () => {
     });
 
     expect(result.score).toBeGreaterThanOrEqual(80);
-    expect(result.checks.every((c) => c.ruleId)).toBe(true);
+    expect(result.engineVersion).toBe(AUDIT_ENGINE_VERSION);
+    expect(result.checks.every((c) => c.ruleId && c.status)).toBe(true);
   });
 
   it("flags missing title and multiple H1s", () => {
@@ -46,6 +47,7 @@ describe("runAuditChecks", () => {
     const h1Check = result.checks.find((c) => c.ruleId === "single-h1");
 
     expect(titleCheck?.passed).toBe(false);
+    expect(titleCheck?.status).toBe("fail");
     expect(h1Check?.passed).toBe(false);
     expect(result.score).toBeLessThan(50);
   });
@@ -67,17 +69,17 @@ describe("runAuditChecks", () => {
     });
 
     const byId = (id: string) => result.checks.find((c) => c.ruleId === id);
-    expect(byId("https")?.passed).toBe(false);
-    expect(byId("robots-indexable")?.passed).toBe(false);
-    expect(byId("viewport-meta")?.passed).toBe(false);
-    expect(byId("lang-attribute")?.passed).toBe(false);
-    expect(byId("heading-structure")?.passed).toBe(false);
-    expect(byId("image-alt")?.passed).toBe(false);
-    expect(byId("content-depth")?.passed).toBe(false);
-    expect(byId("cwv-inp")?.passed).toBe(false);
+    expect(byId("https")?.status).toBe("fail");
+    expect(byId("robots-indexable")?.status).toBe("fail");
+    expect(byId("viewport-meta")?.status).toBe("fail");
+    expect(byId("lang-attribute")?.status).toBe("fail");
+    expect(byId("heading-structure")?.status).toBe("fail");
+    expect(byId("image-alt")?.status).toBe("fail");
+    expect(byId("content-depth")?.status).toBe("fail");
+    expect(byId("cwv-inp")?.status).toBe("fail");
   });
 
-  it("treats unmeasured signals as passing (no false negatives)", () => {
+  it("marks unmeasured signals as unknown and excludes them from the score", () => {
     const result = runAuditChecks({
       url: "https://example.com",
       title: "A reasonable title for the homepage of the site",
@@ -90,10 +92,11 @@ describe("runAuditChecks", () => {
     });
 
     const byId = (id: string) => result.checks.find((c) => c.ruleId === id);
-    expect(byId("viewport-meta")?.passed).toBe(true);
-    expect(byId("image-alt")?.passed).toBe(true);
-    expect(byId("content-depth")?.passed).toBe(true);
-    expect(byId("cwv-inp")?.passed).toBe(true);
-    expect(byId("https")?.passed).toBe(true);
+    expect(byId("viewport-meta")?.status).toBe("unknown");
+    expect(byId("image-alt")?.status).toBe("unknown");
+    expect(byId("content-depth")?.status).toBe("unknown");
+    expect(byId("cwv-inp")?.status).toBe("unknown");
+    expect(byId("https")?.status).toBe("pass");
+    expect(result.score).toBe(100);
   });
 });

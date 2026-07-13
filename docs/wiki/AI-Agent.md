@@ -13,7 +13,7 @@ Exports:
 - `createRankMySeoMcpServer()` / `startMcpStdioServer()` — MCP host integration
 - `@rankmyseo/agent/tools` — Zod input schemas
 - `@rankmyseo/agent/json-schema` — JSON Schemas for tool inputs
-- `rankmyseo-mcp` bin — stdio MCP server (`DATABASE_URL`, `TENANT_ID`, `PROJECT_ID`)
+- `rankmyseo-mcp` bin — stdio MCP server (`DATABASE_URL`, `TENANT_ID`, `PROJECT_ID`; mutating tools require `RANKMYSEO_MCP_ALLOW_MUTATIONS=1`)
 
 ## AI SDK tools (`createAgentTools`)
 
@@ -39,6 +39,8 @@ For live URL fetching, use the HTTP route `POST /scan` — not the `runAudit` to
 `list_keywords`, `query_rank_history`, `add_keyword`, `run_audit`, `get_audit`, `get_dashboard_config`, `update_dashboard_config`, `explain_metric`, `build_report`, `generate_schema`
 
 MCP tools include `readOnlyHint` / `destructiveHint` / `idempotentHint` annotations where applicable.
+
+**Mutating MCP tools are off by default.** Pass `allowMutations: true` to `createRankMySeoMcpServer` / `startMcpStdioServer`, or set `RANKMYSEO_MCP_ALLOW_MUTATIONS=1`. Treat MCP as a trusted-local boundary when mutations are enabled.
 
 ## React integration
 
@@ -75,6 +77,7 @@ Configure an AI SDK `LanguageModel` in your server bootstrap — credentials sta
 DATABASE_URL=sqlite://./data/rankmyseo.sqlite
 TENANT_ID=tenant-a
 PROJECT_ID=project-1
+RANKMYSEO_MCP_ALLOW_MUTATIONS=0   # set to 1 to enable mutating tools
 ```
 
 ## OSS scope

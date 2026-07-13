@@ -2,7 +2,23 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
+  "fixed": [
+    [
+      "@rankmyseo/agent",
+      "@rankmyseo/cli",
+      "@rankmyseo/core",
+      "@rankmyseo/datasource",
+      "@rankmyseo/installer",
+      "@rankmyseo/react",
+      "@rankmyseo/scheduler",
+      "@rankmyseo/scanner",
+      "@rankmyseo/server",
+      "@rankmyseo/server-hono",
+      "@rankmyseo/storage",
+      "@rankmyseo/ui",
+      "rankmyseo"
+    ]
+  ],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

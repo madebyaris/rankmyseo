@@ -31,6 +31,23 @@ export const scheduleConfigSchema = z.object({
 
 export type ScheduleConfig = z.infer<typeof scheduleConfigSchema>;
 
+export const regressionRouteMapEntrySchema = z.object({
+  files: z.array(z.string().min(1)).min(1),
+  routes: z.array(z.string().min(1)).min(1),
+});
+
+export const regressionConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  productionUrl: z.string().url().optional(),
+  alwaysRoutes: z.array(z.string()).default([]),
+  routeMap: z.array(regressionRouteMapEntrySchema).default([]),
+  failOn: z.enum(["error", "warning"]).default("error"),
+  timeoutMs: z.number().int().positive().default(10_000),
+  maxBytes: z.number().int().positive().default(1_500_000),
+});
+
+export type RegressionConfig = z.infer<typeof regressionConfigSchema>;
+
 export const rankMySeoConfigSchema = z.object({
   databaseUrl: z.string().min(1),
   tenantId: z.string().min(1),
@@ -69,6 +86,7 @@ export const rankMySeoConfigSchema = z.object({
         .optional(),
     })
     .optional(),
+  regression: regressionConfigSchema.optional(),
 });
 
 export type RankMySeoConfig = z.infer<typeof rankMySeoConfigSchema>;

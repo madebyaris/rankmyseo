@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "description": "Framework-agnostic RankMySEO HTTP handler",
   "license": "Apache-2.0",
@@ -48,6 +48,8 @@
   "dependencies": {
     "@rankmyseo/agent": "workspace:*",
     "@rankmyseo/core": "workspace:*",
+    "@rankmyseo/datasource": "workspace:*",
+    "@rankmyseo/scanner": "workspace:*",
     "server-only": "^0.0.1",
     "zod": "^4.1.12"
   },

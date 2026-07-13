@@ -6,10 +6,12 @@ Base URL depends on your deployment. Demo playground: `http://localhost:3456`.
 
 | Header | Required | Description |
 | --- | --- | --- |
-| `x-tenant-id` | Yes (most routes) | Tenant identifier |
-| `x-project-id` | Yes (most routes) | Project identifier |
+| `x-tenant-id` | Yes (most routes) | Tenant identifier (scope selector — **not** authentication) |
+| `x-project-id` | Yes (most routes) | Project identifier (scope selector — **not** authentication) |
 | `content-type` | POST/PUT | `application/json` |
 | `accept` | Optional | `text/markdown` on `GET /` for markdown negotiation |
+
+Pass `authorize(request, scope)` on `createHandler` / `createRankMySeoApp` to authenticate callers. Return a `Response` to deny.
 
 ### Header exemptions
 
@@ -70,7 +72,7 @@ Disabled features: collector/blog → **403**; disabled sitemap/llms.txt → **4
 
 | Method | Path | Description |
 | --- | --- | --- |
-| POST | `/scan` | Fetch live URL → signals + score + recommendations |
+| POST | `/scan` | Fetch live URL via `@rankmyseo/scanner` → signals + score + recommendations |
 | POST | `/meta/generate` | Generate meta tags from title/content/keyword |
 | POST | `/schema/generate` | Generate Schema.org JSON-LD structured data |
 

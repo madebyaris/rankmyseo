@@ -39,6 +39,11 @@ export const PACKAGE_CATALOG: RankPackage[] = [
     peers: ["hono@^4.0.0"],
   },
   {
+    name: "@rankmyseo/scanner",
+    description: "Safe HTTP page scanner used by /scan and regression CLI",
+    tier: "backend",
+  },
+  {
     name: "@rankmyseo/agent",
     description: "AI agent tools + MCP server",
     tier: "backend",

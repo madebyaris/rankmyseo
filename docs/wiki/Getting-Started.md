@@ -55,9 +55,11 @@ Then scaffold:
 npx rankmyseo init
 npx rankmyseo migrate
 npx rankmyseo doctor
+# optional: enable regression in config, then
+# npx rankmyseo regression check --candidate-url <preview> --base-ref <sha>
 ```
 
-See [Packages](./Packages.md) for manual `@rankmyseo/*` installs.
+See [Packages](./Packages.md) for manual `@rankmyseo/*` installs. SEO regression gate: [[SEO-Regression]].
 
 ## CLI scaffold (monorepo contributors)
 

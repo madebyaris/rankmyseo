@@ -6,6 +6,10 @@ import { runInstallWizard, type InstallOptions } from "@rankmyseo/installer";
 import { runMigrateCommand, runScheduleCommand } from "./config-commands.js";
 import { runDoctor } from "./doctor.js";
 import { scaffoldConfig } from "./init.js";
+import {
+  formatRegressionHuman,
+  runRegressionCheck,
+} from "./regression.js";
 import { readCliVersion } from "./version.js";
 
 export interface CliGlobalOptions {
@@ -64,7 +68,9 @@ export async function runCli(argv: string[] = process.argv.slice(2)) {
       emit(
         globalOptions.json
           ? { ok: true, ...result }
-          : `Ingested ${result.appended} snapshots${result.projectCreated ? " (seed project created)" : ""}`,
+          : result.skipped
+            ? "Schedule disabled in config (schedule.enabled=false); no ingestion run"
+            : `Ingested ${result.appended} snapshots${result.projectCreated ? " (seed project created)" : ""}`,
       );
       break;
     }
@@ -78,6 +84,52 @@ export async function runCli(argv: string[] = process.argv.slice(2)) {
         }
       }
       if (!result.ok) process.exitCode = 1;
+      break;
+    }
+    case "regression": {
+      const sub = rest[0] === "check" ? "check" : rest[0];
+      const args = rest[0] === "check" ? rest.slice(1) : rest;
+      if (sub && sub !== "check" && !sub.startsWith("--")) {
+        console.error(`Unknown regression subcommand: ${sub}`);
+        process.exitCode = 2;
+        break;
+      }
+      const candidateUrl = readOption(args, "--candidate-url");
+      if (!candidateUrl) {
+        console.error("Missing required --candidate-url <url>");
+        process.exitCode = 2;
+        break;
+      }
+      try {
+        const { result, exitCode } = await runRegressionCheck({
+          candidateUrl,
+          baseRef: readOption(args, "--base-ref"),
+          headRef: readOption(args, "--head-ref"),
+          configPath: readOption(args, "--config"),
+          allRoutes: args.includes("--all-routes"),
+          json: globalOptions.json,
+        });
+        if (globalOptions.json) {
+          emit(result);
+        } else {
+          console.log(formatRegressionHuman(result));
+        }
+        process.exitCode = exitCode;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (globalOptions.json) {
+          emit({ ok: false, error: message });
+        } else {
+          console.error(message);
+        }
+        process.exitCode =
+          typeof err === "object" &&
+          err &&
+          "exitCode" in err &&
+          typeof (err as { exitCode: unknown }).exitCode === "number"
+            ? ((err as { exitCode: number }).exitCode as 0 | 1 | 2)
+            : 2;
+      }
       break;
     }
     case "version":
@@ -102,6 +154,7 @@ Usage:
   rankmyseo-cli migrate [dbUrl]             Run storage migrations
   rankmyseo-cli schedule [dbUrl]            Run one ingestion pass
   rankmyseo-cli doctor [--config path]      Validate config + storage
+  rankmyseo-cli regression check --candidate-url <url> [--base-ref sha] [--head-ref HEAD] [--all-routes] [--config path]
   rankmyseo-cli version                     Print CLI version
 
 Global flags:

@@ -2,8 +2,21 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: "node",
-    include: ["packages/**/*.test.ts", "packages/**/*.test.tsx"],
+    // Delegate to per-package configs so happy-dom / server-only aliases are preserved.
+    projects: [
+      "packages/core",
+      "packages/cli",
+      "packages/installer",
+      "packages/server",
+      "packages/server-hono",
+      "packages/storage",
+      "packages/agent",
+      "packages/datasource",
+      "packages/scheduler",
+      "packages/scanner",
+      "packages/react",
+      "packages/ui",
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary"],

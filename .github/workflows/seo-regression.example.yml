@@ -1,0 +1,37 @@
+name: SEO Regression Example
+
+# Example workflow for integrators. This repo has no production/preview site pair,
+# so the example is documentation-only. Copy into a consuming app after preview deploy.
+
+on:
+  pull_request:
+
+jobs:
+  seo-regression:
+    if: false # enable in consumer repos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install CLI
+        run: npm i -D @rankmyseo/cli
+
+      - name: Wait for preview URL
+        id: preview
+        run: |
+          echo "Set PREVIEW_URL from your deploy provider output"
+          echo "url=${PREVIEW_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Run RankMySEO regression check
+        run: |
+          npx rankmyseo-cli regression check \
+            --candidate-url "${{ steps.preview.outputs.url }}" \
+            --base-ref "${{ github.event.pull_request.base.sha }}" \
+            --head-ref "${{ github.sha }}" \
+            --json

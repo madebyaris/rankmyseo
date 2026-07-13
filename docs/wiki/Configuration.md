@@ -14,7 +14,7 @@ export default defineConfig({
 
   dataSources: [
     { provider: "fixture", default: true },
-    // { provider: "gsc", apiKey: "...", default: true },
+    // { provider: "gsc", apiKey: process.env.GSC_ACCESS_TOKEN, default: true },
   ],
 
   schedule: {
@@ -41,13 +41,26 @@ export default defineConfig({
   dashboard: {
     widgets: [/* optional default widgets */],
   },
+
+  // Opt-in SEO regression gate (see Wiki → SEO-Regression)
+  regression: {
+    enabled: false,
+    productionUrl: "https://www.example.com",
+    alwaysRoutes: ["/"],
+    routeMap: [
+      { files: ["app/**/*.tsx", "pages/**/*.tsx"], routes: ["/", "/about"] },
+    ],
+    failOn: "error",
+    timeoutMs: 10_000,
+    maxBytes: 1_500_000,
+  },
 });
 ```
 
 ## Fields
 
 | Field | Type | Default | Description |
-| --- | --- | --- | --- |
+| --- | --- | --- |
 | `databaseUrl` | string | required | SQLite path (`sqlite:///abs/path` or `sqlite://./relative`) |
 | `tenantId` | string | required | Default tenant for single-tenant setups |
 | `projectId` | string | required | Default project |
@@ -62,6 +75,19 @@ export default defineConfig({
 | `sitemapRoutes` | string[] | `["/"]` | Paths included in sitemap |
 | `llmsTxt` | object | optional | Content for llms.txt |
 | `dashboard.widgets` | array | optional | Seed dashboard layout |
+| `regression` | object | optional | Opt-in production vs preview SEO regression gate |
+
+### `regression` fields
+
+| Field | Type | Default | Description |
+| --- | --- | --- |
+| `enabled` | boolean | `false` | Must be true for `regression check` |
+| `productionUrl` | string (URL) | optional | Live production origin |
+| `alwaysRoutes` | string[] | `[]` | Routes always scanned |
+| `routeMap` | `{ files, routes }[]` | `[]` | Changed-file globs → routes |
+| `failOn` | `"error"` \| `"warning"` | `"error"` | Severity gate for exit `1` |
+| `timeoutMs` | number | `10000` | Per-request scan timeout |
+| `maxBytes` | number | `1500000` | Max response body bytes |
 
 ## Data source providers
 
@@ -70,7 +96,8 @@ Only `"fixture"` and `"gsc"` are valid in OSS:
 ```typescript
 dataSources: [
   { provider: "fixture", default: true },
-  { provider: "gsc", apiKey: process.env.GSC_API_KEY, default: false },
+  // Config field remains `apiKey` for backwards compatibility; GscDataSource expects an OAuth access token.
+  { provider: "gsc", apiKey: process.env.GSC_ACCESS_TOKEN, default: false },
 ]
 ```
 
@@ -81,7 +108,7 @@ npx rankmyseo init
 # or: pnpm exec rankmyseo-cli init
 ```
 
-Generates a starter `rankmyseo.config.ts` with `blog: false`. Refuses to overwrite an existing file.
+Generates a starter `rankmyseo.config.ts` with `blog: false` and `regression.enabled: false`. Refuses to overwrite an existing file.
 
 Load at runtime:
 
@@ -97,8 +124,14 @@ When using `createHandler` or `createRankMySeoApp`, pass:
 ```typescript
 createHandler(store, {
   config: myConfig,
-  agentModel: openai("gpt-4o"),  // optional — enables POST /agent/chat
+  agentModel: openai("gpt-4o"), // optional — enables POST /agent/chat
+  authorize: async (request, scope) => {
+    // Scope headers select tenant/project — they do not authenticate.
+    // Return a Response to deny; return void/undefined to allow.
+  },
 });
 ```
 
 Without `agentModel`, `/agent/chat` returns 503.
+
+See also [[SEO-Regression]] for the CI gate CLI.
