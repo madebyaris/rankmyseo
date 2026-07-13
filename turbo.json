@@ -1,12 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "RANKMYSEO_POSTGRES_URL",
+    "DATABASE_URL",
+    "CI",
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "passThroughEnv": ["RANKMYSEO_POSTGRES_URL", "DATABASE_URL"]
     },
     "typecheck": {
       "dependsOn": ["^build"]

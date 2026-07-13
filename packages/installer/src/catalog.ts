@@ -14,7 +14,18 @@ export const PACKAGE_CATALOG: RankPackage[] = [
   },
   {
     name: "@rankmyseo/storage",
-    description: "SQLite/Drizzle storage adapter",
+    description: "Drizzle storage adapter (SQLite + Postgres)",
+    tier: "backend",
+  },
+  {
+    name: "@rankmyseo/storage-prisma",
+    description: "Prisma RankStore adapter (Postgres)",
+    tier: "backend",
+    peers: ["@prisma/client@^6.0.0", "prisma@^6.0.0"],
+  },
+  {
+    name: "@rankmyseo/storage-kysely",
+    description: "Kysely RankStore adapter (Postgres)",
     tier: "backend",
   },
   {

@@ -1,22 +1,21 @@
 {
-  "name": "@rankmyseo/storage",
+  "name": "@rankmyseo/storage-kysely",
   "version": "0.3.0",
   "type": "module",
-  "description": "RankMySEO storage adapters (Drizzle SQLite + Postgres)",
+  "description": "RankMySEO RankStore adapter backed by Kysely (Postgres)",
   "license": "Apache-2.0",
   "homepage": "https://github.com/madebyaris/rankmyseo#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/madebyaris/rankmyseo.git",
-    "directory": "packages/storage"
+    "directory": "packages/storage-kysely"
   },
   "bugs": {
     "url": "https://github.com/madebyaris/rankmyseo/issues"
   },
   "keywords": [
     "seo",
-    "drizzle",
-    "sqlite",
+    "kysely",
     "postgres",
     "storage",
     "rankmyseo"
@@ -48,17 +47,16 @@
   },
   "dependencies": {
     "@rankmyseo/core": "workspace:*",
-    "better-sqlite3": "^12.4.1",
-    "drizzle-orm": "^0.44.7",
+    "kysely": "^0.28.5",
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.10.1",
     "@types/pg": "^8.15.5",
+    "publint": "^0.3.15",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
-    "publint": "^0.3.15"
+    "vitest": "^3.2.4"
   },
   "publishConfig": {
     "access": "public"

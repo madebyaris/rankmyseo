@@ -13,6 +13,8 @@ export default defineConfig({
       "packages/server-next",
       "packages/server-nitro",
       "packages/storage",
+      "packages/storage-prisma",
+      "packages/storage-kysely",
       "examples/sveltekit-adapter",
       "examples/astro-adapter",
       "packages/agent",
