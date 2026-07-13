@@ -1,0 +1,53 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "RankMySEO ecosystem docs and support matrix." } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title} · RankMySEO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;650&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="/">RankMySEO Docs</a>
+        <nav class="nav" aria-label="Primary">
+          <a href="/" aria-current={path === "/" ? "page" : undefined}>Overview</a>
+          <a href="/install" aria-current={path === "/install" ? "page" : undefined}>Install</a>
+          <a href="/matrix" aria-current={path === "/matrix" ? "page" : undefined}>Matrix</a>
+          <a href="/adapters" aria-current={path === "/adapters" ? "page" : undefined}>Adapters</a>
+          <a href="/storage" aria-current={path === "/storage" ? "page" : undefined}>Storage</a>
+          <a href="/regression" aria-current={path === "/regression" ? "page" : undefined}>Regression</a>
+          <a href="/demo" aria-current={path === "/demo" ? "page" : undefined}>Client demo</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <p>
+        Source: <a href="https://github.com/madebyaris/rankmyseo">github.com/madebyaris/rankmyseo</a>
+        · Wiki: <a href="https://github.com/madebyaris/rankmyseo/wiki">docs/wiki</a>
+        · License: Apache-2.0
+      </p>
+    </footer>
+  </body>
+</html>

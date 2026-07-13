@@ -113,7 +113,7 @@ export const PACKAGE_CATALOG: RankPackage[] = [
   },
   {
     name: "@rankmyseo/cli",
-    description: "CLI — init config, migrate, schedule",
+    description: "CLI — init, migrate, schedule, doctor, regression check",
     tier: "tooling",
   },
 ];

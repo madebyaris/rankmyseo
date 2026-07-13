@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="SEO Regression" description="RankMySEO SEO regression CLI — gate preview vs production.">
+  <h1>SEO regression CLI</h1>
+  <p class="lede">
+    Opt-in CI gate that compares a candidate (preview) URL against a production baseline using
+    <code>@rankmyseo/scanner</code> and config under <code>regression</code>.
+  </p>
+
+  <pre><code>npx rankmyseo-cli regression check \
+  --candidate-url https://preview.example.com \
+  --base-ref origin/main \
+  --json</code></pre>
+
+  <h2>Requirements</h2>
+  <ul>
+    <li><code>regression.enabled</code> + <code>regression.productionUrl</code> + <code>routeMap</code> in config</li>
+    <li>Packages: <code>@rankmyseo/cli</code> (pulls scanner)</li>
+  </ul>
+
+  <h2>Exit codes</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>0</code></td>
+        <td>Pass</td>
+      </tr>
+      <tr>
+        <td><code>1</code></td>
+        <td>Gated findings</td>
+      </tr>
+      <tr>
+        <td><code>2</code></td>
+        <td>Runtime / config / network error</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Full guide:
+    <a href="https://github.com/madebyaris/rankmyseo/wiki/SEO-Regression">Wiki → SEO Regression</a>
+    · Example workflow: <code>.github/workflows/seo-regression.example.yml</code>
+  </p>
+</BaseLayout>

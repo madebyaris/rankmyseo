@@ -1,0 +1,25 @@
+{
+  "name": "@rankmyseo/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "RankMySEO docs / reference site (Astro) — dogfoods @rankmyseo/client",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "lint": "astro check"
+  },
+  "dependencies": {
+    "@rankmyseo/client": "workspace:*",
+    "astro": "^5.18.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

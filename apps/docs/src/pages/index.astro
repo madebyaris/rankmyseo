@@ -1,0 +1,54 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Overview" description="RankMySEO docs — install tree, support matrix, adapters, storage, and client demo.">
+  <p class="pill">M5 ecosystem · shipped</p>
+  <h1>RankMySEO reference</h1>
+  <p class="lede">
+    Composable SEO toolkit for Node.js apps. Bring your own database, framework, and (optionally) AI keys.
+    This Astro site dogfoods <code>@rankmyseo/client</code> and documents the final M5 support matrix.
+  </p>
+
+  <div class="grid">
+    <a class="card" href="/install">
+      <h3>Install decision tree</h3>
+      <p>Pick backend, storage, and UI packages for your stack.</p>
+    </a>
+    <a class="card" href="/matrix">
+      <h3>Runtime support matrix</h3>
+      <p>Node yes · edge/Workers no · React UI · Vue/Svelte headless.</p>
+    </a>
+    <a class="card" href="/adapters">
+      <h3>Server adapters</h3>
+      <p>Hono, Express, Next, Nitro, SvelteKit, Astro.</p>
+    </a>
+    <a class="card" href="/storage">
+      <h3>Storage options</h3>
+      <p>SQLite, Postgres (Drizzle), Prisma, Kysely.</p>
+    </a>
+    <a class="card" href="/regression">
+      <h3>SEO regression CLI</h3>
+      <p>Gate preview vs production with <code>regression check</code>.</p>
+    </a>
+    <a class="card" href="/demo">
+      <h3>Client demo</h3>
+      <p><code>createRankMySeoClient</code> with a mocked baseUrl.</p>
+    </a>
+  </div>
+
+  <h2>Canonical wiki</h2>
+  <p>
+    Full docs live in the repo wiki source under <code>docs/wiki/</code>. Start with
+    <a href="https://github.com/madebyaris/rankmyseo/wiki/Getting-Started">Getting Started</a>,
+    <a href="https://github.com/madebyaris/rankmyseo/wiki/Packages">Packages</a>, and
+    <a href="https://github.com/madebyaris/rankmyseo/wiki/SEO-Regression">SEO Regression</a>.
+  </p>
+
+  <h2>Quick install</h2>
+  <pre><code>npm i rankmyseo
+npx rankmyseo install --yes --preset recommended
+npx rankmyseo init
+npx rankmyseo migrate
+npx rankmyseo doctor --json</code></pre>
+</BaseLayout>

@@ -46,6 +46,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Build docs
+        run: pnpm --filter @rankmyseo/docs build
+
       - name: Test
         run: pnpm test
 

@@ -21,7 +21,7 @@ RankMySEO is a **modular, embeddable SEO toolkit** — not a hosted SaaS lock-in
 
 ## Milestones (high level)
 
-Canonical milestone plan (M0–M5). Through M4 is implemented and verified offline (fixture datasource + mock LLM); live GSC/PSI/LLM paths are implemented but unverified without keys.
+Canonical milestone plan (M0–M5). Through M5 is implemented and verified offline (fixture datasource + mock LLM); live GSC/PSI/LLM paths are implemented but unverified without keys.
 
 | Milestone | Status | Scope |
 | --- | --- | --- |
@@ -30,19 +30,19 @@ Canonical milestone plan (M0–M5). Through M4 is implemented and verified offli
 | **M2 — Audits & reports** | Done | On-page audit engine, Core Web Vitals, report rollups |
 | **M3 — Agent layer** | Done | AI SDK tools + MCP, dashboard config + widget registry, `needsApproval` on mutating tools |
 | **M4 — Site integration** | Done | On-page collector + score, live scan, meta/schema generators, sitemap, agent-readiness (`llms.txt`, markdown negotiation), optional blog |
-| **M5 — Ecosystem** | In progress | Framework adapters (Next, SvelteKit, Express, Nitro), Postgres/Prisma/Kysely storage ✓; docs site polish ongoing |
+| **M5 — Ecosystem** | Done | Framework adapters (Hono, Express, Next, Nitro; SvelteKit/Astro via `createHandler`); Postgres + Prisma/Kysely storage; `@rankmyseo/client` / collector; Vue/Svelte headless; SEO regression CLI; docs site (`apps/docs`) |
 
-**Beyond M5 (exploratory, unscheduled):** WordPress plugin (PHP wrapper around the server) and a hosted SaaS tier with paid SERP providers (kept out of OSS by design).
+**Beyond M5 (exploratory, unscheduled):** WordPress plugin (PHP wrapper around the server), Vue/Svelte UI widgets (headless clients ship today; React `@rankmyseo/ui` only for prebuilt widgets), and a hosted SaaS tier with paid SERP providers (kept out of OSS by design).
 
 Exact internal milestone detail is in the local `PRD.md` (gitignored, not published).
 
 ## What's in OSS today
 
-- Full monorepo: core, storage, server, react, ui, agent, cli
-- Reference dashboard and playground apps
+- Full monorepo: core, storage (+ prisma/kysely), server adapters, react/vue/svelte, ui, agent, cli, client, collector
+- Reference dashboard, playground, and Astro docs app
 - Fixture + GSC datasource adapters
 - Blog module (API + BlogManager widget)
-- Website scan and meta generation
+- Website scan, meta generation, SEO regression gate
 - Apache-2.0 license
 
 ## What's not in OSS (yet)
@@ -50,6 +50,7 @@ Exact internal milestone detail is in the local `PRD.md` (gitignored, not publis
 - Paid SERP rank providers
 - Hosted SaaS deployment
 - WordPress plugin package
+- Vue / Svelte prebuilt UI widgets (deferred; use headless packages)
 
 ## Links
 

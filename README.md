@@ -1,10 +1,25 @@
 # RankMySEO
 
-An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript ecosystem. Drop it into any JS/TS app — Next.js, Hono, SvelteKit, Express, Workers, plain Node — with keyword/rank tracking, SEO audits, persistent reports, an AI agent layer, and a customizable dashboard.
+An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript ecosystem. Drop it into any JS/TS app — Next.js, Hono, SvelteKit, Express, Nuxt/Nitro, Astro, plain Node — with keyword/rank tracking, SEO audits, persistent reports, an AI agent layer, and a customizable dashboard.
 
-**Status:** M1–M4 feature verticals implemented (offline-verified with fixture datasource + mock LLM). Published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.1.x).
+**Status:** M0–M5 implemented (ecosystem adapters shipped). Offline-verified with fixture datasource + mock LLM. Published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.3.x).
 
-**Documentation:** [GitHub Wiki](https://github.com/madebyaris/rankmyseo/wiki) (source: [`docs/wiki/`](./docs/wiki/))
+**Documentation:** [GitHub Wiki](https://github.com/madebyaris/rankmyseo/wiki) (source: [`docs/wiki/`](./docs/wiki/)) · local docs app: `pnpm --filter @rankmyseo/docs dev`
+
+## Support matrix
+
+| Surface | Status |
+| --- | --- |
+| Node.js ≥ 20 (full stack) | Yes |
+| Edge / Cloudflare Workers (full stack) | **No** |
+| Server adapters (Hono / Express / Next / Nitro) | Yes |
+| SvelteKit / Astro (`createHandler`) | Yes |
+| React UI widgets | Yes |
+| Vue / Svelte headless | Yes |
+| Vue / Svelte UI widgets | Deferred |
+| SQLite + Postgres (Drizzle / Prisma / Kysely) | Yes |
+| MySQL | No |
+| SEO regression CLI | Yes — [wiki](https://github.com/madebyaris/rankmyseo/wiki/SEO-Regression) |
 
 ## Why RankMySEO?
 
@@ -82,15 +97,20 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 | [`@rankmyseo/scheduler`](./packages/scheduler) | `NodeCronScheduler` + `ManualScheduler` for rank ingestion jobs |
 | [`@rankmyseo/server`](./packages/server) | Framework-agnostic HTTP handler (`Request` / `Response`) — full API + site features |
 | [`@rankmyseo/server-hono`](./packages/server-hono) | Hono adapter — `createRankMySeoApp(store, options?)` |
+| [`@rankmyseo/server-express`](./packages/server-express) | Express middleware adapter |
+| [`@rankmyseo/server-next`](./packages/server-next) | Next.js App Router route handlers |
+| [`@rankmyseo/server-nitro`](./packages/server-nitro) | Nitro/h3 (Nuxt) adapter |
 | [`@rankmyseo/agent`](./packages/agent) | AI SDK tools + MCP server for dashboard customization |
 | [`@rankmyseo/scanner`](./packages/scanner) | SSRF-safe live page fetch used by `/scan` and the regression CLI |
+| [`@rankmyseo/client`](./packages/client) | Framework-neutral HTTP client |
+| [`@rankmyseo/collector`](./packages/collector) | On-page SEO signal collector (`web-vitals`) |
 | [`@rankmyseo/react`](./packages/react) | Headless React hooks + on-page collector (`web-vitals`) |
 | [`@rankmyseo/vue`](./packages/vue) | Headless Vue 3 composables + plugin + collector |
 | [`@rankmyseo/svelte`](./packages/svelte) | Headless Svelte 4/5 stores + context + collector |
 | [`@rankmyseo/ui`](./packages/ui) | Widget registry + `DashboardRenderer` (custom `.rms-*` CSS, no Tailwind/shadcn in consumer apps) |
 | [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule`, `doctor`, `regression check` |
 
-## What's working today (M0–M5 storage)
+## What's working today (M0–M5)
 
 | Area | Status |
 | --- | --- |
@@ -108,6 +128,9 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 | Rank ingestion service + scheduler port | ✓ |
 | Datasource adapters (fixture default; GSC real class) | ✓ offline via fixture |
 | React hooks + dashboard widgets (`@rankmyseo/ui`) | ✓ |
+| Vue / Svelte headless clients | ✓ (UI widgets deferred) |
+| Framework adapters (Hono / Express / Next / Nitro + SvelteKit/Astro examples) | ✓ |
+| Framework-neutral client + on-page collector | ✓ |
 | AI agent chat + MCP tools (approval-gated mutating tools via AI SDK `needsApproval`) | ✓ offline via mock LLM |
 | Agent-readiness: sitemap, `llms.txt`, markdown negotiation (for coding agents — not evidenced SEO ranking levers) | ✓ |
 | `rankmyseo.config.ts` schema + CLI scaffold | ✓ |
@@ -124,6 +147,7 @@ Automated tests: expanded store contract tests, server route integration tests, 
 | --- | --- | --- |
 | Playground (manual API UI) | `pnpm dev:playground` | http://localhost:3456 |
 | Dashboard (React reference UI) | `pnpm dev:dashboard` | http://localhost:5173 (proxies API to :3456) |
+| Docs (Astro + `@rankmyseo/client` demo) | `pnpm --filter @rankmyseo/docs dev` | http://localhost:4321 |
 
 Run the playground backend first when using the dashboard demo:
 
@@ -304,10 +328,11 @@ Backend packages use `import 'server-only'` and dependency-cruiser rules to prev
 ## Development
 
 ```bash
-pnpm build           # build all packages
+pnpm build           # build all packages (+ apps with build scripts, including docs)
 pnpm test            # Vitest across all packages
 pnpm dev:playground  # manual test UI on :3456
 pnpm dev:dashboard   # React dashboard demo on :5173
+pnpm --filter @rankmyseo/docs dev  # Astro docs site on :4321
 pnpm typecheck       # TypeScript strict
 pnpm lint            # tsc + dependency-cruiser
 pnpm publint         # package export hygiene
@@ -324,7 +349,7 @@ Monorepo tooling: **pnpm workspaces**, **Turborepo**, **tsup**, **Changesets**, 
 | **M2** | SEO audits, reports | ✓ |
 | **M3** | AI agent + customizable dashboard config | ✓ |
 | **M4** | On-page scoring, sitemap, `llms.txt`, markdown negotiation | ✓ |
-| **M5** | Framework adapters + Postgres/Prisma/Kysely storage | ✓ (storage); docs polish ongoing |
+| **M5** | Framework adapters + Postgres/Prisma/Kysely + client/collector + docs | ✓ |
 
 Details in the [Roadmap wiki page](https://github.com/madebyaris/rankmyseo/wiki/Roadmap-and-License).
 

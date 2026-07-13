@@ -2,6 +2,21 @@
 
 All packages live under `packages/` in the monorepo. Published names are scoped `@rankmyseo/*`.
 
+## Support matrix
+
+| Surface | Status |
+| --- | --- |
+| Node.js ≥ 20 (full stack) | Supported |
+| Edge / Cloudflare Workers (full stack) | **Not supported** |
+| React UI widgets (`@rankmyseo/ui`) | Supported |
+| Vue 3 / Svelte headless | Supported |
+| Vue / Svelte UI widgets | Deferred |
+| SQLite + Postgres (Drizzle) | Supported via `@rankmyseo/storage` |
+| Prisma / Kysely (Postgres) | Supported via optional packages |
+| MySQL | Not supported |
+
+See also [[Architecture]], [[SEO-Regression]], [`@rankmyseo/client`](https://www.npmjs.com/package/@rankmyseo/client), and [`@rankmyseo/collector`](https://www.npmjs.com/package/@rankmyseo/collector).
+
 ## Backend (server-only)
 
 | Package | Description |
@@ -12,7 +27,7 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 | `@rankmyseo/storage-kysely` | Optional Kysely `RankStore` (Postgres) — `createKyselyStore(url)` |
 | `@rankmyseo/datasource` | `FixtureDataSource`, `GscDataSource`, `PsiClient`, factory |
 | `@rankmyseo/scheduler` | `NodeCronScheduler`, `ManualScheduler`, ingest job |
-| `@rankmyseo/server` | Framework-agnostic `createHandler` — full HTTP API |
+| `@rankmyseo/server` | Framework-agnostic `createHandler` — full HTTP API (SvelteKit / Astro) |
 | `@rankmyseo/server-hono` | Hono adapter — `createRankMySeoApp(store, options)` |
 | `@rankmyseo/server-express` | Express middleware — `createRankMySeoExpress(store, options)` |
 | `@rankmyseo/server-next` | Next.js App Router — `createRankMySeoRouteHandlers(store, options)` |
@@ -30,7 +45,7 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 | `@rankmyseo/react` | Headless React hooks + collector re-exports |
 | `@rankmyseo/vue` | Headless Vue 3 composables + plugin + collector |
 | `@rankmyseo/svelte` | Headless Svelte stores + context + collector |
-| `@rankmyseo/ui` | Dashboard widget registry, `DashboardRenderer`, optional blog UI |
+| `@rankmyseo/ui` | Dashboard widget registry, `DashboardRenderer`, optional blog UI (React only) |
 
 ## Apps (private, not published)
 
@@ -38,6 +53,7 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 | --- | --- |
 | `apps/playground` | Hono dev server + SQLite + manual test UI |
 | `apps/dashboard` | React reference dashboard (uses shadcn locally for demo shell; library widgets use `@rankmyseo/ui` CSS) |
+| `apps/docs` | Astro docs / reference site — support matrix + `@rankmyseo/client` dogfood |
 
 ## Dependency rules
 

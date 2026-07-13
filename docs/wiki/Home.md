@@ -4,7 +4,7 @@ Welcome to the **RankMySEO** documentation wiki — an open-source, framework-ag
 
 **Repository:** [github.com/madebyaris/rankmyseo](https://github.com/madebyaris/rankmyseo)  
 **License:** Apache-2.0  
-**Status:** M0–M4 implemented; published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.2.x).
+**Status:** M0–M5 implemented (ecosystem adapters shipped); published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.3.x).
 
 ---
 
@@ -19,6 +19,25 @@ RankMySEO is a **composable npm package set** — not a hosted SaaS iframe. You 
 - Report rollups and customizable dashboard widgets
 - AI agent layer for dashboard customization (AI SDK + MCP)
 - Agent-readiness site features (`llms.txt`, markdown negotiation) for coding agents — not SEO ranking levers
+- Framework adapters (Hono, Express, Next, Nitro) + SvelteKit/Astro via `createHandler`
+- Storage: SQLite + Postgres (Drizzle), optional Prisma / Kysely
+- Headless React / Vue / Svelte clients; React UI widgets; SEO regression CI gate
+
+---
+
+## Support matrix (summary)
+
+| Surface | Support |
+| --- | --- |
+| Node.js ≥ 20 full stack | **Yes** |
+| Edge / Cloudflare Workers (full stack) | **No** |
+| React UI widgets (`@rankmyseo/ui`) | **Yes** |
+| Vue / Svelte headless | **Yes** |
+| Vue / Svelte UI widgets | **Deferred** |
+| SQLite + Postgres (Drizzle / Prisma / Kysely) | **Yes** |
+| MySQL | **No** |
+
+Details: monorepo docs site (`apps/docs`, `pnpm --filter @rankmyseo/docs dev`) and [[Architecture]].
 
 ---
 
@@ -40,6 +59,8 @@ RankMySEO is a **composable npm package set** — not a hosted SaaS iframe. You 
 | Contributing & monorepo dev | [[Development]] |
 | Roadmap & license | [[Roadmap-and-License]] |
 
+External packages: [`@rankmyseo/client`](https://www.npmjs.com/package/@rankmyseo/client) · [`@rankmyseo/collector`](https://www.npmjs.com/package/@rankmyseo/collector) · adapters via [[Packages]].
+
 ---
 
 ## Apps (reference)
@@ -48,6 +69,7 @@ RankMySEO is a **composable npm package set** — not a hosted SaaS iframe. You 
 | --- | --- | --- |
 | Playground (API + manual UI) | `pnpm dev:playground` | http://localhost:3456 |
 | Dashboard (React demo) | `pnpm dev:playground` then `pnpm dev:dashboard` | http://localhost:5173 |
+| Docs site (Astro + client dogfood) | `pnpm --filter @rankmyseo/docs dev` | http://localhost:4321 |
 
 The dashboard proxies API calls to the playground on port **3456**.
 
