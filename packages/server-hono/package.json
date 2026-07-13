@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/server-hono",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Hono adapter for RankMySEO server handler",
   "license": "Apache-2.0",

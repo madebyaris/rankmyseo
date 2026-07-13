@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/ui",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "RankMySEO prebuilt dashboard widgets and renderer",
   "license": "Apache-2.0",

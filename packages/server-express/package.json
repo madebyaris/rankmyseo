@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/server-express",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Express adapter for RankMySEO server handler",
   "license": "Apache-2.0",

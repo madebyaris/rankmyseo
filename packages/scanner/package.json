@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/scanner",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Safe HTTP page scanner for RankMySEO audits and regression checks",
   "license": "Apache-2.0",

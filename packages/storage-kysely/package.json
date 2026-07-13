@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/storage-kysely",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "RankMySEO RankStore adapter backed by Kysely (Postgres)",
   "license": "Apache-2.0",

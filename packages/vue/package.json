@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/vue",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "RankMySEO headless Vue 3 composables (backed by @rankmyseo/client + @rankmyseo/collector)",
   "license": "Apache-2.0",

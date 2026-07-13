@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/react",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "RankMySEO headless React hooks (backed by @rankmyseo/client + @rankmyseo/collector)",
   "license": "Apache-2.0",

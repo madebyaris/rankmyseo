@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/server-nitro",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "description": "Nitro/h3 adapter for RankMySEO server handler",
   "license": "Apache-2.0",
