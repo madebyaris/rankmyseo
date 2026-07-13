@@ -195,6 +195,30 @@ async function migrate(db: Kysely<Database>): Promise<void> {
   `.execute(db);
 }
 
+function isPgDuplicateObject(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: unknown }).code === "23505"
+  );
+}
+
+async function migrateWithRetry(db: Kysely<Database>): Promise<void> {
+  let last: unknown;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      await migrate(db);
+      return;
+    } catch (err) {
+      last = err;
+      if (!isPgDuplicateObject(err)) throw err;
+      await new Promise((r) => setTimeout(r, 25 * (attempt + 1)));
+    }
+  }
+  throw last;
+}
+
 export function createKyselyStore(databaseUrl: string): RankStore {
   const pool = new Pool({ connectionString: databaseUrl });
   const db = new Kysely<Database>({
@@ -203,7 +227,7 @@ export function createKyselyStore(databaseUrl: string): RankStore {
 
   let ready: Promise<void> | undefined;
   const ensureReady = () => {
-    ready ??= migrate(db);
+    ready ??= migrateWithRetry(db);
     return ready;
   };
 

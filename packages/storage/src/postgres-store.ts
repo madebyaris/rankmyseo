@@ -187,12 +187,37 @@ async function migrate(pool: pg.Pool): Promise<void> {
   `);
 }
 
+function isPgDuplicateObject(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: unknown }).code === "23505"
+  );
+}
+
+/** Postgres CREATE TABLE IF NOT EXISTS still races on concurrent first creates. */
+async function migrateWithRetry(pool: pg.Pool): Promise<void> {
+  let last: unknown;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      await migrate(pool);
+      return;
+    } catch (err) {
+      last = err;
+      if (!isPgDuplicateObject(err)) throw err;
+      await new Promise((r) => setTimeout(r, 25 * (attempt + 1)));
+    }
+  }
+  throw last;
+}
+
 export function createPostgresStore(databaseUrl: string): RankStore {
   const pool = new Pool({ connectionString: databaseUrl });
   const db = drizzle(pool, { schema: postgresSchema });
   let ready: Promise<void> | undefined;
   const ensureReady = () => {
-    ready ??= migrate(pool);
+    ready ??= migrateWithRetry(pool);
     return ready;
   };
 

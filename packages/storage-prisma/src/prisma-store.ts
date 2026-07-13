@@ -195,6 +195,30 @@ async function ensureSchema(prisma: PrismaClient): Promise<void> {
   }
 }
 
+function isPgDuplicateObject(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: unknown }).code === "23505"
+  );
+}
+
+async function ensureSchemaWithRetry(prisma: PrismaClient): Promise<void> {
+  let last: unknown;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      await ensureSchema(prisma);
+      return;
+    } catch (err) {
+      last = err;
+      if (!isPgDuplicateObject(err)) throw err;
+      await new Promise((r) => setTimeout(r, 25 * (attempt + 1)));
+    }
+  }
+  throw last;
+}
+
 export function createPrismaStore(datasourceUrl: string): RankStore {
   if (!datasourceUrl) {
     throw new Error(
@@ -207,7 +231,7 @@ export function createPrismaStore(datasourceUrl: string): RankStore {
 
   let ready: Promise<void> | undefined;
   const ensureReady = () => {
-    ready ??= ensureSchema(prisma);
+    ready ??= ensureSchemaWithRetry(prisma);
     return ready;
   };
 

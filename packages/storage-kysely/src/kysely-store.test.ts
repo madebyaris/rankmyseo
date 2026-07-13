@@ -4,7 +4,9 @@ import { runStoreContractTests } from "@rankmyseo/core/testing";
 import { createKyselyStore } from "./kysely-store.js";
 
 const postgresUrl =
-  process.env.RANKMYSEO_POSTGRES_URL ?? process.env.DATABASE_URL;
+  process.env.RANKMYSEO_KYSELY_URL ??
+  process.env.RANKMYSEO_POSTGRES_URL ??
+  process.env.DATABASE_URL;
 
 describe.skipIf(!postgresUrl)(
   "kysely store contract (requires RANKMYSEO_POSTGRES_URL or DATABASE_URL)",
