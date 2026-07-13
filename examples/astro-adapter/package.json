@@ -1,0 +1,22 @@
+{
+  "name": "@rankmyseo/example-astro-adapter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Executable Astro API route fixture for RankMySEO (native Request/Response)",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rankmyseo/core": "workspace:*",
+    "@rankmyseo/server": "workspace:*",
+    "@rankmyseo/storage": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

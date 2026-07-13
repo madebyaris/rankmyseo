@@ -15,7 +15,10 @@
       "@rankmyseo/scheduler",
       "@rankmyseo/scanner",
       "@rankmyseo/server",
+      "@rankmyseo/server-express",
       "@rankmyseo/server-hono",
+      "@rankmyseo/server-next",
+      "@rankmyseo/server-nitro",
       "@rankmyseo/storage",
       "@rankmyseo/ui",
       "rankmyseo"

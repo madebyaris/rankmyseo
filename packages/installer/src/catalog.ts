@@ -39,6 +39,24 @@ export const PACKAGE_CATALOG: RankPackage[] = [
     peers: ["hono@^4.0.0"],
   },
   {
+    name: "@rankmyseo/server-express",
+    description: "Express middleware adapter",
+    tier: "backend",
+    peers: ["express@^4.0.0 || ^5.0.0"],
+  },
+  {
+    name: "@rankmyseo/server-next",
+    description: "Next.js App Router adapter",
+    tier: "backend",
+    peers: ["next@>=14.0.0"],
+  },
+  {
+    name: "@rankmyseo/server-nitro",
+    description: "Nitro/h3 (Nuxt) adapter",
+    tier: "backend",
+    peers: ["h3@^1.0.0"],
+  },
+  {
     name: "@rankmyseo/scanner",
     description: "Safe HTTP page scanner used by /scan and regression CLI",
     tier: "backend",

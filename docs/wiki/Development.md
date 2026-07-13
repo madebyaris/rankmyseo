@@ -42,6 +42,9 @@ rankmyseo/
 │   ├── scheduler/     # Ingestion jobs
 │   ├── server/        # HTTP routes
 │   ├── server-hono/   # Hono adapter
+│   ├── server-express/# Express adapter
+│   ├── server-next/   # Next.js App Router adapter
+│   ├── server-nitro/  # Nitro/h3 adapter
 │   ├── react/         # Hooks + provider
 │   ├── ui/            # Widget components + CSS
 │   ├── agent/         # AI agent tools
