@@ -4,7 +4,9 @@ import { runStoreContractTests } from "@rankmyseo/core/testing";
 import { createPrismaStore } from "./prisma-store.js";
 
 const postgresUrl =
-  process.env.RANKMYSEO_POSTGRES_URL ?? process.env.DATABASE_URL;
+  process.env.RANKMYSEO_PRISMA_URL ??
+  process.env.RANKMYSEO_POSTGRES_URL ??
+  process.env.DATABASE_URL;
 
 describe.skipIf(!postgresUrl)(
   "prisma store contract (requires RANKMYSEO_POSTGRES_URL or DATABASE_URL)",

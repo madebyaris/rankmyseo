@@ -29,7 +29,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      RANKMYSEO_POSTGRES_URL: postgres://test:test@localhost:5432/rankmyseo
+      # Isolate adapters so parallel turbo packages do not race on CREATE TABLE.
+      RANKMYSEO_POSTGRES_URL: postgres://test:test@localhost:5432/rankmyseo_drizzle
+      RANKMYSEO_PRISMA_URL: postgres://test:test@localhost:5432/rankmyseo_prisma
+      RANKMYSEO_KYSELY_URL: postgres://test:test@localhost:5432/rankmyseo_kysely
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +45,9 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare Postgres databases
+        run: pnpm --filter @rankmyseo/storage exec node ./scripts/prepare-ci-postgres.mjs
 
       - name: Build
         run: pnpm build
