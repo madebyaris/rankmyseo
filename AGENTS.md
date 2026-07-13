@@ -8,6 +8,8 @@ This file is for **AI coding agents** (Cursor, Claude Code, Copilot, etc.) wirin
 | --- | --- |
 | API-only backend (Hono) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-hono`, `hono` |
 | + Headless React hooks | add `@rankmyseo/react`, `react` |
+| + Framework-neutral HTTP client | add `@rankmyseo/client` (Vue/Svelte/Astro/vanilla) |
+| + Browser page collector | add `@rankmyseo/collector` |
 | + Prebuilt dashboard widgets | add `@rankmyseo/ui`, `react-dom` |
 | + CLI (`init`, `migrate`, `schedule`, `doctor`) | add `@rankmyseo/cli` (dev) or use `rankmyseo` meta installer |
 | + AI chat tools / MCP | add `@rankmyseo/agent`, configure `agentModel` on the server handler |

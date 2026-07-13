@@ -49,6 +49,16 @@ export const PACKAGE_CATALOG: RankPackage[] = [
     tier: "backend",
   },
   {
+    name: "@rankmyseo/client",
+    description: "Framework-neutral HTTP client for the RankMySEO API",
+    tier: "frontend",
+  },
+  {
+    name: "@rankmyseo/collector",
+    description: "On-page SEO signal collector with web-vitals",
+    tier: "frontend",
+  },
+  {
     name: "@rankmyseo/react",
     description: "Headless React hooks + on-page collector",
     tier: "frontend",

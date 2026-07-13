@@ -4,13 +4,13 @@ module.exports = {
     {
       name: "backend-not-in-client-tier",
       comment:
-        "Backend packages (@rankmyseo/storage, @rankmyseo/server) must not be imported from future client-tier packages.",
+        "Backend packages must not be imported from client-tier packages (react/vue/svelte/ui/client/collector).",
       severity: "error",
       from: {
-        path: "^packages/(react|vue|svelte|ui)",
+        path: "^packages/(react|vue|svelte|ui|client|collector)(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|agent|datasource|scheduler|scanner|cli)",
+        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli)(/|$)",
       },
     },
     {
@@ -18,10 +18,22 @@ module.exports = {
       comment: "@rankmyseo/ui must not import backend packages directly.",
       severity: "error",
       from: {
-        path: "^packages/ui",
+        path: "^packages/ui(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|agent|datasource|scheduler|scanner|cli)",
+        path: "^packages/(storage|server|agent|datasource|scheduler|scanner|cli)(/|$)",
+      },
+    },
+    {
+      name: "client-no-backend",
+      comment:
+        "@rankmyseo/client must not import backend or framework UI packages.",
+      severity: "error",
+      from: {
+        path: "^packages/client(/|$)",
+      },
+      to: {
+        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli|react|vue|svelte|ui|collector)(/|$)",
       },
     },
     {
@@ -29,10 +41,10 @@ module.exports = {
       comment: "@rankmyseo/core must not depend on storage, server, or frameworks.",
       severity: "error",
       from: {
-        path: "^packages/core",
+        path: "^packages/core(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli)|^hono$|^drizzle-orm",
+        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli|client|collector|react|vue|svelte|ui)(/|$)|^hono$|^drizzle-orm",
       },
     },
   ],

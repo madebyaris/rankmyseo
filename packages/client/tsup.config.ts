@@ -6,12 +6,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: true,
-  external: [
-    "react",
-    "react-dom",
-    "@rankmyseo/client",
-    "@rankmyseo/collector",
-    "@rankmyseo/core",
-    "@rankmyseo/core/schemas",
-  ],
+  external: ["@rankmyseo/core", "@rankmyseo/core/schemas"],
 });

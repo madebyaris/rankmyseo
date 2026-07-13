@@ -205,6 +205,56 @@ importers:
         specifier: ^3.2.4
         version: 3.2.6(@types/node@24.13.2)(happy-dom@20.10.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)
 
+  packages/client:
+    dependencies:
+      '@rankmyseo/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.13.2
+      publint:
+        specifier: ^0.3.15
+        version: 0.3.21
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.6(@types/node@24.13.2)(happy-dom@20.10.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)
+
+  packages/collector:
+    dependencies:
+      '@rankmyseo/core':
+        specifier: workspace:*
+        version: link:../core
+      web-vitals:
+        specifier: ^5.1.0
+        version: 5.3.0
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.13.2
+      happy-dom:
+        specifier: ^20.0.11
+        version: 20.10.6
+      publint:
+        specifier: ^0.3.15
+        version: 0.3.21
+      tsup:
+        specifier: ^8.5.0
+        version: 8.5.1(jiti@2.7.0)(postcss@8.5.15)(tsx@4.22.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.6(@types/node@24.13.2)(happy-dom@20.10.6)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.4)
+
   packages/core:
     dependencies:
       jiti:
@@ -300,12 +350,15 @@ importers:
 
   packages/react:
     dependencies:
+      '@rankmyseo/client':
+        specifier: workspace:*
+        version: link:../client
+      '@rankmyseo/collector':
+        specifier: workspace:*
+        version: link:../collector
       '@rankmyseo/core':
         specifier: workspace:*
         version: link:../core
-      web-vitals:
-        specifier: ^5.1.0
-        version: 5.3.0
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.0

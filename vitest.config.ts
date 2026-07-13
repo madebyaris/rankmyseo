@@ -14,6 +14,8 @@ export default defineConfig({
       "packages/datasource",
       "packages/scheduler",
       "packages/scanner",
+      "packages/client",
+      "packages/collector",
       "packages/react",
       "packages/ui",
     ],
