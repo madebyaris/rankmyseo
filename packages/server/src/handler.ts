@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { LanguageModel } from "ai";
 import {
   defineConfig,
@@ -25,6 +23,11 @@ export { apiError, isApiErrorResponse } from "./errors.js";
 export interface HandlerOptions {
   config?: RankMySeoConfig;
   agentModel?: LanguageModel;
+  /**
+   * Optional mount prefix (e.g. `/api/rankmyseo`). When set, matching requests
+   * are rewritten so route matching sees paths like `/keywords`.
+   */
+  basePath?: string;
   /**
    * Optional authorization hook. Scope headers select tenant/project — they do
    * not authenticate. Integrators should validate the caller against `scope`.
@@ -55,11 +58,58 @@ const defaultConfig = defineConfig({
   sitemapRoutes: ["/"],
 });
 
+/** Normalize a mount prefix to `/path` or empty string for root. */
+export function normalizeBasePath(basePath?: string): string {
+  if (!basePath || basePath === "/") return "";
+  const withLeading = basePath.startsWith("/") ? basePath : `/${basePath}`;
+  return withLeading.replace(/\/+$/, "");
+}
+
+/**
+ * Strip a mount prefix from a pathname. Returns `null` when the path is
+ * outside the mount (caller should 404).
+ */
+export function stripBasePath(
+  pathname: string,
+  basePath?: string,
+): string | null {
+  const normalized = normalizeBasePath(basePath);
+  const clean = pathname.replace(/\/+$/, "") || "/";
+  if (!normalized) return clean;
+  if (clean === normalized) return "/";
+  if (clean.startsWith(`${normalized}/`)) {
+    return clean.slice(normalized.length) || "/";
+  }
+  return null;
+}
+
+/** Rewrite `request.url` so pathname is relative to `basePath`. */
+export function rewriteRequestBasePath(
+  request: Request,
+  basePath?: string,
+): Request | null {
+  const normalized = normalizeBasePath(basePath);
+  if (!normalized) return request;
+
+  const url = new URL(request.url);
+  const stripped = stripBasePath(url.pathname, normalized);
+  if (stripped === null) return null;
+
+  url.pathname = stripped;
+  return new Request(url, request);
+}
+
 export function createHandler(store: RankStore, options: HandlerOptions = {}) {
   const config = options.config ?? defaultConfig;
+  const basePath = normalizeBasePath(options.basePath);
 
   return async (request: Request): Promise<Response> => {
-    const url = new URL(request.url);
+    const rewritten = rewriteRequestBasePath(request, basePath);
+    if (rewritten === null) {
+      return apiError("Not found", 404, { code: "NOT_FOUND" });
+    }
+
+    const url = new URL(rewritten.url);
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
     const sitePathsWithoutScope = ["/sitemap.xml", "/llms.txt", "/"];
@@ -67,21 +117,21 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
 
     let scope = { tenantId: config.tenantId, projectId: config.projectId };
     if (needsScope) {
-      const parsed = readScope(request);
+      const parsed = readScope(rewritten);
       if (parsed instanceof Response) return parsed;
       scope = parsed;
-    } else if (request.headers.get("x-tenant-id")) {
-      const parsed = readScope(request);
+    } else if (rewritten.headers.get("x-tenant-id")) {
+      const parsed = readScope(rewritten);
       if (!(parsed instanceof Response)) scope = parsed;
     }
 
     if (options.authorize) {
-      const denied = await options.authorize(request, scope);
+      const denied = await options.authorize(rewritten, scope);
       if (denied instanceof Response) return denied;
     }
 
     try {
-      const response = await dispatchRoute(request, {
+      const response = await dispatchRoute(rewritten, {
         store,
         scope,
         config,

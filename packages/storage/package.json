@@ -48,8 +48,7 @@
   "dependencies": {
     "@rankmyseo/core": "workspace:*",
     "better-sqlite3": "^12.4.1",
-    "drizzle-orm": "^0.44.7",
-    "server-only": "^0.0.1"
+    "drizzle-orm": "^0.44.7"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

@@ -1,5 +1,3 @@
-import "server-only";
-
 import { randomUUID } from "node:crypto";
 import type { LanguageModel, UIMessage } from "ai";
 import {
@@ -24,9 +22,6 @@ import {
   type RankStore,
   type TenantScope,
 } from "@rankmyseo/core";
-import { streamAgentChat } from "@rankmyseo/agent";
-import { ScanError, scanPage } from "@rankmyseo/scanner";
-import { PsiClient } from "@rankmyseo/datasource";
 import {
   buildLlmsTxt,
   buildSitemapXml,
@@ -224,6 +219,7 @@ addRoute("POST", /^\/scan$/, async (request, ctx) => {
     });
   }
 
+  const { ScanError, scanPage } = await import("@rankmyseo/scanner");
   let snapshot;
   try {
     snapshot = await scanPage(parsed.data.url, {
@@ -250,6 +246,7 @@ addRoute("POST", /^\/scan$/, async (request, ctx) => {
   let signals = snapshot.signals;
   if (ctx.includeWebVitals) {
     try {
+      const { PsiClient } = await import("@rankmyseo/datasource");
       const psi = new PsiClient({ apiKey: ctx.psiApiKey });
       signals = await psi.enrichPageSignals(signals, "lab");
     } catch {
@@ -516,6 +513,7 @@ addRoute("POST", /^\/agent\/chat$/, async (request, ctx) => {
     });
   }
 
+  const { streamAgentChat } = await import("@rankmyseo/agent");
   const result = await streamAgentChat({
     store: ctx.store,
     scope: ctx.scope,

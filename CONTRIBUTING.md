@@ -61,7 +61,7 @@ See `packages/server-hono/src/smoke.test.ts` for the Hono reference adapter.
 
 ## Layer boundaries
 
-- Backend packages are **server-only** (`core` engines excepted for types/schemas).
+- Backend packages target **Node.js ≥ 20** (not edge/Workers for the full stack).
 - `@rankmyseo/react` and `@rankmyseo/ui` must not import storage, datasource, scheduler, agent, cli, or server.
 - `pnpm lint` runs dependency-cruiser to enforce these boundaries.
 

@@ -50,7 +50,6 @@
     "@rankmyseo/core": "workspace:*",
     "@rankmyseo/datasource": "workspace:*",
     "@rankmyseo/scanner": "workspace:*",
-    "server-only": "^0.0.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

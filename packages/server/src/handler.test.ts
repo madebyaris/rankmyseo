@@ -390,4 +390,45 @@ describe("createHandler routes", () => {
     const body = (await res.json()) as { code?: string };
     expect(body.code).toBe("VALIDATION_ERROR");
   });
+
+  it("mounts under basePath and rewrites route matching", async () => {
+    const store = createSqliteStore(":memory:");
+    await store.projects.create({
+      id: "project-1",
+      tenantId: "tenant-a",
+      name: "Demo",
+      domain: "example.com",
+    });
+    const mounted = createHandler(store, {
+      basePath: "/api/rankmyseo",
+      config: defineConfig({
+        databaseUrl: "sqlite://:memory:",
+        tenantId: "tenant-a",
+        projectId: "project-1",
+        dataSources: [{ provider: "fixture", default: true }],
+        schedule: { cron: "0 6 * * *", enabled: false },
+        siteFeatures: {
+          sitemap: true,
+          llmsTxt: true,
+          collector: true,
+          markdownNegotiation: true,
+          blog: false,
+        },
+      }),
+    });
+
+    const ok = await mounted(
+      new Request("http://localhost/api/rankmyseo/projects", {
+        headers: scopeHeaders,
+      }),
+    );
+    expect(ok.status).toBe(200);
+
+    const miss = await mounted(
+      new Request("http://localhost/projects", {
+        headers: scopeHeaders,
+      }),
+    );
+    expect(miss.status).toBe(404);
+  });
 });

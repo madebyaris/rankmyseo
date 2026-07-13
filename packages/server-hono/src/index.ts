@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { RankStore } from "@rankmyseo/core";
 import { createHandler, type HandlerOptions } from "@rankmyseo/server";
 import { Hono } from "hono";

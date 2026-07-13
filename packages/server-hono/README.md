@@ -1,6 +1,6 @@
 # @rankmyseo/server-hono
 
-[Hono](https://hono.dev) adapter for [RankMySEO](https://github.com/madebyaris/rankmyseo) — mounts the full `@rankmyseo/server` API as a Hono app in a few lines. Server-only.
+[Hono](https://hono.dev) adapter for [RankMySEO](https://github.com/madebyaris/rankmyseo) — mounts the full `@rankmyseo/server` API as a Hono app in a few lines. Requires **Node.js ≥ 20**.
 
 ## Install
 
@@ -27,6 +27,12 @@ const config = defineConfig({
 });
 
 export default createRankMySeoApp(store, { config });
+```
+
+Pass `basePath` through options when mounting under a subpath (same as `createHandler`):
+
+```ts
+createRankMySeoApp(store, { config, basePath: "/api/rankmyseo" });
 ```
 
 ## Documentation

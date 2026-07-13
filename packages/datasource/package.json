@@ -46,8 +46,7 @@
     "publint": "publint"
   },
   "dependencies": {
-    "@rankmyseo/core": "workspace:*",
-    "server-only": "^0.0.1"
+    "@rankmyseo/core": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

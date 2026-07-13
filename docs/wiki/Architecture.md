@@ -3,20 +3,20 @@
 ## Three trust tiers
 
 ```
-Backend (server-only)  →  core, server, storage, datasource, scheduler, agent, cli
+Backend (Node)         →  core, server, storage, datasource, scheduler, scanner, agent, cli
 Frontend (client SDK)  →  @rankmyseo/react — HTTP hooks only, no DB or API keys
 Dashboard (UI)         →  @rankmyseo/ui — widgets via react hooks
 ```
 
-Backend packages import `server-only` and are enforced by **dependency-cruiser** rules so secrets and SQLite never leak into client bundles.
+Backend packages are intended for **Node.js ≥ 20** only. Layer boundaries are enforced by **dependency-cruiser** so secrets and SQLite never leak into client bundles. Edge/Workers are **not** supported for the full stack (native SQLite + scanner DNS APIs).
 
 ## Layer diagram
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Your app (Next.js, Hono, Express, Workers, …)          │
+│  Your app (Next.js, Hono, Express, SvelteKit, Astro, Nuxt — Node runtime) │
 ├─────────────────────────────────────────────────────────┤
-│  @rankmyseo/server-hono  or  createHandler (Request)    │
+│  @rankmyseo/server-hono  or  createHandler (Request, optional basePath) │
 ├─────────────────────────────────────────────────────────┤
 │  @rankmyseo/core  — schemas, engines, ports, config     │
 ├──────────────┬──────────────┬──────────────┬────────────┤

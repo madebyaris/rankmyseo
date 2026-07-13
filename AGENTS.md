@@ -53,6 +53,8 @@ x-project-id: <project>
 
 **These headers select scope — they do not authenticate.** Pass `authorize(request, scope)` to `createHandler` / `createRankMySeoApp` to validate the caller. Return a `Response` to deny.
 
+Mount under a subpath with `basePath: "/api/rankmyseo"` on `createHandler` / `createRankMySeoApp` (Node.js ≥ 20; full stack is not edge/Workers compatible).
+
 **Exempt routes** (no scope headers required; default config tenant/project is used):
 
 - `GET /sitemap.xml`
