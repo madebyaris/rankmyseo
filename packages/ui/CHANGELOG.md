@@ -1,5 +1,13 @@
 # @rankmyseo/ui
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [edffa29]
+  - @rankmyseo/react@1.0.0
+  - @rankmyseo/core@1.0.0
+
 ## 0.2.0
 
 ### Minor Changes

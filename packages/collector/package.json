@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/collector",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Framework-neutral on-page SEO signal collector with web-vitals",
   "license": "Apache-2.0",

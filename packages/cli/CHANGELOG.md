@@ -1,5 +1,23 @@
 # @rankmyseo/cli
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [63b1bad]
+- Updated dependencies [edffa29]
+- Updated dependencies [2aa22cb]
+- Updated dependencies [f4a51d8]
+- Updated dependencies [c801bcf]
+- Updated dependencies [2dd96f1]
+- Updated dependencies [649a9bd]
+  - @rankmyseo/installer@1.0.0
+  - @rankmyseo/storage@1.0.0
+  - @rankmyseo/scanner@1.0.0
+  - @rankmyseo/datasource@1.0.0
+  - @rankmyseo/scheduler@1.0.0
+  - @rankmyseo/core@1.0.0
+
 ## 0.3.0
 
 ### Minor Changes

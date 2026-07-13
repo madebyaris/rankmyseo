@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/core",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "RankMySEO core domain models, ports, and conformance tests",
   "license": "Apache-2.0",

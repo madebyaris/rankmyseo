@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/storage",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "RankMySEO storage adapters (Drizzle SQLite + Postgres)",
   "license": "Apache-2.0",

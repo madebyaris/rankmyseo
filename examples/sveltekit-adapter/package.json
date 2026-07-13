@@ -1,7 +1,7 @@
 {
   "name": "@rankmyseo/example-sveltekit-adapter",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "description": "Executable SvelteKit +server.ts fixture for RankMySEO (native Request/Response)",
   "scripts": {
