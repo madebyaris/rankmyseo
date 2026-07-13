@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { DataSourceConfig, RankDataSource } from "@rankmyseo/core";
 import { FixtureDataSource } from "./fixture.js";
 import { GscDataSource, type GscKeyword } from "./gsc.js";

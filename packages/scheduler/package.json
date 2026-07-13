@@ -46,8 +46,7 @@
   },
   "dependencies": {
     "@rankmyseo/core": "workspace:*",
-    "node-cron": "^4.2.1",
-    "server-only": "^0.0.1"
+    "node-cron": "^4.2.1"
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.11",

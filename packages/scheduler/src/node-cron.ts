@@ -1,5 +1,3 @@
-import "server-only";
-
 import cron, { type ScheduledTask } from "node-cron";
 import type { ScheduledJob, Scheduler } from "@rankmyseo/core";
 

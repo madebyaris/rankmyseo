@@ -46,8 +46,7 @@
   },
   "dependencies": {
     "@rankmyseo/core": "workspace:*",
-    "@rankmyseo/server": "workspace:*",
-    "server-only": "^0.0.1"
+    "@rankmyseo/server": "workspace:*"
   },
   "peerDependencies": {
     "hono": "^4.0.0"

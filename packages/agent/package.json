@@ -73,7 +73,6 @@
     "@rankmyseo/core": "workspace:*",
     "@rankmyseo/storage": "workspace:*",
     "ai": "^6.0.116",
-    "server-only": "^0.0.1",
     "zod": "^4.1.12",
     "zod-to-json-schema": "^3.25.1"
   },

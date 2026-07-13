@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { ScheduledJob, Scheduler } from "@rankmyseo/core";
 
 export class ManualScheduler implements Scheduler {

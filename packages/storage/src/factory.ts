@@ -1,5 +1,3 @@
-import "server-only";
-
 import { createSqliteStore } from "./sqlite-store.js";
 
 export function createStore(databaseUrl: string) {

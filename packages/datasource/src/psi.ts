@@ -1,5 +1,3 @@
-import "server-only";
-
 import type { PageSignals } from "@rankmyseo/core";
 
 export interface PsiLabMetrics {
