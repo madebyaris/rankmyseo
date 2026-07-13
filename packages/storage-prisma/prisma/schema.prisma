@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id        String   @id
+  tenantId  String   @map("tenant_id")
+  name      String
+  domain    String
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  @@map("rms_projects")
+}
+
+model Keyword {
+  id        String   @id
+  tenantId  String   @map("tenant_id")
+  projectId String   @map("project_id")
+  text      String
+  country   String
+  device    String
+  tags      Json
+  createdAt DateTime @map("created_at")
+
+  @@map("rms_keywords")
+}
+
+model RankSnapshot {
+  id           String   @id
+  tenantId     String   @map("tenant_id")
+  projectId    String   @map("project_id")
+  keywordId    String   @map("keyword_id")
+  position     Int?
+  url          String?
+  source       String
+  device       String
+  country      String
+  capturedAt   DateTime @map("captured_at")
+  serpFeatures Json?    @map("serp_features")
+
+  @@map("rms_rank_snapshots")
+}
+
+model Audit {
+  id        String   @id
+  tenantId  String   @map("tenant_id")
+  projectId String   @map("project_id")
+  url       String
+  score     Int
+  checks    Json     @default("[]")
+  createdAt DateTime @map("created_at")
+
+  @@map("rms_audits")
+}
+
+model Report {
+  id        String   @id
+  tenantId  String   @map("tenant_id")
+  projectId String   @map("project_id")
+  title     String
+  rangeFrom DateTime @map("from")
+  rangeTo   DateTime @map("to")
+  summary   Json?
+  createdAt DateTime @map("created_at")
+
+  @@map("rms_reports")
+}
+
+model DashboardConfig {
+  id        String   @id
+  tenantId  String   @map("tenant_id")
+  projectId String   @map("project_id")
+  widgets   Json
+  updatedAt DateTime @map("updated_at")
+
+  @@map("rms_dashboard_configs")
+}
+
+model BlogPost {
+  id              String   @id
+  tenantId        String   @map("tenant_id")
+  projectId       String   @map("project_id")
+  title           String
+  slug            String
+  content         String   @default("")
+  targetKeyword   String   @default("") @map("target_keyword")
+  intent          String   @default("informational")
+  metaTitle       String   @default("") @map("meta_title")
+  metaDescription String   @default("") @map("meta_description")
+  status          String   @default("draft")
+  createdAt       DateTime @map("created_at")
+  updatedAt       DateTime @map("updated_at")
+
+  @@map("rms_blog_posts")
+}

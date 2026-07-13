@@ -7,7 +7,9 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 | Package | Description |
 | --- | --- |
 | `@rankmyseo/core` | Zod schemas, audit/meta/report engines, config loader, port interfaces |
-| `@rankmyseo/storage` | Default Drizzle SQLite adapter — `createStore(url)` |
+| `@rankmyseo/storage` | Drizzle adapter — `createStore(url)` for SQLite + Postgres |
+| `@rankmyseo/storage-prisma` | Optional Prisma `RankStore` (Postgres) — `createPrismaStore(url)` |
+| `@rankmyseo/storage-kysely` | Optional Kysely `RankStore` (Postgres) — `createKyselyStore(url)` |
 | `@rankmyseo/datasource` | `FixtureDataSource`, `GscDataSource`, `PsiClient`, factory |
 | `@rankmyseo/scheduler` | `NodeCronScheduler`, `ManualScheduler`, ingest job |
 | `@rankmyseo/server` | Framework-agnostic `createHandler` — full HTTP API |
@@ -45,7 +47,8 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 - `react` / `vue` / `svelte` — depend on `client` + `collector` + `core`
 - `ui` — depends on `core` + `react`
 - `server` — depends on `core`, optionally `agent`
-- Client bundles must **never** import `storage`, `datasource`, `scheduler`, `scanner`, `agent`, `cli`, or `server`
+- `storage` / `storage-prisma` / `storage-kysely` — depend on `core` only (plus their ORM peers)
+- Client bundles must **never** import `storage`, `storage-prisma`, `storage-kysely`, `datasource`, `scheduler`, `scanner`, `agent`, `cli`, or `server`
 
 ## Testing exports
 
@@ -55,14 +58,11 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 - `runServerAdapterContractTests(options)` — HTTP adapter conformance (keywords, snapshots, site routes, scope errors)
 - `newId()` — UUID helper for tests
 
+Postgres contract tests (storage / storage-prisma / storage-kysely) run when `RANKMYSEO_POSTGRES_URL` or `DATABASE_URL` is set; otherwise they skip.
+
 ## Examples
 
 Thin Request/Response fixtures (not full apps) live under `examples/`:
 
 - `examples/sveltekit-adapter` — SvelteKit `+server.ts` pattern
 - `examples/astro-adapter` — Astro `pages/api/.../[...path].ts` pattern
-
-## Planned (M5+)
-
-- Postgres / Prisma / Kysely storage adapters
-- npm publish via Changesets

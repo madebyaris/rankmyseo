@@ -22,6 +22,8 @@
       "@rankmyseo/server-next",
       "@rankmyseo/server-nitro",
       "@rankmyseo/storage",
+      "@rankmyseo/storage-prisma",
+      "@rankmyseo/storage-kysely",
       "@rankmyseo/ui",
       "rankmyseo"
     ]

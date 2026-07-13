@@ -11,7 +11,7 @@ An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript eco
 Most SEO tooling is locked to a single platform or shipped as a hosted SaaS iframe. RankMySEO is a **composable npm package set**:
 
 - **Headless core** — domain logic and ports with zero framework dependencies
-- **Your database** — Drizzle adapter today (SQLite); Postgres/MySQL and optional Prisma/Kysely adapters planned (M5)
+- **Your database** — Drizzle SQLite + Postgres via `@rankmyseo/storage`; optional Prisma / Kysely adapters
 - **Your stack** — thin adapters per framework; the dashboard never touches your DB directly
 - **Multi-tenant ready** — every row is scoped by `tenantId` + `projectId`
 
@@ -75,7 +75,9 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 | --- | --- |
 | [`rankmyseo`](./packages/rankmyseo) | **npm installer** — `npx rankmyseo install` (recommended / full / custom) |
 | [`@rankmyseo/core`](./packages/core) | Zod schemas, audit engine, report rollup, config loader, ports (`RankStore`, `RankDataSource`, `Scheduler`) |
-| [`@rankmyseo/storage`](./packages/storage) | Default Drizzle SQLite adapter (`createStore`) |
+| [`@rankmyseo/storage`](./packages/storage) | Drizzle SQLite + Postgres adapter (`createStore`) |
+| [`@rankmyseo/storage-prisma`](./packages/storage-prisma) | Optional Prisma `RankStore` (Postgres) |
+| [`@rankmyseo/storage-kysely`](./packages/storage-kysely) | Optional Kysely `RankStore` (Postgres) |
 | [`@rankmyseo/datasource`](./packages/datasource) | Fixture (offline default), Google Search Console rank source + PageSpeed Insights client |
 | [`@rankmyseo/scheduler`](./packages/scheduler) | `NodeCronScheduler` + `ManualScheduler` for rank ingestion jobs |
 | [`@rankmyseo/server`](./packages/server) | Framework-agnostic HTTP handler (`Request` / `Response`) — full API + site features |
@@ -88,14 +90,13 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 | [`@rankmyseo/ui`](./packages/ui) | Widget registry + `DashboardRenderer` (custom `.rms-*` CSS, no Tailwind/shadcn in consumer apps) |
 | [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule`, `doctor`, `regression check` |
 
-Planned (M5+): Postgres store adapters, more framework adapters.
-
-## What's working today (M0–M4)
+## What's working today (M0–M5 storage)
 
 | Area | Status |
 | --- | --- |
 | Keyword CRUD + rank snapshots | ✓ |
-| SQLite persistence (audits, reports, dashboard config) | ✓ |
+| SQLite + Postgres persistence (audits, reports, dashboard config) | ✓ |
+| Optional Prisma / Kysely Postgres stores | ✓ |
 | Multi-tenant scoping (`tenantId` + `projectId`) | ✓ |
 | Audit engine + on-page collector (`POST /collect`) | ✓ |
 | Live website scan (`POST /scan` — fetch URL → signals → score + recommendations) | ✓ |
@@ -320,10 +321,10 @@ Monorepo tooling: **pnpm workspaces**, **Turborepo**, **tsup**, **Changesets**, 
 | --- | --- | --- |
 | **M0** | Core ports, SQLite store, Hono adapter, conformance tests | ✓ |
 | **M1** | Datasource, scheduler, React hooks, rank chart widget | ✓ |
-| **M2** | SEO audits, reports | ✓ (SQLite; Postgres deferred to M5) |
+| **M2** | SEO audits, reports | ✓ |
 | **M3** | AI agent + customizable dashboard config | ✓ |
 | **M4** | On-page scoring, sitemap, `llms.txt`, markdown negotiation | ✓ |
-| **M5** | More adapters (Next, SvelteKit, Express), Postgres/Prisma stores, docs site | Planned |
+| **M5** | Framework adapters + Postgres/Prisma/Kysely storage | ✓ (storage); docs polish ongoing |
 
 Details in the [Roadmap wiki page](https://github.com/madebyaris/rankmyseo/wiki/Roadmap-and-License).
 

@@ -11,6 +11,8 @@ This file is for **AI coding agents** (Cursor, Claude Code, Copilot, etc.) wirin
 | API-only backend (Next App Router) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-next` |
 | API-only backend (Nitro / Nuxt) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-nitro`, `h3` |
 | SvelteKit / Astro (native Request/Response) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server` — see `examples/` |
+| Postgres via Prisma | add `@rankmyseo/storage-prisma` (+ `@prisma/client`, `prisma`) instead of / beside Drizzle |
+| Postgres via Kysely | add `@rankmyseo/storage-kysely` |
 | + Headless React hooks | add `@rankmyseo/react`, `react` |
 | + Headless Vue 3 composables | add `@rankmyseo/vue`, `vue` |
 | + Headless Svelte stores | add `@rankmyseo/svelte`, `svelte` |
@@ -205,9 +207,25 @@ JSON Schemas:
 3. **Assuming `/sitemap.xml` needs headers** — it does not.
 4. **`runAudit` tool vs `/scan` route** — the tool scores provided signals; `/scan` fetches a live URL.
 5. **`schedule` is one ingestion pass** — it does not install a cron daemon; use `@rankmyseo/scheduler` in your app for recurring jobs. `schedule.enabled=false` makes the CLI command a no-op.
-6. **`migrate` runs inline DDL** via `createStore()` — not `drizzle-kit migrate`.
+6. **`migrate` runs inline DDL** via `createStore()` — not `drizzle-kit migrate`. For Prisma, prefer `prisma migrate` / `db push` with the schema shipped in `@rankmyseo/storage-prisma` (or rely on first-use `$executeRaw` DDL in tests/dev).
 7. **MCP mutations disabled** — without `RANKMYSEO_MCP_ALLOW_MUTATIONS=1`, mutating tools are not registered.
 8. **Scope headers are not auth** — wire `authorize` on the handler for multi-tenant production.
+9. **MySQL is not supported** — `createStore("mysql://…")` throws; use `sqlite://` or `postgres://` / `postgresql://`.
+
+## Storage URL routing (`@rankmyseo/storage`)
+
+| URL | Behavior |
+| --- | --- |
+| `sqlite://…` / `:memory:` | Drizzle + better-sqlite3 |
+| `postgres://…` / `postgresql://…` | Drizzle + `pg` |
+| `mysql://…` | Throws: `MySQL is not supported; use sqlite:// or postgres://` |
+
+Optional adapters (same `RankStore` contract):
+
+- `createPrismaStore(url)` from `@rankmyseo/storage-prisma`
+- `createKyselyStore(url)` from `@rankmyseo/storage-kysely`
+
+Contract tests for Postgres adapters run when `RANKMYSEO_POSTGRES_URL` or `DATABASE_URL` is set.
 
 ## Error envelope
 

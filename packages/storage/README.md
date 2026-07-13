@@ -1,6 +1,6 @@
 # @rankmyseo/storage
 
-Default storage adapter for [RankMySEO](https://github.com/madebyaris/rankmyseo) — a Drizzle ORM implementation of the `RankStore` port (SQLite today; Postgres/MySQL planned). Server-only.
+Default storage adapter for [RankMySEO](https://github.com/madebyaris/rankmyseo) — a Drizzle ORM implementation of the `RankStore` port for **SQLite** and **Postgres**. Server-only.
 
 ## Install
 
@@ -13,23 +13,39 @@ npm i @rankmyseo/storage @rankmyseo/core
 ```ts
 import { createStore } from "@rankmyseo/storage";
 
-const store = createStore("sqlite:///path/to/db.sqlite");
+// SQLite
+const sqlite = createStore("sqlite:///path/to/db.sqlite");
 
-await store.projects.create({
-  id: "project-1",
-  tenantId: "tenant-a",
-  name: "My Site",
-  domain: "example.com",
-});
+// Postgres
+const postgres = createStore("postgres://user:pass@localhost:5432/rankmyseo");
 ```
 
-The factory selects the dialect from the connection string. Tables are created automatically on first `createStore()` (inline DDL). Use `npx rankmyseo migrate` or `npx rankmyseo-cli migrate` to initialize the database file without starting a server.
+`createStore(url)` routes by scheme:
 
-Not using Drizzle? Implement the `RankStore` port from `@rankmyseo/core` and validate it with `runStoreContractTests()`.
+| URL | Adapter |
+| --- | --- |
+| `sqlite://…` / `:memory:` | Drizzle + better-sqlite3 |
+| `postgres://…` / `postgresql://…` | Drizzle + `pg` |
+| `mysql://…` | **Not supported** — throws a clear error |
+
+Tables are created automatically on first use (inline DDL). Use `npx rankmyseo migrate` or `npx rankmyseo-cli migrate` to initialize without starting a server.
+
+You can also call `createSqliteStore(path)` or `createPostgresStore(url)` directly.
+
+### Contract tests against Postgres
+
+```bash
+export RANKMYSEO_POSTGRES_URL=postgres://test:test@localhost:5432/rankmyseo
+pnpm --filter @rankmyseo/storage test
+```
+
+Tests skip when neither `RANKMYSEO_POSTGRES_URL` nor `DATABASE_URL` is set.
+
+Not using Drizzle? Implement the `RankStore` port from `@rankmyseo/core` (or use `@rankmyseo/storage-prisma` / `@rankmyseo/storage-kysely`) and validate with `runStoreContractTests()`.
 
 ## Documentation
 
-See the [Wiki → Data Sources / Storage](https://github.com/madebyaris/rankmyseo/wiki).
+See the [Wiki → Packages](https://github.com/madebyaris/rankmyseo/wiki/Packages).
 
 ## License
 
