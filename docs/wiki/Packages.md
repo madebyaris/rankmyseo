@@ -12,6 +12,9 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 | `@rankmyseo/scheduler` | `NodeCronScheduler`, `ManualScheduler`, ingest job |
 | `@rankmyseo/server` | Framework-agnostic `createHandler` — full HTTP API |
 | `@rankmyseo/server-hono` | Hono adapter — `createRankMySeoApp(store, options)` |
+| `@rankmyseo/server-express` | Express middleware — `createRankMySeoExpress(store, options)` |
+| `@rankmyseo/server-next` | Next.js App Router — `createRankMySeoRouteHandlers(store, options)` |
+| `@rankmyseo/server-nitro` | Nitro/h3 — `createRankMySeoNitroHandler(store, options)` |
 | `@rankmyseo/agent` | AI SDK tools + MCP server for dashboard/agent chat |
 | `@rankmyseo/scanner` | SSRF-safe page fetch for `/scan` and regression CLI |
 | `@rankmyseo/cli` | `init`, `migrate`, `schedule`, `doctor`, `regression check` |
@@ -46,9 +49,15 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 - `runServerAdapterContractTests(options)` — HTTP adapter conformance (keywords, snapshots, site routes, scope errors)
 - `newId()` — UUID helper for tests
 
-## Planned (M5)
+## Examples
+
+Thin Request/Response fixtures (not full apps) live under `examples/`:
+
+- `examples/sveltekit-adapter` — SvelteKit `+server.ts` pattern
+- `examples/astro-adapter` — Astro `pages/api/.../[...path].ts` pattern
+
+## Planned (M5+)
 
 - `@rankmyseo/vue`, `@rankmyseo/svelte`
-- `@rankmyseo/server-next`
 - Postgres / Prisma / Kysely storage adapters
 - npm publish via Changesets

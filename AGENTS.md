@@ -7,6 +7,10 @@ This file is for **AI coding agents** (Cursor, Claude Code, Copilot, etc.) wirin
 | Goal | Install |
 | --- | --- |
 | API-only backend (Hono) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-hono`, `hono` |
+| API-only backend (Express) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-express`, `express` |
+| API-only backend (Next App Router) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-next` |
+| API-only backend (Nitro / Nuxt) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-nitro`, `h3` |
+| SvelteKit / Astro (native Request/Response) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server` — see `examples/` |
 | + Headless React hooks | add `@rankmyseo/react`, `react` |
 | + Framework-neutral HTTP client | add `@rankmyseo/client` (Vue/Svelte/Astro/vanilla) |
 | + Browser page collector | add `@rankmyseo/collector` |

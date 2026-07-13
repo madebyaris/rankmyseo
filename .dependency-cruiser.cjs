@@ -10,7 +10,7 @@ module.exports = {
         path: "^packages/(react|vue|svelte|ui|client|collector)(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli)(/|$)",
+        path: "^packages/(storage|server|server-hono|server-express|server-next|server-nitro|agent|datasource|scheduler|scanner|cli)(/|$)",
       },
     },
     {
@@ -21,7 +21,7 @@ module.exports = {
         path: "^packages/ui(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|agent|datasource|scheduler|scanner|cli)(/|$)",
+        path: "^packages/(storage|server|server-hono|server-express|server-next|server-nitro|agent|datasource|scheduler|scanner|cli)(/|$)",
       },
     },
     {
@@ -33,7 +33,7 @@ module.exports = {
         path: "^packages/client(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli|react|vue|svelte|ui|collector)(/|$)",
+        path: "^packages/(storage|server|server-hono|server-express|server-next|server-nitro|agent|datasource|scheduler|scanner|cli|react|vue|svelte|ui|collector)(/|$)",
       },
     },
     {
@@ -44,7 +44,7 @@ module.exports = {
         path: "^packages/core(/|$)",
       },
       to: {
-        path: "^packages/(storage|server|server-hono|agent|datasource|scheduler|scanner|cli|client|collector|react|vue|svelte|ui)(/|$)|^hono$|^drizzle-orm",
+        path: "^packages/(storage|server|server-hono|server-express|server-next|server-nitro|agent|datasource|scheduler|scanner|cli|client|collector|react|vue|svelte|ui)(/|$)|^hono$|^express$|^drizzle-orm",
       },
     },
   ],
