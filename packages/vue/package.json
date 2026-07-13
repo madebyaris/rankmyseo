@@ -1,0 +1,67 @@
+{
+  "name": "@rankmyseo/vue",
+  "version": "0.3.0",
+  "type": "module",
+  "description": "RankMySEO headless Vue 3 composables (backed by @rankmyseo/client + @rankmyseo/collector)",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/madebyaris/rankmyseo#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madebyaris/rankmyseo.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/madebyaris/rankmyseo/issues"
+  },
+  "keywords": [
+    "seo",
+    "vue",
+    "composables",
+    "rankmyseo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "publint": "publint"
+  },
+  "dependencies": {
+    "@rankmyseo/client": "workspace:*",
+    "@rankmyseo/collector": "workspace:*",
+    "@rankmyseo/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.0.11",
+    "publint": "^0.3.15",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "vue": "^3.5.22"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

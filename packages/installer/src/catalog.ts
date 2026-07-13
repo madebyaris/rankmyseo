@@ -83,6 +83,18 @@ export const PACKAGE_CATALOG: RankPackage[] = [
     peers: ["react@^18.0.0 || ^19.0.0"],
   },
   {
+    name: "@rankmyseo/vue",
+    description: "Headless Vue 3 composables + on-page collector",
+    tier: "frontend",
+    peers: ["vue@^3.4.0"],
+  },
+  {
+    name: "@rankmyseo/svelte",
+    description: "Headless Svelte stores + on-page collector",
+    tier: "frontend",
+    peers: ["svelte@^4.0.0 || ^5.0.0"],
+  },
+  {
     name: "@rankmyseo/ui",
     description: "Prebuilt dashboard widgets",
     tier: "frontend",

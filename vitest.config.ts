@@ -22,6 +22,8 @@ export default defineConfig({
       "packages/client",
       "packages/collector",
       "packages/react",
+      "packages/vue",
+      "packages/svelte",
       "packages/ui",
     ],
     coverage: {
