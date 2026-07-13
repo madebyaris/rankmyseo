@@ -12,7 +12,9 @@ This file is for **AI coding agents** (Cursor, Claude Code, Copilot, etc.) wirin
 | API-only backend (Nitro / Nuxt) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-nitro`, `h3` |
 | SvelteKit / Astro (native Request/Response) | `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server` — see `examples/` |
 | + Headless React hooks | add `@rankmyseo/react`, `react` |
-| + Framework-neutral HTTP client | add `@rankmyseo/client` (Vue/Svelte/Astro/vanilla) |
+| + Headless Vue 3 composables | add `@rankmyseo/vue`, `vue` |
+| + Headless Svelte stores | add `@rankmyseo/svelte`, `svelte` |
+| + Framework-neutral HTTP client | add `@rankmyseo/client` (Astro/vanilla / custom adapters) |
 | + Browser page collector | add `@rankmyseo/collector` |
 | + Prebuilt dashboard widgets | add `@rankmyseo/ui`, `react-dom` |
 | + CLI (`init`, `migrate`, `schedule`, `doctor`) | add `@rankmyseo/cli` (dev) or use `rankmyseo` meta installer |

@@ -23,7 +23,11 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 
 | Package | Description |
 | --- | --- |
-| `@rankmyseo/react` | Headless React hooks + on-page collector (`web-vitals`) |
+| `@rankmyseo/client` | Framework-neutral HTTP client for the RankMySEO API |
+| `@rankmyseo/collector` | On-page SEO signal collector (`web-vitals`) |
+| `@rankmyseo/react` | Headless React hooks + collector re-exports |
+| `@rankmyseo/vue` | Headless Vue 3 composables + plugin + collector |
+| `@rankmyseo/svelte` | Headless Svelte stores + context + collector |
 | `@rankmyseo/ui` | Dashboard widget registry, `DashboardRenderer`, optional blog UI |
 
 ## Apps (private, not published)
@@ -36,7 +40,9 @@ All packages live under `packages/` in the monorepo. Published names are scoped 
 ## Dependency rules
 
 - `core` — no internal `@rankmyseo/*` deps
-- `react` — depends on `core` only (HTTP client)
+- `client` — depends on `core` only
+- `collector` — depends on `core` (+ `web-vitals`)
+- `react` / `vue` / `svelte` — depend on `client` + `collector` + `core`
 - `ui` — depends on `core` + `react`
 - `server` — depends on `core`, optionally `agent`
 - Client bundles must **never** import `storage`, `datasource`, `scheduler`, `scanner`, `agent`, `cli`, or `server`
@@ -58,6 +64,5 @@ Thin Request/Response fixtures (not full apps) live under `examples/`:
 
 ## Planned (M5+)
 
-- `@rankmyseo/vue`, `@rankmyseo/svelte`
 - Postgres / Prisma / Kysely storage adapters
 - npm publish via Changesets

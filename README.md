@@ -82,11 +82,13 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 | [`@rankmyseo/server-hono`](./packages/server-hono) | Hono adapter — `createRankMySeoApp(store, options?)` |
 | [`@rankmyseo/agent`](./packages/agent) | AI SDK tools + MCP server for dashboard customization |
 | [`@rankmyseo/scanner`](./packages/scanner) | SSRF-safe live page fetch used by `/scan` and the regression CLI |
-| [`@rankmyseo/react`](./packages/react) | Headless hooks + on-page collector (`web-vitals`) |
+| [`@rankmyseo/react`](./packages/react) | Headless React hooks + on-page collector (`web-vitals`) |
+| [`@rankmyseo/vue`](./packages/vue) | Headless Vue 3 composables + plugin + collector |
+| [`@rankmyseo/svelte`](./packages/svelte) | Headless Svelte 4/5 stores + context + collector |
 | [`@rankmyseo/ui`](./packages/ui) | Widget registry + `DashboardRenderer` (custom `.rms-*` CSS, no Tailwind/shadcn in consumer apps) |
 | [`@rankmyseo/cli`](./packages/cli) | `init`, `migrate`, `schedule`, `doctor`, `regression check` |
 
-Planned (M5): `@rankmyseo/vue`, `@rankmyseo/svelte`, `@rankmyseo/server-next`, Postgres store adapters, more framework adapters.
+Planned (M5+): Postgres store adapters, more framework adapters.
 
 ## What's working today (M0–M4)
 

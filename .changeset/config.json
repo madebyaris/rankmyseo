@@ -12,6 +12,8 @@
       "@rankmyseo/datasource",
       "@rankmyseo/installer",
       "@rankmyseo/react",
+      "@rankmyseo/svelte",
+      "@rankmyseo/vue",
       "@rankmyseo/scheduler",
       "@rankmyseo/scanner",
       "@rankmyseo/server",
