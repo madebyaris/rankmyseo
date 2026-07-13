@@ -6,6 +6,8 @@
     [
       "@rankmyseo/agent",
       "@rankmyseo/cli",
+      "@rankmyseo/client",
+      "@rankmyseo/collector",
       "@rankmyseo/core",
       "@rankmyseo/datasource",
       "@rankmyseo/installer",

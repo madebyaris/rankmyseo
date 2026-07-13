@@ -1,6 +1,6 @@
 # @rankmyseo/react
 
-Headless React hooks and on-page collector for [RankMySEO](https://github.com/madebyaris/rankmyseo). Talks to the backend over HTTP with a scoped token — **no DB access or secrets in the browser.**
+Headless React hooks for [RankMySEO](https://github.com/madebyaris/rankmyseo). Talks to the backend over HTTP via `@rankmyseo/client` — **no DB access or secrets in the browser.** On-page collection lives in `@rankmyseo/collector` and is re-exported here.
 
 ## Install
 

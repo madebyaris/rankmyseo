@@ -26,5 +26,7 @@ export { useBlogModule } from "./hooks/use-blog-module.js";
 export {
   collectPageSignals,
   postPageSignals,
+  startPageCollector,
   usePageCollector,
+  type PageCollectorConfig,
 } from "./collector.js";
