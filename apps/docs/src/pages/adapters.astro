@@ -1,0 +1,75 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Adapters" description="RankMySEO server adapters — Hono, Express, Next, Nitro, SvelteKit, Astro.">
+  <h1>Server adapters</h1>
+  <p class="lede">
+    Prefer a thin framework adapter when one exists. SvelteKit and Astro use the framework-agnostic
+    <code>createHandler</code> from <code>@rankmyseo/server</code> (native <code>Request</code> / <code>Response</code>).
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Framework</th>
+        <th>Package / pattern</th>
+        <th>Entry</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Hono</td>
+        <td><code>@rankmyseo/server-hono</code></td>
+        <td><code>createRankMySeoApp(store, options)</code></td>
+      </tr>
+      <tr>
+        <td>Express</td>
+        <td><code>@rankmyseo/server-express</code></td>
+        <td><code>createRankMySeoExpress(store, options)</code></td>
+      </tr>
+      <tr>
+        <td>Next.js App Router</td>
+        <td><code>@rankmyseo/server-next</code></td>
+        <td><code>createRankMySeoRouteHandlers(store, options)</code></td>
+      </tr>
+      <tr>
+        <td>Nitro / Nuxt (h3)</td>
+        <td><code>@rankmyseo/server-nitro</code></td>
+        <td><code>createRankMySeoNitroHandler(store, options)</code></td>
+      </tr>
+      <tr>
+        <td>SvelteKit</td>
+        <td><code>@rankmyseo/server</code> + <code>examples/sveltekit-adapter</code></td>
+        <td><code>createHandler</code> in <code>+server.ts</code></td>
+      </tr>
+      <tr>
+        <td>Astro</td>
+        <td><code>@rankmyseo/server</code> + <code>examples/astro-adapter</code></td>
+        <td><code>createHandler</code> in API catch-all (Node / hybrid output)</td>
+      </tr>
+      <tr>
+        <td>Any Node HTTP</td>
+        <td><code>@rankmyseo/server</code></td>
+        <td><code>createHandler(store, options)</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card">
+    <h3>Runtime note</h3>
+    <p>
+      Mount under Node.js ≥ 20. Full-stack RankMySEO is <strong>not</strong> edge/Workers compatible.
+      Use <code>basePath</code> when nesting under a subpath (e.g. <code>/api/rankmyseo</code>).
+      Scope headers select tenant/project — wire <code>authorize</code> for real auth.
+    </p>
+  </div>
+
+  <p>
+    Related:
+    <a href="https://github.com/madebyaris/rankmyseo/wiki/Architecture">Architecture</a> ·
+    <a href="/demo">Client demo</a> ·
+    <a href="https://www.npmjs.com/package/@rankmyseo/client">@rankmyseo/client</a> ·
+    <a href="https://www.npmjs.com/package/@rankmyseo/collector">@rankmyseo/collector</a>
+  </p>
+</BaseLayout>

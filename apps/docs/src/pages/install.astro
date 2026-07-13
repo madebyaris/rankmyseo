@@ -1,0 +1,82 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Install" description="RankMySEO install decision tree — which packages to add for your stack.">
+  <h1>Install decision tree</h1>
+  <p class="lede">
+    Use the meta installer, or pick packages manually. Recommended preset: core + storage + server-hono + react + cli.
+  </p>
+
+  <h2>Shortcut</h2>
+  <pre><code>npx rankmyseo install --yes --preset recommended</code></pre>
+
+  <h2>By goal</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Goal</th>
+        <th>Install</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>API backend (Hono)</td>
+        <td><code>@rankmyseo/core</code> <code>@rankmyseo/storage</code> <code>@rankmyseo/server-hono</code> <code>hono</code></td>
+      </tr>
+      <tr>
+        <td>API backend (Express)</td>
+        <td><code>@rankmyseo/core</code> <code>@rankmyseo/storage</code> <code>@rankmyseo/server-express</code> <code>express</code></td>
+      </tr>
+      <tr>
+        <td>Next.js App Router</td>
+        <td><code>@rankmyseo/core</code> <code>@rankmyseo/storage</code> <code>@rankmyseo/server-next</code></td>
+      </tr>
+      <tr>
+        <td>Nitro / Nuxt</td>
+        <td><code>@rankmyseo/core</code> <code>@rankmyseo/storage</code> <code>@rankmyseo/server-nitro</code> <code>h3</code></td>
+      </tr>
+      <tr>
+        <td>SvelteKit / Astro</td>
+        <td><code>@rankmyseo/core</code> <code>@rankmyseo/storage</code> <code>@rankmyseo/server</code> — see <code>examples/</code></td>
+      </tr>
+      <tr>
+        <td>Postgres via Prisma</td>
+        <td>add <code>@rankmyseo/storage-prisma</code> (+ <code>@prisma/client</code>, <code>prisma</code>)</td>
+      </tr>
+      <tr>
+        <td>Postgres via Kysely</td>
+        <td>add <code>@rankmyseo/storage-kysely</code></td>
+      </tr>
+      <tr>
+        <td>Headless React</td>
+        <td>add <code>@rankmyseo/react</code>, <code>react</code></td>
+      </tr>
+      <tr>
+        <td>Headless Vue / Svelte</td>
+        <td>add <code>@rankmyseo/vue</code> or <code>@rankmyseo/svelte</code></td>
+      </tr>
+      <tr>
+        <td>Framework-neutral HTTP client</td>
+        <td>add <code>@rankmyseo/client</code></td>
+      </tr>
+      <tr>
+        <td>On-page collector</td>
+        <td>add <code>@rankmyseo/collector</code></td>
+      </tr>
+      <tr>
+        <td>Prebuilt widgets</td>
+        <td>add <code>@rankmyseo/ui</code>, <code>react-dom</code> (React only)</td>
+      </tr>
+      <tr>
+        <td>SEO regression CI</td>
+        <td>add <code>@rankmyseo/cli</code> (+ scanner via CLI deps), configure <code>regression</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Integrator notes: <a href="https://github.com/madebyaris/rankmyseo/blob/main/AGENTS.md">AGENTS.md</a>
+    · Packages: <a href="https://github.com/madebyaris/rankmyseo/wiki/Packages">Wiki → Packages</a>
+  </p>
+</BaseLayout>

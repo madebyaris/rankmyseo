@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Storage" description="RankMySEO storage options — SQLite, Postgres Drizzle, Prisma, Kysely.">
+  <h1>Storage options</h1>
+  <p class="lede">
+    Default path: <code>createStore(url)</code> from <code>@rankmyseo/storage</code> (Drizzle).
+    Optional packages implement the same <code>RankStore</code> contract for Prisma and Kysely.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Option</th>
+        <th>Package</th>
+        <th>Factory</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>SQLite (Drizzle)</td>
+        <td><code>@rankmyseo/storage</code></td>
+        <td><code>createStore("sqlite://…")</code> or <code>:memory:</code></td>
+      </tr>
+      <tr>
+        <td>Postgres (Drizzle)</td>
+        <td><code>@rankmyseo/storage</code></td>
+        <td><code>createStore("postgres://…")</code></td>
+      </tr>
+      <tr>
+        <td>Postgres (Prisma)</td>
+        <td><code>@rankmyseo/storage-prisma</code></td>
+        <td><code>createPrismaStore(url)</code></td>
+      </tr>
+      <tr>
+        <td>Postgres (Kysely)</td>
+        <td><code>@rankmyseo/storage-kysely</code></td>
+        <td><code>createKyselyStore(url)</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Migrations</h2>
+  <ul>
+    <li><code>npx rankmyseo migrate</code> runs inline DDL via <code>createStore()</code> (not <code>drizzle-kit migrate</code>).</li>
+    <li>Prisma: prefer <code>prisma migrate</code> / <code>db push</code> with the schema shipped in <code>@rankmyseo/storage-prisma</code>.</li>
+    <li>Contract tests: <code>runStoreContractTests</code> from <code>@rankmyseo/core/testing</code>. Postgres suites run when <code>RANKMYSEO_POSTGRES_URL</code> or <code>DATABASE_URL</code> is set.</li>
+  </ul>
+
+  <pre><code>import &#123; createStore &#125; from "@rankmyseo/storage";
+// or: createPrismaStore / createKyselyStore from their packages
+
+const store = createStore(process.env.DATABASE_URL!);</code></pre>
+</BaseLayout>

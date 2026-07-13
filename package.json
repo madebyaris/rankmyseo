@@ -11,7 +11,8 @@
     "publint": "turbo run publint",
     "test:coverage": "vitest run --coverage",
     "dev:playground": "pnpm --filter @rankmyseo/playground dev",
-    "dev:dashboard": "pnpm --filter @rankmyseo/dashboard dev"
+    "dev:dashboard": "pnpm --filter @rankmyseo/dashboard dev",
+    "dev:docs": "pnpm --filter @rankmyseo/docs dev"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",

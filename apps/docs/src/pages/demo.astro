@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { createDemoClient } from "../lib/demo-client";
+
+const client = createDemoClient();
+const keywords = await client.keywords.list();
+---
+
+<BaseLayout title="Client demo" description="Dogfood createRankMySeoClient from @rankmyseo/client with a mocked fetch.">
+  <h1>Client demo</h1>
+  <p class="lede">
+    This page imports <code>createRankMySeoClient</code> from <code>@rankmyseo/client</code> in Astro
+    frontmatter. The client points at a mocked <code>baseUrl</code> — no live database required.
+  </p>
+
+  <div class="card">
+    <h3>Resolved config</h3>
+    <p class="mono">
+      baseUrl={client.config.baseUrl}<br />
+      tenantId={client.config.tenantId}<br />
+      projectId={client.config.projectId}
+    </p>
+  </div>
+
+  <h2>keywords.list() (mocked)</h2>
+  <ul class="keyword-list">
+    {
+      keywords.map((kw) => (
+        <li>
+          <span>{kw.text}</span>
+          <span class="mono" style="color: var(--muted)">
+            {kw.device} · {kw.country}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2>Snippet</h2>
+  <pre><code>import &#123; createRankMySeoClient &#125; from "@rankmyseo/client";
+
+const client = createRankMySeoClient(&#123;
+  baseUrl: "/api/rankmyseo",
+  tenantId: "tenant-a",
+  projectId: "project-1",
+  // optional: fetchImpl for tests / static builds
+&#125;);
+
+const keywords = await client.keywords.list();</code></pre>
+
+  <p>
+    Package:
+    <a href="https://www.npmjs.com/package/@rankmyseo/client">@rankmyseo/client</a>
+    · Collector:
+    <a href="https://www.npmjs.com/package/@rankmyseo/collector">@rankmyseo/collector</a>
+  </p>
+</BaseLayout>

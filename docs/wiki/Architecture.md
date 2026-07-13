@@ -3,12 +3,26 @@
 ## Three trust tiers
 
 ```
-Backend (Node)         →  core, server, storage, datasource, scheduler, scanner, agent, cli
-Frontend (client SDK)  →  @rankmyseo/react — HTTP hooks only, no DB or API keys
-Dashboard (UI)         →  @rankmyseo/ui — widgets via react hooks
+Backend (Node)         →  core, server(+adapters), storage(+prisma/kysely), datasource, scheduler, scanner, agent, cli
+Frontend (client SDK)  →  @rankmyseo/client + react / vue / svelte — HTTP only, no DB or API keys
+Dashboard (UI)         →  @rankmyseo/ui — React widgets via react hooks (Vue/Svelte UI widgets deferred)
 ```
 
 Backend packages are intended for **Node.js ≥ 20** only. Layer boundaries are enforced by **dependency-cruiser** so secrets and SQLite never leak into client bundles. Edge/Workers are **not** supported for the full stack (native SQLite + scanner DNS APIs).
+
+## Support matrix
+
+| Surface | Status |
+| --- | --- |
+| Node.js ≥ 20 full stack | Yes |
+| Edge / Cloudflare Workers full stack | No |
+| Adapters: Hono / Express / Next / Nitro | Yes |
+| SvelteKit / Astro via `createHandler` | Yes (see `examples/`) |
+| React UI widgets | Yes |
+| Vue / Svelte headless | Yes |
+| Vue / Svelte UI widgets | Deferred |
+| Storage: SQLite, Postgres Drizzle, Prisma, Kysely | Yes |
+| MySQL | No |
 
 ## Layer diagram
 
@@ -16,17 +30,19 @@ Backend packages are intended for **Node.js ≥ 20** only. Layer boundaries are 
 ┌─────────────────────────────────────────────────────────┐
 │  Your app (Next.js, Hono, Express, SvelteKit, Astro, Nuxt — Node runtime) │
 ├─────────────────────────────────────────────────────────┤
-│  @rankmyseo/server-hono  or  createHandler (Request, optional basePath) │
+│  server-hono / express / next / nitro  or  createHandler │
 ├─────────────────────────────────────────────────────────┤
 │  @rankmyseo/core  — schemas, engines, ports, config     │
 ├──────────────┬──────────────┬──────────────┬────────────┤
-│  storage     │  datasource  │  scheduler   │  agent     │
-│  (SQLite)    │  (GSC/fix)   │  (cron)      │  (AI SDK)  │
+│  storage*    │  datasource  │  scheduler   │  agent     │
+│  SQLite/PG   │  (GSC/fix)   │  (cron)      │  (AI SDK)  │
 └──────────────┴──────────────┴──────────────┴────────────┘
          ▲                              ▲
          │                              │
-  @rankmyseo/react (hooks)      @rankmyseo/ui (widgets)
+  client / react / vue / svelte   @rankmyseo/ui (React)
 ```
+
+\* `@rankmyseo/storage` (Drizzle) or optional `@rankmyseo/storage-prisma` / `@rankmyseo/storage-kysely`.
 
 ## Core ports
 

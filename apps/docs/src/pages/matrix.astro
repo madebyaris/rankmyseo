@@ -1,0 +1,119 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Support matrix" description="RankMySEO runtime and UI support matrix — Node, edge, React, Vue, Svelte.">
+  <h1>Runtime support matrix</h1>
+  <p class="lede">
+    Full stack targets <strong>Node.js ≥ 20</strong>. Edge/Workers are unsupported for the API + storage + scanner path.
+    Vue and Svelte ship headless clients; prebuilt UI widgets remain React-only for now.
+  </p>
+
+  <h2>Runtimes</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Runtime</th>
+        <th>Full stack (server + storage + scanner)</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Node.js ≥ 20</td>
+        <td class="status-yes">Yes</td>
+        <td>Primary target for all backend packages</td>
+      </tr>
+      <tr>
+        <td>Edge / Cloudflare Workers</td>
+        <td class="status-no">No</td>
+        <td>Native SQLite + scanner DNS APIs are Node-oriented</td>
+      </tr>
+      <tr>
+        <td>Browser (hooks / client / UI)</td>
+        <td class="status-partial">Client only</td>
+        <td>Talks HTTP to your Node-hosted API — no secrets in the bundle</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Frontend surfaces</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Surface</th>
+        <th>Status</th>
+        <th>Package</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Framework-neutral HTTP client</td>
+        <td class="status-yes">Shipped</td>
+        <td><code>@rankmyseo/client</code></td>
+      </tr>
+      <tr>
+        <td>On-page collector</td>
+        <td class="status-yes">Shipped</td>
+        <td><code>@rankmyseo/collector</code></td>
+      </tr>
+      <tr>
+        <td>React headless hooks</td>
+        <td class="status-yes">Shipped</td>
+        <td><code>@rankmyseo/react</code></td>
+      </tr>
+      <tr>
+        <td>React dashboard widgets</td>
+        <td class="status-yes">Shipped</td>
+        <td><code>@rankmyseo/ui</code></td>
+      </tr>
+      <tr>
+        <td>Vue 3 headless composables</td>
+        <td class="status-yes">Shipped</td>
+        <td><code>@rankmyseo/vue</code></td>
+      </tr>
+      <tr>
+        <td>Svelte headless stores</td>
+        <td class="status-yes">Shipped</td>
+        <td><code>@rankmyseo/svelte</code></td>
+      </tr>
+      <tr>
+        <td>Vue / Svelte UI widgets</td>
+        <td class="status-no">Deferred</td>
+        <td>Use headless + your own UI, or React <code>@rankmyseo/ui</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Databases</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>URL / adapter</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>sqlite://</code> / <code>:memory:</code> (Drizzle)</td>
+        <td class="status-yes">Supported</td>
+      </tr>
+      <tr>
+        <td><code>postgres://</code> / <code>postgresql://</code> (Drizzle)</td>
+        <td class="status-yes">Supported</td>
+      </tr>
+      <tr>
+        <td>Prisma Postgres (<code>@rankmyseo/storage-prisma</code>)</td>
+        <td class="status-yes">Supported</td>
+      </tr>
+      <tr>
+        <td>Kysely Postgres (<code>@rankmyseo/storage-kysely</code>)</td>
+        <td class="status-yes">Supported</td>
+      </tr>
+      <tr>
+        <td><code>mysql://</code></td>
+        <td class="status-no">Not supported</td>
+      </tr>
+    </tbody>
+  </table>
+</BaseLayout>

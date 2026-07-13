@@ -26,6 +26,23 @@ This file is for **AI coding agents** (Cursor, Claude Code, Copilot, etc.) wirin
 
 The **recommended** preset installs: `@rankmyseo/core`, `@rankmyseo/storage`, `@rankmyseo/server-hono`, `@rankmyseo/react`, `@rankmyseo/cli` (+ peers `hono`, `react`).
 
+## Support matrix
+
+| Surface | Status |
+| --- | --- |
+| Node.js ≥ 20 full stack | Yes |
+| Edge / Cloudflare Workers (full stack) | **No** |
+| Adapters: Hono, Express, Next, Nitro | Yes |
+| SvelteKit / Astro via `@rankmyseo/server` `createHandler` | Yes (`examples/`) |
+| React UI widgets (`@rankmyseo/ui`) | Yes |
+| Vue / Svelte headless | Yes |
+| Vue / Svelte UI widgets | Deferred |
+| Storage: sqlite / postgres / prisma / kysely | Yes |
+| MySQL | No |
+| SEO regression CLI | Yes — see [SEO Regression wiki](https://github.com/madebyaris/rankmyseo/wiki/SEO-Regression) |
+
+Docs reference app (dogfoods `@rankmyseo/client`): `pnpm --filter @rankmyseo/docs dev`.
+
 ## CLI commands (real binary names)
 
 | User-facing | Direct CLI binary |
