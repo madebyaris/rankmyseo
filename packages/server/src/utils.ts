@@ -20,7 +20,7 @@ export async function readJson<T>(request: Request): Promise<T | Response> {
   try {
     return (await request.json()) as T;
   } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+    return apiError("Invalid JSON body", 400, { code: "INVALID_JSON" });
   }
 }
 
@@ -45,7 +45,7 @@ export function buildSitemapXml(routes: string[], baseUrl: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
 }
 
-export function buildLlmsTxt(config: RankMySeoConfig): string {
+export function buildLlmsTxt(config: RankMySeoConfig, basePath = ""): string {
   const name = config.llmsTxt?.projectName ?? "RankMySEO Project";
   const summary =
     config.llmsTxt?.summary ??
@@ -55,7 +55,11 @@ export function buildLlmsTxt(config: RankMySeoConfig): string {
   ];
 
   const linkBlock = links.map((l) => `- [${l.title}](${l.url})`).join("\n");
-  return `# ${name}\n\n> ${summary}\n\n## Resources\n\n${linkBlock}\n`;
+  const discovery =
+    config.siteFeatures.apiCatalog === false
+      ? ""
+      : `\n## Discovery\n\n- [API guide](${basePath}/api)\n- [API catalog](${basePath}/.well-known/api-catalog)\n- [ARD manifest](${basePath}/.well-known/ard.json)\n`;
+  return `# ${name}\n\n> ${summary}\n\n## Resources\n\n${linkBlock}\n${discovery}`;
 }
 
 export function pageToMarkdown(pathname: string, title: string): string {
@@ -83,10 +87,12 @@ export function withMarkdownNegotiation(
   }
 
   if (accept && !accept.includes("*/*") && !accept.includes("text/html")) {
-    return Response.json(
-      { error: "Not acceptable", supported: ["text/html", "text/markdown"] },
-      { status: 406, headers: { Vary: "Accept" } },
-    );
+    const response = apiError("Not acceptable", 406, {
+      code: "NOT_ACCEPTABLE",
+      details: { supported: ["text/html", "text/markdown"] },
+    });
+    response.headers.set("Vary", "Accept");
+    return response;
   }
 
   return new Response(html, {

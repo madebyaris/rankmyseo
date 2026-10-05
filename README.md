@@ -2,7 +2,7 @@
 
 An open-source, framework-agnostic SEO toolkit for the JavaScript/TypeScript ecosystem. Drop it into any JS/TS app — Next.js, Hono, SvelteKit, Express, Nuxt/Nitro, Astro, plain Node — with keyword/rank tracking, SEO audits, persistent reports, an AI agent layer, and a customizable dashboard.
 
-**Status:** M0–M5 implemented (ecosystem adapters shipped). Offline-verified with fixture datasource + mock LLM. Published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.3.x).
+**Status:** M0–M5 implemented (ecosystem adapters shipped). Offline-verified with fixture datasource + mock LLM. Repo package versions are **1.0.2** for `@rankmyseo/*` and **1.0.3** for the `rankmyseo` installer.
 
 **Documentation:** [GitHub Wiki](https://github.com/madebyaris/rankmyseo/wiki) (source: [`docs/wiki/`](./docs/wiki/)) · local docs app: `pnpm --filter @rankmyseo/docs dev`
 
@@ -114,7 +114,7 @@ Each package's npm page and the [Wiki](https://github.com/madebyaris/rankmyseo/w
 
 | Area | Status |
 | --- | --- |
-| Keyword CRUD + rank snapshots | ✓ |
+| Keyword create, list, delete, and rank snapshots | ✓ |
 | SQLite + Postgres persistence (audits, reports, dashboard config) | ✓ |
 | Optional Prisma / Kysely Postgres stores | ✓ |
 | Multi-tenant scoping (`tenantId` + `projectId`) | ✓ |
@@ -240,7 +240,7 @@ Most routes require tenant/project headers:
 | `x-tenant-id` | Tenant scope |
 | `x-project-id` | Project scope |
 
-**Exempt:** `GET /sitemap.xml` and `GET /llms.txt` do not require scope headers. `GET /` accepts optional headers (defaults to config tenant/project).
+**Exempt:** `GET /sitemap.xml`, `GET /llms.txt`, `GET /api`, and `GET /.well-known/api-catalog`, `/.well-known/ard.json`, `/.well-known/ai-catalog.json` do not require scope headers. `GET /` accepts optional headers (both together replace the config tenant/project; one header alone leaves the default).
 
 **Scope headers select tenant/project — they are not authentication.** Pass `authorize(request, scope)` to `createHandler` / `createRankMySeoApp` in production.
 
@@ -277,6 +277,10 @@ Most routes require tenant/project headers:
 | `POST` | `/agent/chat` | Stream agent chat (requires `agentModel` in handler options) |
 | `GET` | `/sitemap.xml` | Generated sitemap (opt-in) |
 | `GET` | `/llms.txt` | Agent-readable site summary (opt-in; agent-readiness) |
+| `GET` | `/.well-known/api-catalog` | RFC 9727 API catalog (`application/linkset+json`) |
+| `GET` | `/.well-known/ard.json` | ARD capability manifest |
+| `GET` | `/.well-known/ai-catalog.json` | Same manifest as `ard.json` (predecessor path) |
+| `GET` | `/api` | API guide (HTML or `Accept: text/markdown`) |
 | `GET` | `/` | HTML or markdown (`Accept: text/markdown`, opt-in) |
 
 Example:

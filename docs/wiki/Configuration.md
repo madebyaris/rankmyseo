@@ -71,6 +71,7 @@ export default defineConfig({
 | `siteFeatures.llmsTxt` | boolean | `true` | Serve `GET /llms.txt` |
 | `siteFeatures.collector` | boolean | `true` | Enable `POST /collect` |
 | `siteFeatures.markdownNegotiation` | boolean | `true` | HTML/markdown on `GET /` |
+| `siteFeatures.apiCatalog` | boolean | `true` | RFC 9727 catalog, ARD manifest, and `GET /api` |
 | `siteFeatures.blog` | boolean | `false` | Enable `/blog` CRUD routes |
 | `sitemapRoutes` | string[] | `["/"]` | Paths included in sitemap |
 | `llmsTxt` | object | optional | Content for llms.txt |

@@ -12,7 +12,7 @@ npm i @rankmyseo/core
 
 - **Zod schemas** — `Project`, `Keyword`, `RankSnapshot`, `Audit`, `Report`, `PageSignals`, `DashboardConfig`, …
 - **Audit engine** — `runAuditChecks(signals)` scores a page across 16 on-page checks (title, meta, headings, OG, JSON-LD, HTTPS, indexability, viewport, lang, image alt, content depth, and Core Web Vitals incl. INP).
-- **HTML parser** — `extractPageSignals(html, url)` (dependency-free, runs anywhere).
+- **HTML parser** — `extractPageSignals(html, url)` uses `node-html-parser`. JSON-LD blocks are read from the raw `<script type="application/ld+json">` text.
 - **Recommendations** — `buildAuditRecommendations`, `buildBlogRecommendations`.
 - **Ports** — implement `RankStore` and validate it with `runStoreContractTests()` from `@rankmyseo/core/testing`.
 

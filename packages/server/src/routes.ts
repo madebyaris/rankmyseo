@@ -23,6 +23,16 @@ import {
   type TenantScope,
 } from "@rankmyseo/core";
 import {
+  apiCatalogEnabled,
+  ardEntryJsonLd,
+  buildApiCatalog,
+  buildApiGuide,
+  buildArdEntry,
+  buildArdManifest,
+  discoveryHeadLinks,
+  publicBaseUrl,
+} from "./discovery.js";
+import {
   buildLlmsTxt,
   buildSitemapXml,
   pageToMarkdown,
@@ -41,6 +51,8 @@ export interface RouteContext {
   store: RankStore;
   scope: TenantScope;
   config: RankMySeoConfig;
+  /** Mount prefix already stripped from the request path. Empty at the origin root. */
+  basePath: string;
   agentModel?: LanguageModel;
   includeWebVitals?: boolean;
   psiApiKey?: string;
@@ -79,7 +91,7 @@ addRoute("POST", /^\/projects$/, async (request, ctx) => {
     .omit({ createdAt: true, updatedAt: true })
     .safeParse(body);
   if (!parsed.success) {
-    return Response.json({ error: "Invalid project", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid project", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const project = await ctx.store.projects.create({
     ...parsed.data,
@@ -90,7 +102,7 @@ addRoute("POST", /^\/projects$/, async (request, ctx) => {
 
 addRoute("GET", /^\/projects\/([^/]+)$/, async (_req, ctx, params) => {
   const project = await ctx.store.projects.getById(ctx.scope, params[1]!);
-  if (!project) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!project) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return Response.json({ data: project });
 });
 
@@ -108,7 +120,7 @@ addRoute("POST", /^\/keywords$/, async (request, ctx) => {
     projectId: ctx.scope.projectId,
   });
   if (!parsed.success) {
-    return Response.json({ error: "Invalid keyword", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid keyword", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const keyword = await ctx.store.keywords.create(parsed.data);
   return Response.json({ data: keyword }, { status: 201 });
@@ -116,13 +128,13 @@ addRoute("POST", /^\/keywords$/, async (request, ctx) => {
 
 addRoute("GET", /^\/keywords\/([^/]+)$/, async (_req, ctx, params) => {
   const keyword = await ctx.store.keywords.getById(ctx.scope, params[1]!);
-  if (!keyword) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!keyword) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return Response.json({ data: keyword });
 });
 
 addRoute("DELETE", /^\/keywords\/([^/]+)$/, async (_req, ctx, params) => {
   const deleted = await ctx.store.keywords.delete(ctx.scope, params[1]!);
-  if (!deleted) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!deleted) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return new Response(null, { status: 204 });
 });
 
@@ -135,7 +147,7 @@ addRoute("POST", /^\/snapshots$/, async (request, ctx) => {
     projectId: ctx.scope.projectId,
   });
   if (!parsed.success) {
-    return Response.json({ error: "Invalid snapshot", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid snapshot", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const snapshot = await ctx.store.snapshots.append(parsed.data);
   return Response.json({ data: snapshot }, { status: 201 });
@@ -150,7 +162,7 @@ addRoute("GET", /^\/snapshots$/, async (_req, ctx, _params, url) => {
     to: url.searchParams.get("to"),
   });
   if (!parsed.success) {
-    return Response.json({ error: "Invalid query", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid query", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const data = await ctx.store.snapshots.listByRange(parsed.data);
   return Response.json({ data });
@@ -170,7 +182,7 @@ addRoute("POST", /^\/audits$/, async (request, ctx) => {
     projectId: ctx.scope.projectId,
   });
   if (!parsed.success) {
-    return Response.json({ error: "Invalid audit", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid audit", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const audit = await ctx.store.audits.create({
     ...parsed.data,
@@ -181,19 +193,19 @@ addRoute("POST", /^\/audits$/, async (request, ctx) => {
 
 addRoute("GET", /^\/audits\/([^/]+)$/, async (_req, ctx, params) => {
   const audit = await ctx.store.audits.getById(ctx.scope, params[1]!);
-  if (!audit) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!audit) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return Response.json({ data: audit });
 });
 
 addRoute("POST", /^\/collect$/, async (request, ctx) => {
   if (!ctx.config.siteFeatures.collector) {
-    return Response.json({ error: "Collector disabled" }, { status: 403 });
+    return apiError("Collector disabled", 403, { code: "FEATURE_DISABLED" });
   }
   const body = await readJson<unknown>(request);
   if (body instanceof Response) return body;
   const parsed = pageSignalsSchema.safeParse(body);
   if (!parsed.success) {
-    return Response.json({ error: "Invalid signals", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid signals", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const { checks, score } = runAuditChecks(parsed.data);
   const audit = await ctx.store.audits.create({
@@ -325,10 +337,10 @@ addRoute("POST", /^\/schema\/generate$/, async (request, _ctx) => {
 
   const parsed = schemaGeneratorInputSchema.safeParse(body);
   if (!parsed.success) {
-    return Response.json(
-      { error: "Invalid schema input", details: parsed.error.flatten() },
-      { status: 400 },
-    );
+    return apiError("Invalid schema input", 400, {
+      code: "VALIDATION_ERROR",
+      details: parsed.error.flatten(),
+    });
   }
 
   const schema = generateSchema(parsed.data);
@@ -337,7 +349,7 @@ addRoute("POST", /^\/schema\/generate$/, async (request, _ctx) => {
 
 function blogDisabled(ctx: RouteContext): Response | null {
   if (!ctx.config.siteFeatures.blog) {
-    return Response.json({ error: "Blog module disabled" }, { status: 403 });
+    return apiError("Blog module disabled", 403, { code: "FEATURE_DISABLED" });
   }
   return null;
 }
@@ -360,7 +372,7 @@ addRoute("POST", /^\/blog$/, async (request, ctx) => {
     projectId: ctx.scope.projectId,
   });
   if (!parsed.success) {
-    return Response.json({ error: "Invalid blog post", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid blog post", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
 
   const input = parsed.data;
@@ -396,7 +408,7 @@ addRoute("GET", /^\/blog\/([^/]+)$/, async (_req, ctx, params) => {
   const denied = blogDisabled(ctx);
   if (denied) return denied;
   const post = await ctx.store.blog.getById(ctx.scope, params[1]!);
-  if (!post) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!post) return apiError("Not found", 404, { code: "NOT_FOUND" });
   const recommendations = buildBlogRecommendations({
     intent: post.intent,
     targetKeyword: post.targetKeyword,
@@ -414,10 +426,10 @@ addRoute("PUT", /^\/blog\/([^/]+)$/, async (request, ctx, params) => {
   if (body instanceof Response) return body;
   const parsed = updateBlogPostInputSchema.safeParse(body);
   if (!parsed.success) {
-    return Response.json({ error: "Invalid blog post", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid blog post", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const updated = await ctx.store.blog.update(ctx.scope, params[1]!, parsed.data);
-  if (!updated) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!updated) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return Response.json({ data: updated });
 });
 
@@ -425,7 +437,7 @@ addRoute("DELETE", /^\/blog\/([^/]+)$/, async (_req, ctx, params) => {
   const denied = blogDisabled(ctx);
   if (denied) return denied;
   const deleted = await ctx.store.blog.delete(ctx.scope, params[1]!);
-  if (!deleted) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!deleted) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return new Response(null, { status: 204 });
 });
 
@@ -471,7 +483,7 @@ addRoute("POST", /^\/reports$/, async (request, ctx) => {
 
 addRoute("GET", /^\/reports\/([^/]+)$/, async (_req, ctx, params) => {
   const report = await ctx.store.reports.getById(ctx.scope, params[1]!);
-  if (!report) return Response.json({ error: "Not found" }, { status: 404 });
+  if (!report) return apiError("Not found", 404, { code: "NOT_FOUND" });
   return Response.json({ data: report });
 });
 
@@ -492,7 +504,7 @@ addRoute("PUT", /^\/dashboard$/, async (request, ctx) => {
     updatedAt: new Date(),
   });
   if (!parsed.success) {
-    return Response.json({ error: "Invalid dashboard", details: parsed.error.flatten() }, { status: 400 });
+    return apiError("Invalid dashboard", 400, { code: "VALIDATION_ERROR", details: parsed.error.flatten() });
   }
   const saved = await ctx.store.dashboard.upsert(parsed.data);
   return Response.json({ data: saved });
@@ -535,7 +547,7 @@ addRoute("POST", /^\/agent\/chat$/, async (request, ctx) => {
 
 addRoute("GET", /^\/sitemap\.xml$/, async (_req, ctx) => {
   if (!ctx.config.siteFeatures.sitemap) {
-    return Response.json({ error: "Sitemap disabled" }, { status: 404 });
+    return apiError("Sitemap disabled", 404, { code: "FEATURE_DISABLED" });
   }
   const projects = await ctx.store.projects.list(ctx.scope);
   const domain = projects[0]?.domain ?? "example.com";
@@ -548,20 +560,50 @@ addRoute("GET", /^\/sitemap\.xml$/, async (_req, ctx) => {
 
 addRoute("GET", /^\/llms\.txt$/, async (_req, ctx) => {
   if (!ctx.config.siteFeatures.llmsTxt) {
-    return Response.json({ error: "llms.txt disabled" }, { status: 404 });
+    return apiError("llms.txt disabled", 404, { code: "FEATURE_DISABLED" });
   }
-  const text = buildLlmsTxt(ctx.config);
+  const text = buildLlmsTxt(ctx.config, ctx.basePath);
   return new Response(text, {
     headers: { "Content-Type": "text/markdown; charset=utf-8" },
   });
+});
+
+function discoveryDisabled(): Response {
+  return apiError("API catalog disabled", 404, { code: "FEATURE_DISABLED" });
+}
+
+addRoute("GET", /^\/\.well-known\/api-catalog$/, async (_req, ctx, _params, url) => {
+  if (!apiCatalogEnabled(ctx.config)) return discoveryDisabled();
+  const body = buildApiCatalog(publicBaseUrl(url.href, ctx.basePath), ctx.config);
+  return new Response(JSON.stringify(body), {
+    headers: { "Content-Type": "application/linkset+json; charset=utf-8" },
+  });
+});
+
+addRoute("GET", /^\/\.well-known\/(?:ard|ai-catalog)\.json$/, async (_req, ctx, _params, url) => {
+  if (!apiCatalogEnabled(ctx.config)) return discoveryDisabled();
+  const body = buildArdManifest(publicBaseUrl(url.href, ctx.basePath), ctx.basePath, ctx.config);
+  return Response.json(body);
+});
+
+addRoute("GET", /^\/api$/, async (request, ctx, _params, url) => {
+  if (!apiCatalogEnabled(ctx.config)) return discoveryDisabled();
+  const base = publicBaseUrl(url.href, ctx.basePath);
+  const entry = buildArdEntry(base, ctx.basePath);
+  const guide = buildApiGuide(ctx.basePath);
+  const html = `<!DOCTYPE html><html><head><title>RankMySEO API</title>${discoveryHeadLinks(ctx.basePath)}<script type="application/ld+json">${ardEntryJsonLd(entry)}</script></head><body><h1>RankMySEO API</h1><pre>${guide.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</pre></body></html>`;
+  return withMarkdownNegotiation(request, html, guide, `${ctx.basePath}/api`);
 });
 
 addRoute("GET", /^\/$/, async (request, ctx, _params, url) => {
   if (!ctx.config.siteFeatures.markdownNegotiation) {
     return Response.json({ ok: true, service: "rankmyseo" });
   }
-  const html = `<!DOCTYPE html><html><head><title>RankMySEO</title></head><body><h1>RankMySEO</h1><p>SEO toolkit API</p></body></html>`;
-  const md = pageToMarkdown(url.pathname, "RankMySEO");
+  const head = apiCatalogEnabled(ctx.config) ? discoveryHeadLinks(ctx.basePath) : "";
+  const html = `<!DOCTYPE html><html><head><title>RankMySEO</title>${head}</head><body><h1>RankMySEO</h1><p>SEO toolkit API</p></body></html>`;
+  const md = apiCatalogEnabled(ctx.config)
+    ? `# RankMySEO\n\nSEO toolkit API.\n\n- [API guide](${ctx.basePath}/api)\n- [API catalog](${ctx.basePath}/.well-known/api-catalog)\n`
+    : pageToMarkdown(url.pathname, "RankMySEO");
   return withMarkdownNegotiation(request, html, md, url.pathname);
 });
 

@@ -1,6 +1,6 @@
 # @rankmyseo/server
 
-Framework-agnostic HTTP handler for [RankMySEO](https://github.com/madebyaris/rankmyseo), built on Web-standard `Request`/`Response`. Exposes the full dashboard API plus site features (live scan, meta generator, blog, sitemap, `llms.txt`, markdown negotiation). Server-only.
+Framework-agnostic HTTP handler for [RankMySEO](https://github.com/madebyaris/rankmyseo), built on Web-standard `Request`/`Response`. Exposes the full dashboard API plus site features (live scan, meta generator, blog, sitemap, `llms.txt`, markdown negotiation, RFC 9727 API catalog, and ARD manifest). Server-only.
 
 ## Install
 

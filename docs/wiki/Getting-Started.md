@@ -132,7 +132,7 @@ Most routes require tenant/project headers:
 | `x-tenant-id` | Tenant scope |
 | `x-project-id` | Project scope |
 
-**No headers required:** `GET /sitemap.xml`, `GET /llms.txt`
+**No headers required:** `GET /sitemap.xml`, `GET /llms.txt`, `GET /api`, `GET /.well-known/api-catalog`, `GET /.well-known/ard.json`, `GET /.well-known/ai-catalog.json`
 
 **Optional headers:** `GET /` (defaults to config `tenantId` / `projectId`)
 

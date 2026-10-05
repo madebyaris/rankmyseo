@@ -99,6 +99,74 @@ describe("createHandler routes", () => {
     const text = await res.text();
     expect(text).toContain("# Example");
     expect(text).toContain("About");
+    expect(text).toContain("/.well-known/api-catalog");
+  });
+
+  it("serves the RFC 9727 API catalog and ARD manifest without scope headers", async () => {
+    const catalogRes = await handler(new Request("http://localhost/.well-known/api-catalog"));
+    expect(catalogRes.status).toBe(200);
+    expect(catalogRes.headers.get("content-type")).toContain("application/linkset+json");
+    expect(catalogRes.headers.get("link")).toContain('rel="api-catalog"');
+    const catalog = (await catalogRes.json()) as {
+      linkset: Array<{
+        anchor: string;
+        item: Array<{ href: string; title: string }>;
+        "service-doc": Array<{ href: string }>;
+        "service-desc": Array<{ href: string }>;
+      }>;
+    };
+    expect(catalog.linkset[0]?.anchor).toBe("http://localhost/");
+    expect(catalog.linkset[0]?.item.map((entry) => entry.href)).toContain(
+      "http://localhost/keywords",
+    );
+    expect(catalog.linkset[0]?.["service-doc"][0]?.href).toBe("http://localhost/api");
+    expect(catalog.linkset[0]?.["service-desc"][0]?.href).toBe("http://localhost/llms.txt");
+
+    const ardRes = await handler(new Request("http://localhost/.well-known/ard.json"));
+    const previousRes = await handler(
+      new Request("http://localhost/.well-known/ai-catalog.json"),
+    );
+    expect(ardRes.status).toBe(200);
+    expect(previousRes.status).toBe(200);
+    const ard = (await ardRes.json()) as {
+      specVersion: string;
+      entries: Array<{ identifier: string; url: string; data?: unknown; representativeQueries: string[] }>;
+    };
+    const previous = (await previousRes.json()) as { entries: Array<{ identifier: string }> };
+    expect(ard.specVersion).toBe("1.0");
+    expect(ard.entries[0]?.identifier).toBe("urn:air:localhost:rankmyseo:root");
+    expect(ard.entries[0]?.url).toBe("http://localhost/.well-known/api-catalog");
+    expect(ard.entries[0]?.data).toBeUndefined();
+    expect(ard.entries[0]?.representativeQueries).toHaveLength(4);
+    expect(previous.entries[0]?.identifier).toBe(ard.entries[0]?.identifier);
+  });
+
+  it("serves the API guide as markdown and HTML", async () => {
+    const mdRes = await handler(
+      new Request("http://localhost/api", { headers: { accept: "text/markdown" } }),
+    );
+    expect(mdRes.status).toBe(200);
+    const markdown = await mdRes.text();
+    expect(markdown).toContain("RFC 9727");
+    expect(markdown).toContain("rankmyseo-mcp");
+
+    const htmlRes = await handler(
+      new Request("http://localhost/api", { headers: { accept: "text/html" } }),
+    );
+    const html = await htmlRes.text();
+    expect(html).toContain('rel="api-catalog"');
+    expect(html).toContain('rel="ard"');
+    expect(html).toContain("application/ld+json");
+  });
+
+  it("advertises discovery on scoped responses", async () => {
+    const res = await handler(
+      new Request("http://localhost/keywords", { headers: scopeHeaders }),
+    );
+    expect(res.status).toBe(200);
+    const link = res.headers.get("link") ?? "";
+    expect(link).toContain('rel="api-catalog"');
+    expect(link).toContain('rel="ard"');
   });
 
   it("negotiates markdown on GET /", async () => {
@@ -367,6 +435,45 @@ describe("createHandler routes", () => {
 
     const res = await disabledHandler(new Request("http://localhost/sitemap.xml"));
     expect(res.status).toBe(404);
+    const body = (await res.json()) as { code?: string };
+    expect(body.code).toBe("FEATURE_DISABLED");
+  });
+
+  it("returns 404 when the API catalog is disabled and omits discovery links", async () => {
+    const store = createSqliteStore(":memory:");
+    await store.projects.create({
+      id: "project-1",
+      tenantId: "tenant-a",
+      name: "Demo",
+      domain: "example.com",
+    });
+    const disabledHandler = createHandler(store, {
+      config: defineConfig({
+        databaseUrl: "sqlite://:memory:",
+        tenantId: "tenant-a",
+        projectId: "project-1",
+        dataSources: [{ provider: "fixture", default: true }],
+        schedule: { cron: "0 6 * * *", enabled: false },
+        siteFeatures: {
+          sitemap: true,
+          llmsTxt: true,
+          collector: true,
+          markdownNegotiation: true,
+          apiCatalog: false,
+          blog: false,
+        },
+      }),
+    });
+
+    const catalog = await disabledHandler(new Request("http://localhost/.well-known/ard.json"));
+    expect(catalog.status).toBe(404);
+    const body = (await catalog.json()) as { code?: string };
+    expect(body.code).toBe("FEATURE_DISABLED");
+
+    const keywords = await disabledHandler(
+      new Request("http://localhost/keywords", { headers: scopeHeaders }),
+    );
+    expect(keywords.headers.get("link") ?? "").not.toContain("api-catalog");
   });
 
   it("returns 406 when Accept rejects html and markdown on GET /", async () => {
@@ -423,6 +530,16 @@ describe("createHandler routes", () => {
       }),
     );
     expect(ok.status).toBe(200);
+
+    const catalog = await mounted(
+      new Request("http://localhost/api/rankmyseo/.well-known/api-catalog"),
+    );
+    expect(catalog.status).toBe(200);
+    const body = (await catalog.json()) as { linkset: Array<{ anchor: string }> };
+    expect(body.linkset[0]?.anchor).toBe("http://localhost/api/rankmyseo/");
+    expect(catalog.headers.get("link")).toContain(
+      "http://localhost/api/rankmyseo/.well-known/api-catalog",
+    );
 
     const miss = await mounted(
       new Request("http://localhost/projects", {

@@ -4,7 +4,7 @@ Welcome to the **RankMySEO** documentation wiki — an open-source, framework-ag
 
 **Repository:** [github.com/madebyaris/rankmyseo](https://github.com/madebyaris/rankmyseo)  
 **License:** Apache-2.0  
-**Status:** M0–M5 implemented (ecosystem adapters shipped); published on npm under the [`@rankmyseo`](https://www.npmjs.com/org/rankmyseo) scope (v0.3.x).
+**Status:** M0–M5 implemented (ecosystem adapters shipped). Repo package versions are **1.0.2** for `@rankmyseo/*` and **1.0.3** for the `rankmyseo` installer.
 
 ---
 
@@ -18,7 +18,7 @@ RankMySEO is a **composable npm package set** — not a hosted SaaS iframe. You 
 - Optional blog module with keyword intent and recommendations
 - Report rollups and customizable dashboard widgets
 - AI agent layer for dashboard customization (AI SDK + MCP)
-- Agent-readiness site features (`llms.txt`, markdown negotiation) for coding agents — not SEO ranking levers
+- Agent-readiness site features (`llms.txt`, markdown negotiation, RFC 9727 API catalog, ARD manifest) for coding agents — not SEO ranking levers
 - Framework adapters (Hono, Express, Next, Nitro) + SvelteKit/Astro via `createHandler`
 - Storage: SQLite + Postgres (Drizzle), optional Prisma / Kysely
 - Headless React / Vue / Svelte clients; React UI widgets; SEO regression CI gate

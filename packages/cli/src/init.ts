@@ -11,6 +11,7 @@ export default defineConfig({
     llmsTxt: true,
     collector: true,
     markdownNegotiation: true,
+    apiCatalog: true,
     blog: false,
   },
   sitemapRoutes: ["/", "/about"],

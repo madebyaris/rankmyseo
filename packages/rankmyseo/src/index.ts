@@ -53,7 +53,14 @@ async function main() {
     return;
   }
 
-  if (cmd === "init" || cmd === "migrate" || cmd === "schedule" || cmd === "doctor" || cmd === "version") {
+  if (
+    cmd === "init" ||
+    cmd === "migrate" ||
+    cmd === "schedule" ||
+    cmd === "doctor" ||
+    cmd === "regression" ||
+    cmd === "version"
+  ) {
     await forwardToCli([cmd, ...args]);
     return;
   }
@@ -82,6 +89,7 @@ Project setup (requires @rankmyseo/cli — included in recommended preset):
   npx rankmyseo migrate [dbUrl]
   npx rankmyseo schedule [dbUrl]
   npx rankmyseo doctor [--config path]
+  npx rankmyseo regression check --candidate-url <preview> --base-ref <sha>
   npx rankmyseo version
 
 Docs: https://github.com/madebyaris/rankmyseo/wiki/Getting-Started

@@ -86,15 +86,21 @@ Mount under a subpath with `basePath: "/api/rankmyseo"` on `createHandler` / `cr
 
 - `GET /sitemap.xml`
 - `GET /llms.txt`
+- `GET /api`
+- `GET /.well-known/api-catalog`
+- `GET /.well-known/ard.json`
+- `GET /.well-known/ai-catalog.json`
 
 **Special case:**
 
-- `GET /` — scope headers optional; uses config defaults unless headers are provided
+- `GET /` — scope headers optional. Both `x-tenant-id` and `x-project-id` together replace the config default. One header alone leaves the default in place.
 
 Disabled features:
 
-- `POST /collect`, `/blog/*` → **403** when feature off
-- `GET /sitemap.xml`, `/llms.txt` → **404** when feature off
+- `POST /collect`, `/blog/*` → **403** `FEATURE_DISABLED` when the feature is off
+- `GET /sitemap.xml`, `/llms.txt`, `/api`, and the well-known catalog paths → **404** `FEATURE_DISABLED` when the feature is off
+
+Discovery responses carry `Link: </.well-known/api-catalog>; rel="api-catalog"` and `rel="ard"` ([RFC 9727](https://www.rfc-editor.org/rfc/rfc9727), [ARD](https://agenticresourcediscovery.org/spec/)). With `basePath`, those URLs live under the mount. Origin-root `/.well-known/*` applies when the handler is mounted at `/`.
 
 ## Minimal Hono + agent snippet
 
@@ -249,11 +255,13 @@ Contract tests for Postgres adapters run when `RANKMYSEO_POSTGRES_URL` or `DATAB
 API errors:
 
 ```json
-{ "error": "message", "code": "MISSING_SCOPE", "details": {} }
+{ "error": "message", "code": "MISSING_SCOPE" }
 ```
+
+`code` is set on handler errors (`MISSING_SCOPE`, `VALIDATION_ERROR`, `NOT_FOUND`, `FEATURE_DISABLED`, `INVALID_JSON`, `NOT_ACCEPTABLE`, `AGENT_UNAVAILABLE`, `INTERNAL_ERROR`). `details` is included for validation failures. `GET /blog/:id` returns `{ "data", "recommendations" }`.
 
 Success responses wrap payloads as `{ "data": … }`.
 
 ## Agent-readiness features (not SEO ranking levers)
 
-`llms.txt` and markdown `Accept` negotiation help **coding agents and dev tools** consume site content cheaply. They are not evidenced to improve search rankings or AI citation rates — treat them as integrator/agent UX, not organic SEO tactics.
+`llms.txt`, markdown `Accept` negotiation, the RFC 9727 API catalog, and the ARD manifest help **coding agents and dev tools** find this API. They are not evidenced to improve search rankings or AI citation rates — treat them as integrator/agent UX, not organic SEO tactics. The catalog describes this self-hosted HTTP API. The hosted rankmyseo.com MCP lobby is a separate product.

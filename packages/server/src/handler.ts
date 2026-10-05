@@ -8,6 +8,12 @@ import {
 import { dispatchRoute } from "./routes.js";
 import { apiError } from "./errors.js";
 import { readScope } from "./utils.js";
+import {
+  apiCatalogEnabled,
+  applyDiscoveryLinks,
+  discoveryLinkHeader,
+  publicBaseUrl,
+} from "./discovery.js";
 
 export type { RequestScope } from "./utils.js";
 export { readScope } from "./utils.js";
@@ -53,6 +59,7 @@ const defaultConfig = defineConfig({
     llmsTxt: true,
     collector: true,
     markdownNegotiation: true,
+    apiCatalog: true,
     blog: false,
   },
   sitemapRoutes: ["/"],
@@ -104,21 +111,37 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
   const basePath = normalizeBasePath(options.basePath);
 
   return async (request: Request): Promise<Response> => {
+    const respond = (response: Response): Response => {
+      if (!apiCatalogEnabled(config)) return response;
+      return applyDiscoveryLinks(
+        response,
+        discoveryLinkHeader(publicBaseUrl(request.url, basePath)),
+      );
+    };
+
     const rewritten = rewriteRequestBasePath(request, basePath);
     if (rewritten === null) {
-      return apiError("Not found", 404, { code: "NOT_FOUND" });
+      return respond(apiError("Not found", 404, { code: "NOT_FOUND" }));
     }
 
     const url = new URL(rewritten.url);
     const pathname = url.pathname.replace(/\/+$/, "") || "/";
 
-    const sitePathsWithoutScope = ["/sitemap.xml", "/llms.txt", "/"];
+    const sitePathsWithoutScope = [
+      "/sitemap.xml",
+      "/llms.txt",
+      "/",
+      "/api",
+      "/.well-known/api-catalog",
+      "/.well-known/ard.json",
+      "/.well-known/ai-catalog.json",
+    ];
     const needsScope = !sitePathsWithoutScope.includes(pathname);
 
     let scope = { tenantId: config.tenantId, projectId: config.projectId };
     if (needsScope) {
       const parsed = readScope(rewritten);
-      if (parsed instanceof Response) return parsed;
+      if (parsed instanceof Response) return respond(parsed);
       scope = parsed;
     } else if (rewritten.headers.get("x-tenant-id")) {
       const parsed = readScope(rewritten);
@@ -127,7 +150,7 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
 
     if (options.authorize) {
       const denied = await options.authorize(rewritten, scope);
-      if (denied instanceof Response) return denied;
+      if (denied instanceof Response) return respond(denied);
     }
 
     try {
@@ -135,16 +158,17 @@ export function createHandler(store: RankStore, options: HandlerOptions = {}) {
         store,
         scope,
         config,
+        basePath,
         agentModel: options.agentModel,
         includeWebVitals: options.includeWebVitals,
         psiApiKey: options.psiApiKey,
       });
 
-      if (response) return response;
-      return apiError("Not found", 404, { code: "NOT_FOUND" });
+      if (response) return respond(response);
+      return respond(apiError("Not found", 404, { code: "NOT_FOUND" }));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Internal server error";
-      return apiError(message, 500, { code: "INTERNAL_ERROR" });
+      return respond(apiError(message, 500, { code: "INTERNAL_ERROR" }));
     }
   };
 }

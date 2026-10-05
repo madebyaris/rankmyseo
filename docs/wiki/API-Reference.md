@@ -19,10 +19,14 @@ Pass `authorize(request, scope)` on `createHandler` / `createRankMySeoApp` to au
 | --- | --- |
 | `GET /sitemap.xml` | Not required |
 | `GET /llms.txt` | Not required |
+| `GET /api` | Not required |
+| `GET /.well-known/api-catalog` | Not required |
+| `GET /.well-known/ard.json` | Not required |
+| `GET /.well-known/ai-catalog.json` | Not required |
 | `GET /` | Optional (defaults to config tenant/project) |
 | All other routes | Required |
 
-Disabled features: collector/blog → **403**; disabled sitemap/llms.txt → **404**.
+Disabled features: collector/blog → **403** `FEATURE_DISABLED`; disabled sitemap, `llms.txt`, or API catalog → **404** `FEATURE_DISABLED`.
 
 ## Projects
 
@@ -146,6 +150,10 @@ Returns **403** when blog is disabled in config.
 | --- | --- | --- |
 | GET | `/sitemap.xml` | Generated sitemap (requires `siteFeatures.sitemap`) |
 | GET | `/llms.txt` | Agent-readable site summary (agent-readiness; not an SEO ranking lever) |
+| GET | `/.well-known/api-catalog` | [RFC 9727](https://www.rfc-editor.org/rfc/rfc9727) linkset for this API (`siteFeatures.apiCatalog`, default on) |
+| GET | `/.well-known/ard.json` | [ARD](https://agenticresourcediscovery.org/spec/) manifest for this API |
+| GET | `/.well-known/ai-catalog.json` | Same JSON as `ard.json`, for clients that still request the predecessor path |
+| GET | `/api` | API guide. HTML, or markdown with `Accept: text/markdown` |
 | GET | `/` | HTML or markdown (`Accept: text/markdown`) for agent/dev-tool consumption |
 
 ## Audit rules
