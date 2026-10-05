@@ -1,5 +1,12 @@
 # @rankmyseo/scheduler
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+
 ## 1.0.0
 
 ### Minor Changes

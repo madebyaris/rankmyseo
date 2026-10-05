@@ -1,5 +1,18 @@
 # @rankmyseo/cli
 
+## 2.0.0
+
+### Patch Changes
+
+- b712b76: Serve an RFC 9727 API catalog and an ARD manifest from the HTTP handler, and forward `regression` through `npx rankmyseo`.
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+  - @rankmyseo/datasource@2.0.0
+  - @rankmyseo/scanner@2.0.0
+  - @rankmyseo/scheduler@2.0.0
+  - @rankmyseo/storage@2.0.0
+  - @rankmyseo/installer@2.0.0
+
 ## 1.0.0
 
 ### Patch Changes

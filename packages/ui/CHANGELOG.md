@@ -1,5 +1,13 @@
 # @rankmyseo/ui
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+  - @rankmyseo/react@2.0.0
+
 ## 1.0.0
 
 ### Patch Changes

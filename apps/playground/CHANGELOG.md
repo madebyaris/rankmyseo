@@ -1,5 +1,14 @@
 # @rankmyseo/playground
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+  - @rankmyseo/server@2.0.0
+  - @rankmyseo/storage@2.0.0
+
 ## 0.0.4
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @rankmyseo/server-express
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+  - @rankmyseo/server@2.0.0
+
 ## 1.0.0
 
 ### Minor Changes

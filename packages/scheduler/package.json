@@ -1,6 +1,6 @@
 {
   "name": "@rankmyseo/scheduler",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "type": "module",
   "description": "RankMySEO scheduler adapters (node-cron, manual)",
   "license": "Apache-2.0",

@@ -1,5 +1,11 @@
 # @rankmyseo/docs
 
+## 0.0.2
+
+### Patch Changes
+
+- @rankmyseo/client@2.0.0
+
 ## 0.0.1
 
 ### Patch Changes

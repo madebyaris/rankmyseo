@@ -1,5 +1,14 @@
 # @rankmyseo/dashboard
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+  - @rankmyseo/react@2.0.0
+  - @rankmyseo/ui@2.0.0
+
 ## 0.0.4
 
 ### Patch Changes

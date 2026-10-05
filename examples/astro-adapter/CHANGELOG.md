@@ -1,5 +1,14 @@
 # @rankmyseo/example-astro-adapter
 
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies [b712b76]
+  - @rankmyseo/core@2.0.0
+  - @rankmyseo/server@2.0.0
+  - @rankmyseo/storage@2.0.0
+
 ## 0.0.1
 
 ### Patch Changes

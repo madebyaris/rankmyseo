@@ -1,5 +1,11 @@
 # @rankmyseo/core
 
+## 2.0.0
+
+### Minor Changes
+
+- b712b76: Serve an RFC 9727 API catalog and an ARD manifest from the HTTP handler, and forward `regression` through `npx rankmyseo`.
+
 ## 1.0.0
 
 ## 0.2.0
